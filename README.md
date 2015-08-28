@@ -10,6 +10,8 @@ Core UI Framework shared across all native/spritekit iOS apps.
 
 TODO: Static swift frameworks currently only support iOS 8+, so once we're not worried about iOS 7 any more we can do the legwork for making this an actual compiled framework (make all the fields public)
 
+TODO: the above way of doing things is _brittle_ -- at some point once we're sure we prefer this separate-repo workflow we should set up the code as a git submodule, which will mean fixes in on project cannot inherently break fixes in another project. for now, we're doing it the ghetto way...
+
 
 
 
