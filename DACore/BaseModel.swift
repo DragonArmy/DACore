@@ -1,0 +1,173 @@
+//
+//  BaseModel.swift
+//  trace
+//
+//  Created by Edie Woelfle on 4/13/15.
+//  Copyright (c) 2015 Dragon Army. All rights reserved.
+//
+
+import Foundation
+import UIKit
+
+class BaseModel
+{
+    // static variables for the basemodel
+    static var allCache = Dictionary<String, Dictionary<String, AnyObject>>()
+    static var allData = Dictionary<String, [AnyObject]>()
+    
+    // private variables for each object
+    var objectVariables = Dictionary<String, AnyObject>()
+    
+    // not sure what I needed this for in here, but it's important
+    required init()
+    {
+        
+    }
+    
+    // get the key for the current class
+    static var allKey : String
+    {
+        return "\(self)"
+    }
+    
+    // get all the variables from one type
+    static func all<T : AnyObject>() -> [T]
+    {
+        return allData[allKey] as! [T]
+    }
+    
+    // load all the data from the file
+    static func loadFromData(filename:String)
+    {
+        allData[allKey] = [AnyObject]()
+        allCache[allKey] = Dictionary<String, AnyObject>()
+        
+        var error : NSError?
+        
+        // load the data from the bundle
+        if let data = String(contentsOfURL: NSBundle.mainBundle().URLForResource(filename, withExtension: ".csv")!, encoding: NSUTF8StringEncoding, error: &error)
+        {
+            // removing the trailing whitespace if there is any
+            let data = data.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+            
+            // split the data based on a newline character
+            let text = data.split("\n")
+            
+            // return if the csv doesn't have enough lines to satisfy parsing requirements
+            if(text.count < 2)
+            {
+                // don't know if this is needed or not, but I'm trying to work this out
+                println("ERROR: \(filename) does not contain enough information. Please update the google spreadsheet and try again.")
+                return
+            }
+            
+            // get the variable names and types
+            let variableNames = text[0].componentsSeparatedByString(",")
+            let variableTypes = text[1].componentsSeparatedByString(",")
+            
+            // if there isn't an id, remove it
+            if (variableNames.count == 0)
+            {
+                println("ERROR: no data found in \(filename)")
+                return
+            }
+            
+            // parse through all the data
+            for var i = 2; i < text.count; i++
+            {
+                var objectData = text[i]
+                
+                // if the string is empty, skip it
+                if(objectData.isEmpty)
+                {
+                    continue
+                }
+                
+                //create an object and assign variables from
+                var object = self();
+                
+                // get the variables from the data
+                var dataVariables = objectData.componentsSeparatedByString(",")
+                
+                if(dataVariables.count == 0)
+                {
+                    continue
+                }
+                
+                // go through all the variables from the reflection and set them to the data from the csv
+                for var variable = 0; variable < variableNames.count; variable++
+                {
+                    if (variable >= dataVariables.count)
+                    {
+                        println("ERROR: no data found for \(variableNames[variable]) on line \(i) of \(filename)")
+                        continue
+                    }
+                    
+                    // parse out all the data based on types
+                    switch(variableTypes[variable].lowercaseString)
+                    {
+                        case "color":
+                            if !contains(dataVariables[variable], "#")
+                            {
+                                object.objectVariables[variableNames[variable]] = ("#" + dataVariables[variable]).lowercaseString.toColor()
+                            }
+                            else
+                            {
+                                object.objectVariables[variableNames[variable]] = dataVariables[variable].lowercaseString.toColor()
+                            }
+                        break
+                        case "int":
+                            object.objectVariables[variableNames[variable]] = dataVariables[variable].toInt()
+                        break
+                        case "float":
+                            object.objectVariables[variableNames[variable]] = dataVariables[variable].toFloat()
+                        break
+                        case "bool":
+                            object.objectVariables[variableNames[variable]] = dataVariables[variable].lowercaseString == "true"
+                        break
+                        default:
+                            object.objectVariables[variableNames[variable]] = dataVariables[variable]
+                        break
+                    }
+                }
+                
+                // add the object to the dictionary
+                allCache[allKey]![dataVariables[0]] = object
+                allData[allKey]!.append(object as AnyObject)
+            }
+        } else {
+            println("ERROR READING FILE \(filename)")
+        }
+    }
+    
+    static func find<T>(id:Int) -> T?
+    {
+        return find("\(id)")
+    }
+    
+    static func find<T>(id:String) -> T?
+    {
+        var return_value = allCache[allKey]![id] as! T?
+        return return_value
+    }
+    
+    static func parseInt(value : String) -> Int?
+    {
+        return value.toInt()
+    }
+    
+    static func parseFloat(value : String) -> Float?
+    {
+        return value.toFloat()
+    }
+    
+    static func parseColor(value : String) -> UIColor?
+    {
+        return value.toColor()
+    }
+    
+    static func parseBool(value : String) -> Bool?
+    {
+        return value.lowercaseString == "true"
+    }
+}
