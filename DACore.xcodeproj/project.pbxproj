@@ -26,6 +26,7 @@
 		BE6B72F91B90DB43009342FE /* DAScale9.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72E91B90DB43009342FE /* DAScale9.swift */; };
 		BE6B72FA1B90DB43009342FE /* DAScaleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72EA1B90DB43009342FE /* DAScaleButton.swift */; };
 		BE6B72FB1B90DB43009342FE /* DATabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72EB1B90DB43009342FE /* DATabButton.swift */; };
+		BE6F5D6F1B90ED0900B2F417 /* DAScroller.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6F5D6E1B90ED0900B2F417 /* DAScroller.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +63,7 @@
 		BE6B72EA1B90DB43009342FE /* DAScaleButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAScaleButton.swift; sourceTree = "<group>"; };
 		BE6B72EB1B90DB43009342FE /* DATabButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DATabButton.swift; sourceTree = "<group>"; };
 		BE6B73251B90E011009342FE /* DACore copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "DACore copy-Info.plist"; path = "/Users/will/dev/dragonarmy/DACore/DACore copy-Info.plist"; sourceTree = "<absolute>"; };
+		BE6F5D6E1B90ED0900B2F417 /* DAScroller.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAScroller.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -163,6 +165,7 @@
 		BE6B72E21B90DB43009342FE /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				BE6F5D6E1B90ED0900B2F417 /* DAScroller.swift */,
 				BE6B72E31B90DB43009342FE /* DAButton.swift */,
 				BE6B72E41B90DB43009342FE /* DAButtonBase.swift */,
 				BE6B72E51B90DB43009342FE /* DAContainer.swift */,
@@ -293,6 +296,7 @@
 				BE6B72EE1B90DB43009342FE /* BaseModel.swift in Sources */,
 				BE6B72F71B90DB43009342FE /* DAProgressBar.swift in Sources */,
 				BE6B72F11B90DB43009342FE /* SkinnedCharacter.swift in Sources */,
+				BE6F5D6F1B90ED0900B2F417 /* DAScroller.swift in Sources */,
 				BE6B72ED1B90DB43009342FE /* FlumpNode.swift in Sources */,
 				BE6B72F61B90DB43009342FE /* DAMetaNode.swift in Sources */,
 				BE6B72F41B90DB43009342FE /* DAButtonBase.swift in Sources */,

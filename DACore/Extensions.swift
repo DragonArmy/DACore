@@ -19,13 +19,89 @@ public func arc4random <T: IntegerLiteralConvertible> (type: T.Type) -> T {
     return r
 }
 
+public extension CGPoint
+{
+    func magnitude() -> CGFloat
+    {
+        return hypot(x, y)
+    }
+    
+    func clamp(target_magnitude:CGFloat) -> CGPoint
+    {
+        let current_magnitude = magnitude()
+        let scale_factor = target_magnitude / current_magnitude
+        
+        return CGPointMake(x*scale_factor, y*scale_factor)
+    }
+}
+
+public extension CGRect
+{
+    var center:CGPoint
+    {
+            return CGPointMake(CGRectGetMidX(self), CGRectGetMidY(self))
+    }
+}
+
 // CGPoint addition, which I do all the frickin time
 public func + (left: CGPoint, right: CGPoint) -> CGPoint {
     return CGPoint(x: left.x + right.x, y: left.y + right.y)
 }
 
+public func - (left: CGPoint, right: CGPoint) -> CGPoint {
+    return CGPoint(x: left.x - right.x, y: left.y - right.y)
+}
+
 public func += (inout left: CGPoint, right: CGPoint) {
     left = left + right
+}
+
+//hashable XY coordinate
+struct XY : Hashable, Equatable, Printable
+{
+    var x:Int
+    var y:Int
+    
+    var hashValue : Int
+        {
+        get
+        {
+            return "\(x)_\(y)".hashValue
+        }
+    }
+    
+    var description: String
+        {
+        get
+        {
+            return "(\(x),\(y))"
+        }
+    }
+}
+
+func ==(left:XY, right:XY) -> Bool
+{
+    return (left.x == right.x && left.y == right.y)
+}
+
+func !=(left:XY, right:XY) -> Bool
+{
+    return !(left == right)
+}
+
+extension Set
+{
+    func anyItem<T>() -> T?
+    {
+        if self.count == 0
+        {
+            return nil
+        }
+        
+        let n = Int(arc4random_uniform(UInt32(self.count)))
+        let i = advance(self.startIndex, n)
+        return self[i] as? T
+    }
 }
 
 // Nice helper function for dispatch_after
