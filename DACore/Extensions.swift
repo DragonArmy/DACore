@@ -276,6 +276,15 @@ extension Array {
         }
         return nil
     }
+    
+    func last(how_many:Int) -> Array<T>
+    {
+        
+        let lower = count - how_many
+        let upper = count - 1
+        
+        return Array(self[lower...upper])
+    }
 }
 
 extension SKNode

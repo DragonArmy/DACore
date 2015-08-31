@@ -62,7 +62,6 @@
 		BE6B72E91B90DB43009342FE /* DAScale9.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAScale9.swift; sourceTree = "<group>"; };
 		BE6B72EA1B90DB43009342FE /* DAScaleButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAScaleButton.swift; sourceTree = "<group>"; };
 		BE6B72EB1B90DB43009342FE /* DATabButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DATabButton.swift; sourceTree = "<group>"; };
-		BE6B73251B90E011009342FE /* DACore copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "DACore copy-Info.plist"; path = "/Users/will/dev/dragonarmy/DACore/DACore copy-Info.plist"; sourceTree = "<absolute>"; };
 		BE6F5D6E1B90ED0900B2F417 /* DAScroller.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAScroller.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -91,7 +90,6 @@
 				BE6B72BF1B90DA77009342FE /* DACore */,
 				BE6B72CC1B90DA78009342FE /* DACoreTests */,
 				BE6B72BE1B90DA77009342FE /* Products */,
-				BE6B73251B90E011009342FE /* DACore copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
