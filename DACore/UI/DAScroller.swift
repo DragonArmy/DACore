@@ -10,6 +10,47 @@
 import Foundation
 import SpriteKit
 
+func ==(left:DAScroller, right:DAScroller) -> Bool
+{
+    let tests = [
+        left.position == right.position,
+        left.boundsMax == right.boundsMax,
+        left.boundsMin == right.boundsMin,
+        left.speed == right.speed
+    ]
+    
+    for bool in tests
+    {
+        if(!bool)
+        {
+            return false
+        }
+    }
+    
+    return true
+}
+
+func ==(left:DAScroller?, right:DAScroller) -> Bool
+{
+    if let test = left
+    {
+        return (test == right)
+    }else{
+        return false
+    }
+}
+
+func ==(left:DAScroller, right:DAScroller?) -> Bool
+{
+    if let test = right
+    {
+        return (test == left)
+    }else{
+        return false
+    }
+}
+
+
 class DAScroller
 {
     //note: these are variables in case you want to set them on a per-scroller basis

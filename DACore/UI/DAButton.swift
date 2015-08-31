@@ -25,7 +25,7 @@ class DAButton : DAButtonBase
     
     var _isButtonDown:Bool = false
     override var isButtonDown:Bool
-        {
+    {
         get
         {
             return _isButtonDown
