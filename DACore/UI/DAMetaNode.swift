@@ -97,6 +97,51 @@ class DAMetaNode : DAContainer
         super.init()
     }
     
+    init(from_node:DAResetNode, asynchSprites asynch_sprites:Bool)
+    {
+        println("CREATING DAMetaNode from existing node!")
+        fileRoot = ""
+        rootContainer = from_node.name!
+        
+        super.init()
+        
+        let container = processContainerNode(from_node.cachedMetadata, withAsynch: asynch_sprites)
+        container.resetPosition = nil
+        
+        var offset_x:CGFloat = 0
+        var offset_y:CGFloat = 0
+        
+        if let dacon = container as? DAContainer
+        {
+            //println("\(node_child.name!) X/Y = \(dacon.x),\(dacon.y)     PIVOT = \(dacon.pivotX),\(dacon.pivotY)")
+            offset_x = dacon.pivotX
+            offset_y = dacon.pivotY
+        }
+        
+        for root_child in container.children
+        {
+            if let node = root_child as? SKNode
+            {
+                
+                node.removeFromParent()
+                addChild(node)
+                
+                //offset us to our container's location since we're discarding the shell
+                node.x += offset_x
+                node.y += offset_y
+                
+                
+                //update our positions so we can reset properly
+                positions[node] = node.position
+                
+                if let resettable = node as? DAResetNode
+                {
+                    resettable.resetPosition = node.position
+                }
+            }
+        }
+    }
+    
     init(file_root:String, fromContainer container_name:String?, resolutionIndependent omit_device_tag:Bool, asynchSprites asynch_sprites:Bool)
     {
         fileRoot = file_root
@@ -448,27 +493,27 @@ class DAMetaNode : DAContainer
             
             switch(container_type)
             {
-            case "container":
-                container = DAContainer()
-            case "btn":
-                container = DAButton()
-                let btn_name = container_name.replace("btn_",withString:"")
-                buttons[btn_name] = container as? DAButtonBase
-                container!.name = btn_name
-            case "scalebtn":
-                container = DAScaleButton()
-                let btn_name = container_name.replace("scalebtn_",withString:"")
-                buttons[btn_name] = container as? DAButtonBase
-                container!.name = btn_name
-            case "progress":
-                container = DAProgressBar()
-            case "tab":
-                container = DATabButton()
-            case "scale9":
-                container = DAScale9()
-            default:
-                println("ERROR: UNRECOGNIZED CONTAINER TYPE: \(container_type)")
-                container = DAContainer()
+                case "container":
+                    container = DAContainer()
+                case "btn":
+                    container = DAButton()
+                    let btn_name = container_name.replace("btn_",withString:"")
+                    buttons[btn_name] = container as? DAButtonBase
+                    container!.name = btn_name
+                case "scalebtn":
+                    container = DAScaleButton()
+                    let btn_name = container_name.replace("scalebtn_",withString:"")
+                    buttons[btn_name] = container as? DAButtonBase
+                    container!.name = btn_name
+                case "progress":
+                    container = DAProgressBar()
+                case "tab":
+                    container = DATabButton()
+                case "scale9":
+                    container = DAScale9()
+                default:
+                    println("ERROR: UNRECOGNIZED CONTAINER TYPE: \(container_type)")
+                    container = DAContainer()
             }
         }
         
@@ -477,7 +522,6 @@ class DAMetaNode : DAContainer
         {
             container?.name = node["name"] as? NSString as? String
         }
-
         
         if let children = node["children"] as? NSArray as? [AnyObject]
         {
@@ -525,6 +569,9 @@ class DAMetaNode : DAContainer
         
         positions[container!] = container!.position
         container!.resetPosition = container!.position
+        
+        container!.cachedMetadata = node
+        
         return container!
     }
     

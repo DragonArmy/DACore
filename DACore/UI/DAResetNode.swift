@@ -12,6 +12,8 @@ import SpriteKit
 
 class DAResetNode : SKNode
 {
+    var cachedMetadata = Dictionary<String, AnyObject>()
+    
     var resetPosition : CGPoint?
     
     func reset()
