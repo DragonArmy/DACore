@@ -674,7 +674,6 @@ class DAMetaNode : DAContainer
             if(image_type == "scalebtn")
             {
                 let container = DAScaleButton()
-                container.name = sprite.name
                 container.position = sprite.position
                 sprite.position = CGPoint(x:0,y:0)
                 container.addChild(sprite)
@@ -683,6 +682,7 @@ class DAMetaNode : DAContainer
                 if let btn_name = (node["name"] as? NSString as? String)?.replace("scalebtn_",withString:"")
                 {
                     buttons[btn_name] = container as DAButtonBase
+                    container.name = btn_name
                 }
                 
                 positions[container] = container.position
