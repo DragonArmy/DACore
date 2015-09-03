@@ -12,6 +12,8 @@ import SpriteKit
 
 class DAScaleButton : DAButtonBase
 {
+    static var DOWN_SCALE:CGFloat = 0.85
+    
     override init()
     {
         super.init()
@@ -48,7 +50,7 @@ class DAScaleButton : DAButtonBase
     {
         if(_isButtonDown)
         {
-            setScale(0.85)
+            setScale(DAScaleButton.DOWN_SCALE)
         }else{
             setScale(1.0)
         }
