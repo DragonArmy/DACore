@@ -52,16 +52,17 @@ class BaseModel
             
             // split the data based on a newline character
             let text = data.split("\n")
-            
-            // return if the csv doesn't have enough lines to satisfy parsing requirements
+
+            //we require 2 rows:
+            // 1) column name
+            // 2) column type
             if(text.count < 2)
             {
-                // don't know if this is needed or not, but I'm trying to work this out
                 println("ERROR: \(filename) does not contain enough information. Please update the google spreadsheet and try again.")
                 return
             }
             
-            // get the variable names and types
+            // get the variable names and types -- simple split! no commas allowed in name/type fields
             let variableNames = text[0].componentsSeparatedByString(",")
             let variableTypes = text[1].componentsSeparatedByString(",")
             
@@ -87,7 +88,34 @@ class BaseModel
                 var object = self();
                 
                 // get the variables from the data
-                var dataVariables = objectData.componentsSeparatedByString(",")
+                var raw_data = objectData.componentsSeparatedByString(",")
+                var dataVariables = [String]()
+                
+                for(var i = 0; i < raw_data.count; i++)
+                {
+                    //check to see if we have quotes
+                    if(i < raw_data.count - 1 && raw_data[i].hasPrefix("\""))
+                    {
+                        var working_string = raw_data[i].replace("\"", withString: "")
+                        
+                        for(var j = i+1; j < raw_data.count; j++)
+                        {
+                            if(raw_data[j].hasSuffix("\""))
+                            {
+                                working_string = working_string + "," + raw_data[j].replace("\"", withString: "")
+                                i = j;
+                                break;
+                            }else{
+                                working_string = working_string + "," + raw_data[j]
+                            }
+                        }
+                        
+//                        println("REJOINED DATA: \(working_string)")
+                        dataVariables.append(working_string)
+                    }else{
+                        dataVariables.append(raw_data[i])
+                    }
+                }
                 
                 if(dataVariables.count == 0)
                 {
