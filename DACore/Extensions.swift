@@ -285,6 +285,13 @@ extension Array {
         
         return Array(self[lower...upper])
     }
+    
+    func shuffle() -> Array<T>
+    {
+        return self.sorted({ (a, b) -> Bool in
+            return Float.random(lower:0, upper:1) > 0.5
+        })
+    }
 }
 
 extension SKNode
