@@ -207,6 +207,31 @@ public extension CGFloat {
     }
 }
 
+public func * (left: String, right: Int) -> String
+{
+    if(right <= 0)
+    {
+        fatalError("Cannot multiply a string by a number <= 0")
+    }
+    
+    if(right == 1)
+    {
+        return left
+    }
+    
+    var str = ""
+    for(var i = 0; i < right; i++)
+    {
+        str = str + left
+    }
+    return str
+}
+
+public func * (left: Int, right: String) -> String
+{
+    return right * left
+}
+
 extension String {
     func toFloat() -> Float
     {
