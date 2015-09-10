@@ -93,9 +93,13 @@ class BaseModel
                 
                 for(var i = 0; i < raw_data.count; i++)
                 {
+                    
+                    
                     //check to see if we have quotes
-                    if(i < raw_data.count - 1 && raw_data[i].hasPrefix("\""))
-                    {
+                    if(raw_data[i] == "\"\""){
+                        //empty string kinda screws up the logic below
+                        dataVariables.append(raw_data[i])
+                    }else if(i < raw_data.count - 1 && raw_data[i].hasPrefix("\"")){
                         var working_string = raw_data[i].replace("\"", withString: "")
                         
                         for(var j = i+1; j < raw_data.count; j++)
