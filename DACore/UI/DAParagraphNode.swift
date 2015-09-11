@@ -1,5 +1,5 @@
 //
-//  DAMultilineLabelNode.swift
+//  DAParagraphNode.swift
 //
 //  Created by Will Hankinson on 9/10/15.
 //
@@ -9,7 +9,23 @@
 import Foundation
 import SpriteKit
 
-class DAMultilineLabelNode : SKSpriteNode
+class DAParagraphNode : DAResetNode
+{
+    var paragraph = DAMultilineLabel()
+    
+    override init()
+    {
+        super.init()
+        addChild(paragraph)
+    }
+    
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class DAMultilineLabel : SKSpriteNode
 {
     private var _text = ""
     private var _fontColor = SKColor.whiteColor()
@@ -19,6 +35,7 @@ class DAMultilineLabelNode : SKSpriteNode
     private var _verticalAlignmentMode = SKLabelVerticalAlignmentMode.Baseline
     
     private var _paragraphWidth = CGFloat(0)
+    private var _explicitAnchorPoint:CGPoint?
     
     init()
     {
@@ -34,9 +51,9 @@ class DAMultilineLabelNode : SKSpriteNode
         self.fontName = fontName
     }
     
-    static func labelNodeWithFontNamed(fontName:String) -> DAMultilineLabelNode
+    static func labelNodeWithFontNamed(fontName:String) -> DAMultilineLabel
     {
-        return DAMultilineLabelNode(fontName: fontName)
+        return DAMultilineLabel(fontName: fontName)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -50,7 +67,15 @@ class DAMultilineLabelNode : SKSpriteNode
             var new_texture = SKTexture(image: new_text_image)
             
             texture = new_texture
-            anchorPoint = CGPointMake(0.5, 0.5)
+            
+            if _explicitAnchorPoint == nil
+            {
+                //reset to default anchorPoint
+                anchorPoint = CGPointMake(0.5, 0.5)
+            }else{
+                anchorPoint = _explicitAnchorPoint!
+            }
+            println("SET ANCHOR TO \(anchorPoint)")
         }
     }
     
@@ -73,17 +98,12 @@ class DAMultilineLabelNode : SKSpriteNode
         text_attributes.setObject(paragraph_style, forKey: NSParagraphStyleAttributeName)
         text_attributes.setObject(_fontColor, forKey: NSForegroundColorAttributeName)
         
-        if(scene == nil)
-        {
-            return nil
-        }
-        
         if(_paragraphWidth == 0)
         {
-            _paragraphWidth = scene!.size.width
+            _paragraphWidth = 2048
         }
         
-        let texture_size = CGSize(width: _paragraphWidth, height: 2048)//scene!.size.height)
+        let texture_size = CGSize(width: _paragraphWidth, height: 2048)
         var texture_rect = (text as NSString).boundingRectWithSize(texture_size,
             options: NSStringDrawingOptions.UsesLineFragmentOrigin,
             attributes: text_attributes as [NSObject:AnyObject],
@@ -93,6 +113,8 @@ class DAMultilineLabelNode : SKSpriteNode
         //iOS7 uses fractional size values.  So we needed to ceil it to make sure we have enough room for display.
         texture_rect.size = CGSize(width: ceil(texture_rect.size.width), height: ceil(texture_rect.size.height))
         
+        println("TEXTURE RECT: \(texture_rect)")
+        
         if(texture_rect.size.width == 0 || texture_rect.size.height == 0)
         {
             return nil
@@ -100,6 +122,7 @@ class DAMultilineLabelNode : SKSpriteNode
         
         size = texture_rect.size
         
+        println("DRAWING PARAGRAPH TEXT: \(text)")
         UIGraphicsBeginImageContextWithOptions(texture_rect.size, false, 0)
         (text as NSString).drawInRect(texture_rect, withAttributes: text_attributes as [NSObject : AnyObject])
         
@@ -120,6 +143,19 @@ class DAMultilineLabelNode : SKSpriteNode
                 return NSTextAlignment.Left
             case .Right:
                 return NSTextAlignment.Right
+        }
+    }
+    
+    var explicitAnchorPoint:CGPoint?
+    {
+        get
+        {
+            return _explicitAnchorPoint
+        }
+        set(value)
+        {
+            _explicitAnchorPoint = value
+            retexture()
         }
     }
     

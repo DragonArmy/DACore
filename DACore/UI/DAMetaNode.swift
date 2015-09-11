@@ -24,6 +24,7 @@ class DAMetaNode : DAContainer
     var placeholders    = [String:CGRect]()
     var buttons         = [String:DAButtonBase]()
     var labels          = [String:SKLabelNode]()
+    var paragraphs      = [String:DAParagraphNode]()
     
     var positions       = [SKNode:CGPoint]()
     
@@ -213,6 +214,16 @@ class DAMetaNode : DAContainer
         }
         
         return childNodeWithName("//container_" + container_name) as? DAContainer
+    }
+    
+    func paragraphWithName(paragraph_name:String) -> DAParagraphNode?
+    {
+        if(paragraph_name.split("_").first! == "paragraph")
+        {
+            println("[ERROR] paragraphWithName provides the paragraph_, you may omit it from your call!")
+        }
+        
+        return paragraphs[paragraph_name]
     }
     
     func scale9WithName(scale9_name:String) -> DAScale9?
@@ -511,6 +522,11 @@ class DAMetaNode : DAContainer
                     container = DATabButton()
                 case "scale9":
                     container = DAScale9()
+                case "paragraph":
+                    let children = node["children"] as! NSArray as! [AnyObject]
+                    let paragraph_name = container_name.replace("paragraph_",withString:"")
+                
+                    container = processParagraphNode(paragraph_name, withChildren: children)
                 default:
                     println("ERROR: UNRECOGNIZED CONTAINER TYPE: \(container_type)")
                     container = DAContainer()
@@ -573,6 +589,81 @@ class DAMetaNode : DAContainer
         container!.cachedMetadata = node
         
         return container!
+    }
+    
+    func processParagraphNode(name:String, withChildren children:[AnyObject]) -> DAParagraphNode
+    {
+        
+        println("********* PROCESS PARAGRAPH NODE")
+        
+        var node = DAParagraphNode()
+        node.name = name
+        
+        var placeholder:CGRect?
+        var label:SKLabelNode?
+        
+        for raw_node in children
+        {
+            if let node = raw_node as? Dictionary<String,AnyObject>
+            {
+                if let node_type = node["type"] as? NSString as? String
+                {
+                    switch node_type
+                    {
+                        case "text":
+                            label = processTextNode(node)
+                        case "placeholder":
+                            processPlaceholderNode(node)
+                            if let name = node["name"] as? NSString as? String
+                            {
+                                //println("ADD PLACEHOLDER \(name)")
+                                placeholder = placeholders[name]!
+                            }
+                        default:
+                            fatalError("PARAGRAPH containers can only contain a single text field and a single placeholder")
+                    }
+                }
+            }
+        }
+        
+        if(placeholder == nil || label == nil)
+        {
+            fatalError("PARAGRAPH must contain a text field and a placeholder")
+        }
+        
+        let paragraph = node.paragraph
+        paragraph.fontColor = label!.fontColor
+        paragraph.horizontalAlignmentMode = label!.horizontalAlignmentMode
+        paragraph.fontSize = label!.fontSize
+        paragraph.text = label!.text
+        
+        println("SET FONT COLOR to \(paragraph.fontColor)")
+        println("SET FONT SIZE to \(paragraph.fontSize)")
+        
+        paragraph.paragraphWidth = placeholder!.width
+
+        if(label!.horizontalAlignmentMode == .Left)
+        {
+            println("ALIGN LEFT")
+            //set anchor at 0,0
+            paragraph.explicitAnchorPoint = CGPointMake(0, 1)
+            node.x = placeholder!.minX
+        }else if(label!.horizontalAlignmentMode == .Right){
+            println("ALIGN RIGHT")
+            paragraph.explicitAnchorPoint = CGPointMake(1, 1)
+            node.x = placeholder!.maxX
+        }else if(label!.horizontalAlignmentMode == .Center){
+            println("ALIGN CENTER")
+            paragraph.explicitAnchorPoint = CGPointMake(0.5, 1)
+            node.x = placeholder!.center.x
+        }else{
+            fatalError("UH OH! WE CURRENTLY ONLY SUPPORT Left/Right/Center Justifications")
+        }
+        
+        node.y = placeholder!.maxY
+        println("NODE PLACED AT \(node.position)       PARAGRAPH @ \(paragraph.position)")
+        paragraphs[name] = node
+        return node
     }
     
     func processTextNode(node:Dictionary<String, AnyObject>) -> SKLabelNode
@@ -710,12 +801,10 @@ class DAMetaNode : DAContainer
                     
                     if(name.rangeOfString("modal", options: nil, range: nil, locale: nil) != nil)
                     {
-                        println("ADD A MODAL")
                         let modal = SKShapeNode(rect: placeholders[name]!)
                         modal.name = "modal"
                         modal.fillColor = "#230211".toColor()
                         modal.alpha = 0.5
-                        println("MADE A MODAL WITH RECT \(placeholders[name]!)")
                         return modal
                     }
                     
