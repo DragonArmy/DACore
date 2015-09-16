@@ -541,10 +541,16 @@ class DAMetaNode : DAContainer
         
         if let children = node["children"] as? NSArray as? [AnyObject]
         {
-            let node_children = processChildren(children, withAsynch:asynch)
-            for node_child in node_children
+            if container is DAParagraphNode
             {
-                container?.addChild(node_child)
+                //I HAVE ABANDONED MY CHILD
+            }else{
+                
+                let node_children = processChildren(children, withAsynch:asynch)
+                for node_child in node_children
+                {
+                        container?.addChild(node_child)
+                }
             }
         }
         
@@ -593,7 +599,6 @@ class DAMetaNode : DAContainer
     
     func processParagraphNode(name:String, withChildren children:[AnyObject]) -> DAParagraphNode
     {
-        
         println("********* PROCESS PARAGRAPH NODE")
         
         var node = DAParagraphNode()
@@ -638,23 +643,16 @@ class DAMetaNode : DAContainer
         paragraph.fontName = label!.fontName
         paragraph.text = label!.text
         
-        println("SET FONT COLOR to \(paragraph.fontColor)")
-        println("SET FONT SIZE to \(paragraph.fontSize)")
-        
         paragraph.paragraphWidth = placeholder!.width
 
         if(label!.horizontalAlignmentMode == .Left)
         {
-            println("ALIGN LEFT")
-            //set anchor at 0,0
             paragraph.explicitAnchorPoint = CGPointMake(0, 1)
             node.x = placeholder!.minX
         }else if(label!.horizontalAlignmentMode == .Right){
-            println("ALIGN RIGHT")
             paragraph.explicitAnchorPoint = CGPointMake(1, 1)
             node.x = placeholder!.maxX
         }else if(label!.horizontalAlignmentMode == .Center){
-            println("ALIGN CENTER")
             paragraph.explicitAnchorPoint = CGPointMake(0.5, 1)
             node.x = placeholder!.center.x
         }else{
@@ -662,7 +660,6 @@ class DAMetaNode : DAContainer
         }
         
         node.y = placeholder!.maxY
-        println("NODE PLACED AT \(node.position)       PARAGRAPH @ \(paragraph.position)")
         paragraphs[name] = node
         return node
     }
@@ -680,6 +677,7 @@ class DAMetaNode : DAContainer
             if let name = node["name"] as? NSString as? String
             {
                 label.name = name
+                println("PROCESSING \(name) label");
             }
             
             if let position = node["position"] as? NSArray as? [NSNumber] as? [CGFloat]
