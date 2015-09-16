@@ -635,6 +635,7 @@ class DAMetaNode : DAContainer
         paragraph.fontColor = label!.fontColor
         paragraph.horizontalAlignmentMode = label!.horizontalAlignmentMode
         paragraph.fontSize = label!.fontSize
+        paragraph.fontName = label!.fontName
         paragraph.text = label!.text
         
         println("SET FONT COLOR to \(paragraph.fontColor)")
