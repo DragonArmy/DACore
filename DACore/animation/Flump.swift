@@ -78,8 +78,6 @@ struct FlumpLayer : Equatable
     {
         var actions = [SKAction]()
         
-        var debug = false
-        
         var lastFrame:FlumpKeyframe = rest_layer.frames[0]
         
         for(var i:Int = 0; i < frames.count; i++)
@@ -108,10 +106,10 @@ struct FlumpLayer : Equatable
         
         //this one assumes that we've reset the metacontainer to it's reset position before calling this!
         //we can't use moveTo because it'll move it absolutely
-        var pos_delta = CGVector(dx: frame2.position.x - frame1.position.x, dy: frame2.position.y - frame1.position.y)
+        let pos_delta = CGVector(dx: frame2.position.x - frame1.position.x, dy: frame2.position.y - frame1.position.y)
         actions.append(SKAction.moveBy(pos_delta, duration: 0))
         
-        var rot_delta = frame2.rotation - frame1.rotation
+        let rot_delta = frame2.rotation - frame1.rotation
         actions.append(SKAction.rotateToAngle(rot_delta, duration: 0))
         
         //CONVENTION -- Rest Pose most have all its pieces scaled to 1
@@ -129,18 +127,18 @@ struct FlumpLayer : Equatable
         
         if(frame1.pivot != frame2.pivot)
         {
-            println("[ERROR] WE DONT SUPPORT ANIMATING PIVOTS \(frame2.symbolName) FRAME \(frame2.startFrame)")
+            print("[ERROR] WE DONT SUPPORT ANIMATING PIVOTS \(frame2.symbolName) FRAME \(frame2.startFrame)")
         }
         
         if(frame1.position != frame2.position)
         {
-            var delta = CGVector(dx: frame2.position.x - frame1.position.x, dy: frame2.position.y - frame1.position.y)
+            let delta = CGVector(dx: frame2.position.x - frame1.position.x, dy: frame2.position.y - frame1.position.y)
             actions.append(SKAction.moveBy(delta, duration: frame1.duration))
         }
         
         if(frame1.rotation != frame2.rotation)
         {
-            var delta = frame2.rotation - frame1.rotation
+            let delta = frame2.rotation - frame1.rotation
             actions.append(SKAction.rotateByAngle(delta, duration:frame1.duration))
         }
         
@@ -259,21 +257,36 @@ class Flump
         for file_root in file_root_list
         {
             //println("QUEUING ANIMATION: \(file_root)")
-
-            let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
             
-            let closure_file = file_root
-            dispatch_async(backgroundQueue) {
-                Flump.loadAnimation(closure_file)
-                //println("FINISHED LOADING \(closure_file)")
+            
+            if #available(iOS 8.0, *) {
+                let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+                let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+                
+                let closure_file = file_root
+                dispatch_async(backgroundQueue) {
+                    Flump.loadAnimation(closure_file)
+                    //println("FINISHED LOADING \(closure_file)")
+                }
+                
+            } else {
+                let qualityOfServiceClass = DISPATCH_QUEUE_PRIORITY_BACKGROUND
+                let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+                
+                let closure_file = file_root
+                dispatch_async(backgroundQueue) {
+                    Flump.loadAnimation(closure_file)
+                    //println("FINISHED LOADING \(closure_file)")
+                }
+                
             }
+
         }
     }
     
     static func isLoaded(file_root:String) -> Bool
     {
-        if let movie = LoadedMovies[file_root]
+        if(LoadedMovies[file_root] != nil)
         {
             return true
         }
@@ -295,20 +308,18 @@ class Flump
         // edie added this because I have no idea why this error is being thrown
         if(animation_url == nil)
         {
-            println("ANIMATION URL IS NIL")
+            print("ANIMATION URL IS NIL")
             //return
         }
         
-        var error:NSError?
-        if let data = String(contentsOfURL: animation_url!, encoding: NSUTF8StringEncoding, error: &error)
+        do
         {
+            let data = try String(contentsOfURL: animation_url!, encoding: NSUTF8StringEncoding)
+
             Flump.LoadedAnimations[file_root] = data
             parseFlumpJSON(data)
-        }
-        
-        if let the_error = error
-        {
-            println("ERROR READING FILE \(file_root)")
+        }catch{
+            print("ERROR READING FILE \(file_root)")
         }
     }
     
@@ -319,14 +330,15 @@ class Flump
         
         if(animation_data.isEmpty)
         {
-            NSException(name: "NoMetaDataError", reason: "You must provide metadata!", userInfo: nil)
+            print("[FLUMP ERROR] You must provide metadata!")
         }
         
         var error:NSError?
-        var data = animation_data.dataUsingEncoding(NSUTF8StringEncoding)!
+        let data = animation_data.dataUsingEncoding(NSUTF8StringEncoding)!
         
-        if let json = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: &error) as? Dictionary<String, AnyObject>
+        if let json = try! NSJSONSerialization.JSONObjectWithData(data, options: []) as? Dictionary<String, AnyObject>
         {
+            
             var frame_rate:Float = 24
             
             if let json_frame_rate = json["frameRate"] as? NSNumber as? Float
@@ -345,7 +357,7 @@ class Flump
                     {
                         movie_name = json_movie_name
                     }else{
-                        println("[ERROR] MovieClip found without name!")
+                        print("[ERROR] MovieClip found without name!")
                     }
                     
                     if let json_layers = json_movie["layers"] as? [Dictionary<String, AnyObject>]
@@ -359,17 +371,17 @@ class Flump
                             {
                                 layer_name = json_layer_name
                             }else{
-                                println("[ERROR] MovieClip found with name-less layer")
+                                print("[ERROR] MovieClip found with name-less layer")
                             }
                             
                             if let keyframes = json_layer["keyframes"] as? [Dictionary<String, AnyObject>]
                             {
                                 for keyframe in keyframes
                                 {
-                                    let duration = NSTimeInterval((keyframe["duration"] as! NSNumber as! Float) / frame_rate)
+                                    let duration = NSTimeInterval((keyframe["duration"] as! NSNumber as Float) / frame_rate)
                                     let symbol = keyframe["ref"] as? NSString as? String
-                                    let start_frame = keyframe["index"] as! NSNumber as! Float
-                                    let end_frame = start_frame + (keyframe["duration"] as! NSNumber as! Float)
+                                    let start_frame = keyframe["index"] as! NSNumber as Float
+                                    let end_frame = start_frame + (keyframe["duration"] as! NSNumber as Float)
                                     
                                     var tweened = true
                                     if let json_tweened = keyframe["tweened"] as? Bool
@@ -387,7 +399,7 @@ class Flump
                                     
                                     if let kf_pivot = keyframe["pivot"] as? [NSNumber]
                                     {
-                                        pivot = CGPoint(x: kf_pivot[0] as! CGFloat, y: kf_pivot[1] as! CGFloat)
+                                        pivot = CGPoint(x: kf_pivot[0] as CGFloat, y: kf_pivot[1] as CGFloat)
                                     }else{
                                         pivot = CGPoint(x:0,y:0)
                                     }

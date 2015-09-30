@@ -53,17 +53,17 @@ class DAProgressBar : DAContainerBase
         {
             if let fill = self.childNodeWithName("//" + short_name + "_fill")
             {
-                println("FILL SPRITE FOUND: \(fill)")
+                print("FILL SPRITE FOUND: \(fill)")
                 if let fill_sprite = fill as? SKSpriteNode
                 {
                     fill_sprite.anchorPoint = CGPoint(x:0.0, y:0.5)
                     fill_sprite.x -= fill_sprite.width/2
                     progressSprite = fill_sprite
                 }else{
-                    println("BUT IT WASN'T A SPRITE")
+                    print("BUT IT WASN'T A SPRITE")
                 }
             }else{
-                println("[ERROR] PROGRESS BAR " + self.name! + " IS MISSING " + short_name + "_fill")
+                print("[ERROR] PROGRESS BAR " + self.name! + " IS MISSING " + short_name + "_fill")
             }
         }
     }

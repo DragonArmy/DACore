@@ -62,41 +62,39 @@ class DAContainerBase : DAResetNode
     }
     
     var innerContainer = SKNode()
-    var pivotDisplay = SKShapeNode(circleOfRadius:4)
     
     override init()
     {
+        print("INITIALIZE DA CONTAINER")
         super.init();
+        
+        print("ADD INNER CONTAINER")
         super.addChild(innerContainer)
-        pivotDisplay.fillColor = SKColor.redColor()
-        pivotDisplay.hidden = true
+        print("ADDED INNER CONTAINER")
     }
     
     required init(coder: NSCoder) {
         fatalError("NSCoding not supported")
     }
     
-    func showPivots()
+    override func addChild(node:SKNode)
     {
-        addChild(pivotDisplay)
-        pivotDisplay.hidden = false
-        for child in children
+        if(node == innerContainer)
         {
-            if let da_container = child as? DAContainerBase
-            {
-                da_container.showPivots()
-            }
+            super.addChild(node)
+        }else{
+            innerContainer.addChild(node)
         }
     }
     
-    override func addChild(node:SKNode)
+    override func insertChild(node: SKNode, atIndex index: Int)
     {
-        innerContainer.addChild(node)
-    }
-    
-    override func insertChild(node: SKNode!, atIndex index: Int)
-    {
-        innerContainer.insertChild(node, atIndex: index)
+        if(node == innerContainer)
+        {
+            super.insertChild(node, atIndex: index)
+        }else{
+            innerContainer.insertChild(node, atIndex: index)
+        }
     }
     
     //removeFromParent works the same!
@@ -106,11 +104,11 @@ class DAContainerBase : DAResetNode
         innerContainer.removeAllChildren()
     }
     
-    override func removeChildrenInArray(nodes: [AnyObject]!) {
+    override func removeChildrenInArray(nodes: [SKNode]) {
         innerContainer.removeChildrenInArray(nodes)
     }
     
-    override var children : [AnyObject]
+    override var children : [SKNode]
     {
         get
         {
@@ -123,7 +121,7 @@ class DAContainerBase : DAResetNode
         return innerContainer.childNodeWithName(name)
     }
     
-    override func enumerateChildNodesWithName(name: String, usingBlock block: ((SKNode!, UnsafeMutablePointer<ObjCBool>) -> Void)!)
+    override func enumerateChildNodesWithName(name: String, usingBlock block: ((SKNode, UnsafeMutablePointer<ObjCBool>) -> Void))
     {
         innerContainer.enumerateChildNodesWithName(name, usingBlock: block)
     }

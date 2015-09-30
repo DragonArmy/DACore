@@ -52,21 +52,17 @@ class DAMetaNode : DAContainer
             
             if let meta_url = bundle.URLForResource("\(file_root)\(device_tag)", withExtension: "txt")
             {
-                println(meta_url)
+                print(meta_url)
                 
-                var error:NSError?
-                if let metadata = String(contentsOfURL: meta_url, encoding: NSUTF8StringEncoding, error: &error)
-                {
-                    var error2:NSError?
-                    var data = metadata.dataUsingEncoding(NSUTF8StringEncoding)!
-                    
-                    if let json = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: &error2) as? Dictionary<String, AnyObject>
-                    {
-                        DAMetaNode.LoadedMetadata[file_root] = json
-                    }
-                }
+                let metadata = try! String(contentsOfURL: meta_url, encoding: NSUTF8StringEncoding)
+                
+                let data = metadata.dataUsingEncoding(NSUTF8StringEncoding)!
+                
+                let json = try! NSJSONSerialization.JSONObjectWithData(data, options: []) as? Dictionary<String, AnyObject>
+                
+                DAMetaNode.LoadedMetadata[file_root] = json
             }else{
-                println("ERROR ERROR ERROR -- \(file_root)\(device_tag) NOT FOUND")
+                print("ERROR ERROR ERROR -- \(file_root)\(device_tag) NOT FOUND")
             }
         }
     }
@@ -78,16 +74,31 @@ class DAMetaNode : DAContainer
         {
             //println("QUEUING METADATA: \(file_root)")
             
-            let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-            
-            let closure_file = file_root
-            let closure_omit = omit_device_tag
-            
-            dispatch_async(backgroundQueue) {
-                DAMetaNode.loadMetadata([(closure_file, closure_omit)])
-                //println("FINISHED LOADING \(closure_file)")
+            if #available(iOS 8.0, *) {
+                let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+                let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+                
+                let closure_file = file_root
+                let closure_omit = omit_device_tag
+                
+                dispatch_async(backgroundQueue) {
+                    DAMetaNode.loadMetadata([(closure_file, closure_omit)])
+                    //println("FINISHED LOADING \(closure_file)")
+                }
+                
+            } else {
+                let qualityOfServiceClass = DISPATCH_QUEUE_PRIORITY_BACKGROUND
+                let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+                
+                let closure_file = file_root
+                let closure_omit = omit_device_tag
+                
+                dispatch_async(backgroundQueue) {
+                    DAMetaNode.loadMetadata([(closure_file, closure_omit)])
+                    //println("FINISHED LOADING \(closure_file)")
+                }
             }
+            
         }
     }
     
@@ -100,7 +111,7 @@ class DAMetaNode : DAContainer
     
     init(from_node:DAResetNode, asynchSprites asynch_sprites:Bool)
     {
-        println("CREATING DAMetaNode from existing node!")
+        print("CREATING DAMetaNode from existing node!")
         fileRoot = ""
         rootContainer = from_node.name!
         
@@ -119,26 +130,22 @@ class DAMetaNode : DAContainer
             offset_y = dacon.pivotY
         }
         
-        for root_child in container.children
+        for node in container.children
         {
-            if let node = root_child as? SKNode
+            node.removeFromParent()
+            addChild(node)
+            
+            //offset us to our container's location since we're discarding the shell
+            node.x += offset_x
+            node.y += offset_y
+            
+            
+            //update our positions so we can reset properly
+            positions[node.name!] = node.position
+            
+            if let resettable = node as? DAResetNode
             {
-                
-                node.removeFromParent()
-                addChild(node)
-                
-                //offset us to our container's location since we're discarding the shell
-                node.x += offset_x
-                node.y += offset_y
-                
-                
-                //update our positions so we can reset properly
-                positions[node.name!] = node.position
-                
-                if let resettable = node as? DAResetNode
-                {
-                    resettable.resetPosition = node.position
-                }
+                resettable.resetPosition = node.position
             }
         }
     }
@@ -168,7 +175,7 @@ class DAMetaNode : DAContainer
             {
                 processMetadata(json, withAsynchSprites:asynch_sprites)
             }else{
-                println("UNABLE TO LOAD \(file_root)")
+                print("UNABLE TO LOAD \(file_root)")
                 return
             }
 
@@ -205,7 +212,7 @@ class DAMetaNode : DAContainer
     {
         if(container_name.split("_").first! == "container")
         {
-            println("[ERROR] containerWithName provides the container_, you may omit it from your call!")
+            print("[ERROR] containerWithName provides the container_, you may omit it from your call!")
         }
         
         return childNodeWithName("//container_" + container_name) as? DAContainer
@@ -215,7 +222,7 @@ class DAMetaNode : DAContainer
     {
         if(paragraph_name.split("_").first! == "paragraph")
         {
-            println("[ERROR] paragraphWithName provides the paragraph_, you may omit it from your call!")
+            print("[ERROR] paragraphWithName provides the paragraph_, you may omit it from your call!")
         }
         
         return paragraphs[paragraph_name]
@@ -225,7 +232,7 @@ class DAMetaNode : DAContainer
     {
         if(progress_name.split("_").first! == "progress")
         {
-            println("[ERROR] progressWithName provides the progress_, you may omit it from your call!")
+            print("[ERROR] progressWithName provides the progress_, you may omit it from your call!")
         }
         
         return childNodeWithName("//progress_" + progress_name) as? DAProgressBar
@@ -235,7 +242,7 @@ class DAMetaNode : DAContainer
     {
         if(tab_name.split("_").first! == "tab")
         {
-            println("[ERROR] tabWithName provides the progress_, you may omit it from your call!")
+            print("[ERROR] tabWithName provides the progress_, you may omit it from your call!")
         }
         
         return childNodeWithName("//tab_" + tab_name) as? DATabButton
@@ -258,7 +265,7 @@ class DAMetaNode : DAContainer
         
         //helps in cases where we have something like btn_foo that has an image named foo
         //both end up with name "foo", so the childNodeWithName gets the first it finds
-        println("[ERROR] Found \(maybe_image) while looking for a SKSpriteNode named \(image_name)")
+        print("[ERROR] Found \(maybe_image) while looking for a SKSpriteNode named \(image_name)")
         return nil
     }
     
@@ -266,7 +273,7 @@ class DAMetaNode : DAContainer
     {
         if(label_name.split("_").first! == "txt")
         {
-            println("[ERROR] labelWithName provides the txt_, you may omit it from your call!")
+            print("[ERROR] labelWithName provides the txt_, you may omit it from your call!")
         }
         
         return labels[label_name]
@@ -277,7 +284,7 @@ class DAMetaNode : DAContainer
     {
         if(button_name.split("_").first! == "btn")
         {
-            println("[ERROR] buttonWithName provides the btn_, you may omit it from your call!")
+            print("[ERROR] buttonWithName provides the btn_, you may omit it from your call!")
         }
         
         return buttons[button_name]
@@ -287,7 +294,7 @@ class DAMetaNode : DAContainer
     {
         if(placeholder_name.split("_").first! == "placeholder")
         {
-            println("[ERROR] placeholderWithName provides the placeholder_, you may omit it from your call!")
+            print("[ERROR] placeholderWithName provides the placeholder_, you may omit it from your call!")
         }
         
         return placeholders[placeholder_name]
@@ -302,7 +309,7 @@ class DAMetaNode : DAContainer
             rootWidth = root_width
             if(DEBUG)
             {
-                println("ROOT WIDTH: \(rootWidth)")
+                print("ROOT WIDTH: \(rootWidth)")
             }
         }
         
@@ -311,7 +318,7 @@ class DAMetaNode : DAContainer
             rootHeight = root_height
             if(DEBUG)
             {
-                println("ROOT WIDTH: \(rootHeight)")
+                print("ROOT WIDTH: \(rootHeight)")
             }
         }
         
@@ -332,8 +339,8 @@ class DAMetaNode : DAContainer
                 for raw_node in children
                 {
                     let node = raw_node as! Dictionary<String,AnyObject>
-                    let node_type = node["type"] as! NSString as! String
-                    let node_name = node["name"] as! NSString as! String
+                    let node_type = node["type"] as! NSString as String
+                    let node_name = node["name"] as! NSString as String
                     
                     if(node_type == "container" && node_name == "container_\(rootContainer!)")
                     {
@@ -353,34 +360,30 @@ class DAMetaNode : DAContainer
                         }
                         if(DEBUG)
                         {
-                            println("OFFSET FOR \(node_child.name!) = \(offset_x),\(offset_y)")
+                            print("OFFSET FOR \(node_child.name!) = \(offset_x),\(offset_y)")
                         }
 
-                        for root_child in node_child.children
+                        for node in node_child.children
                         {
-                            if let node = root_child as? SKNode
+                            node.removeFromParent()
+                            addChild(node)
+                            
+                            if(DEBUG)
                             {
+                                 print("OFFSET \(node.name!) from \(node.x),\(node.y)")
+                            }
+                            
+                            //offset us to our container's location since we're discarding the shell
+                            node.x += offset_x
+                            node.y += offset_y
+                            
+                            
+                            //update our positions so we can reset properly
+                            positions[node.name!] = node.position
 
-                                node.removeFromParent()
-                                addChild(node)
-                                
-                                if(DEBUG)
-                                {
-                                     println("OFFSET \(node.name!) from \(node.x),\(node.y)")
-                                }
-                                
-                                //offset us to our container's location since we're discarding the shell
-                                node.x += offset_x
-                                node.y += offset_y
-                                
-                                
-                                //update our positions so we can reset properly
-                                positions[node.name!] = node.position
-
-                                if let resettable = node as? DAResetNode
-                                {
-                                    resettable.resetPosition = node.position
-                                }
+                            if let resettable = node as? DAResetNode
+                            {
+                                resettable.resetPosition = node.position
                             }
                         }
                         break
@@ -389,7 +392,7 @@ class DAMetaNode : DAContainer
                 
                 if(got_one == false)
                 {
-                    println("ERROR -- UNABLE TO LOAD CHILD CONTAINER container_\(rootContainer!)")
+                    print("ERROR -- UNABLE TO LOAD CHILD CONTAINER container_\(rootContainer!)")
                 }
             }
         }
@@ -398,7 +401,7 @@ class DAMetaNode : DAContainer
         
         if(asynch && asynchSpriteQueue.count > 0)
         {
-            dispatch_after_delay(0.01, asynchProcessImage)
+            dispatch_after_delay(0.01, block: asynchProcessImage)
         }
     }
     
@@ -437,7 +440,7 @@ class DAMetaNode : DAContainer
         
         if(asynchSpriteQueue.count > 0)
         {
-            dispatch_after_delay(0.01, asynchProcessImage)
+            dispatch_after_delay(0.01, block: asynchProcessImage)
         }
     }
     
@@ -468,7 +471,7 @@ class DAMetaNode : DAContainer
                             child_nodes.append(modal)
                         }
                     default:
-                        println("UH OH -- INVALID NODE FOUND: \(node_type)")
+                        print("UH OH -- INVALID NODE FOUND: \(node_type)")
                         
                     }
                 }
@@ -482,12 +485,12 @@ class DAMetaNode : DAContainer
     {
         var container:DAResetNode?
         
+        var ignore_children = false
         if let container_name = node["name"] as? NSString as? String
         {
 
             let container_type = container_name.split("_")[0]
             
-            var ignore_children = false
             switch(container_type)
             {
                 case "container":
@@ -510,13 +513,13 @@ class DAMetaNode : DAContainer
                     //SHHH, NOT ACTUALLY A CONTAINER
                     return processScale9Node(node)
                 case "paragraph":
-                    let children = node["children"] as! NSArray as! [AnyObject]
+                    let children = node["children"] as! NSArray as [AnyObject]
                     let paragraph_name = container_name.replace("paragraph_",withString:"")
                 
                     container = processParagraphNode(paragraph_name, withChildren: children)
                     ignore_children = true
                 default:
-                    println("ERROR: UNRECOGNIZED CONTAINER TYPE: \(container_type)")
+                    print("ERROR: UNRECOGNIZED CONTAINER TYPE: \(container_type)")
                     container = DAContainer()
             }
         }
@@ -529,7 +532,7 @@ class DAMetaNode : DAContainer
         
         if let children = node["children"] as? NSArray as? [AnyObject]
         {
-            if container is DAParagraphNode
+            if(ignore_children)
             {
                 //I HAVE ABANDONED MY CHILD
             }else{
@@ -581,7 +584,7 @@ class DAMetaNode : DAContainer
         var sprite:SKSpriteNode?
         var size:CGRect?
         
-        let children = node["children"] as! NSArray as! [AnyObject]
+        let children = node["children"] as! NSArray as [AnyObject]
         
         for raw_node in children
         {
@@ -604,7 +607,7 @@ class DAMetaNode : DAContainer
                             }else if(name == "center"){
                                 center = placeholderWithName(name)!
                             }else{
-                                println("GOT \(name)")
+                                print("GOT \(name)")
                             }
                             
                         }
@@ -622,9 +625,6 @@ class DAMetaNode : DAContainer
             let full_height = sprite!.height
             
             let left = center!.minX - sprite!.frame.minX
-            let top = sprite!.frame.maxY - center!.maxY
-            
-            let right = sprite!.frame.maxX - center!.maxX
             let bottom = center!.minY - sprite!.frame.minY
             
             let x = left / full_width
@@ -654,7 +654,7 @@ class DAMetaNode : DAContainer
     
     func processParagraphNode(name:String, withChildren children:[AnyObject]) -> DAParagraphNode
     {
-        var node = DAParagraphNode()
+        let node = DAParagraphNode()
         node.name = name
         
         var placeholder:CGRect?
@@ -690,11 +690,11 @@ class DAMetaNode : DAContainer
         }
         
         let paragraph = node.paragraph
-        paragraph.fontColor = label!.fontColor
+        paragraph.fontColor = label!.fontColor!
         paragraph.horizontalAlignmentMode = label!.horizontalAlignmentMode
         paragraph.fontSize = label!.fontSize
-        paragraph.fontName = label!.fontName
-        paragraph.text = label!.text
+        paragraph.fontName = label!.fontName!
+        paragraph.text = label!.text!
         
         paragraph.paragraphWidth = placeholder!.width
 
@@ -762,7 +762,7 @@ class DAMetaNode : DAContainer
                 }else if(align == "right"){
                     label.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Right
                 }else{
-                    println("[MetaNode] -- INVALID LABEL ORIENTATION ON LABEL \(label.name)")
+                    print("[MetaNode] -- INVALID LABEL ORIENTATION ON LABEL \(label.name)")
                 }
             }
             
@@ -779,7 +779,7 @@ class DAMetaNode : DAContainer
     {
         if(asynch)
         {
-            var placeholder = SKNode()
+            let placeholder = SKNode()
             if let image_name = node["name"] as? NSString as? String
             {
                 placeholder.name = "placeholder_\(image_name)"
@@ -839,7 +839,7 @@ class DAMetaNode : DAContainer
     }
     
     //no return type here
-    func processPlaceholderNode(node:Dictionary<String, AnyObject>) -> SKShapeNode?
+    func processPlaceholderNode(node:Dictionary<String, AnyObject>) -> SKNode?
     {
         if let position = node["position"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
@@ -850,13 +850,20 @@ class DAMetaNode : DAContainer
                     //println("ADD PLACEHOLDER \(name)")
                     placeholders[name] = CGRect(x: position[0] - size[0]/2.0, y: position[1] - size[1]/2.0, width: size[0], height: size[1])
                     
-                    if(name.rangeOfString("modal", options: nil, range: nil, locale: nil) != nil)
+                    if(name.rangeOfString("modal", options: [], range: nil, locale: nil) != nil)
                     {
-                        let modal = SKShapeNode(rect: placeholders[name]!)
-                        modal.name = "modal"
-                        modal.fillColor = "#230211".toColor()
-                        modal.alpha = 0.5
-                        return modal
+                     
+                        if #available(iOS 8.0, *) {
+                            let modal = SKShapeNode(rect: placeholders[name]!)
+                            modal.name = "modal"
+                            modal.fillColor = "#230211".toColor()
+                            modal.alpha = 0.5
+                            return modal
+                        } else {
+                            // Fallback on earlier versions
+                            print("TODO: USE THE IMAGE MODAL")
+                        }
+                        
                     }
                     
                 }
@@ -873,9 +880,9 @@ class DAMetaNode : DAContainer
     
     func printDisplayTree(node:SKNode, currentDepth depth:Int)
     {
-        let tab = join("", Array<String>(count: depth, repeatedValue: "  ")) + "->"
+        let tab = "".join(Array<String>(count: depth, repeatedValue: "  ")) + "->"
         let node_name = (node.name == nil ? node.description : node.name!)
-        println("\(tab) \(node_name)     \(node.position)")
+        print("\(tab) \(node_name)     \(node.position)")
         
         if let container = node as? DAContainer
         {

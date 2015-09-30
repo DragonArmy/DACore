@@ -68,7 +68,7 @@ public func += (inout left: CGPoint, right: CGPoint) {
 }
 
 //hashable XY coordinate
-struct XY : Hashable, Equatable, Printable
+struct XY : Hashable, Equatable, CustomStringConvertible
 {
     var x:Int
     var y:Int
@@ -136,7 +136,7 @@ public extension UIColor {
             let scanner = NSScanner(string: hex)
             var hexValue: CUnsignedLongLong = 0
             if scanner.scanHexLongLong(&hexValue) {
-                switch (count(hex)) {
+                switch (hex.characters.count) {
                 case 3:
                     red   = CGFloat((hexValue & 0xF00) >> 8)       / 15.0
                     green = CGFloat((hexValue & 0x0F0) >> 4)       / 15.0
@@ -159,7 +159,7 @@ public extension UIColor {
                     print("Invalid RGB string, number of characters after '#' should be either 3, 4, 6 or 8")
                 }
             } else {
-                println("Scan hex error: \(rgba)")
+                print("Scan hex error: \(rgba)")
             }
         } else {
             print("Invalid RGB string, missing '#' as prefix")
@@ -172,14 +172,14 @@ public extension UIColor {
 public extension Int {
     /**
     Create a random num Int
-    :param: lower number Int
-    :param: upper number Int
+    - parameter lower: number Int
+    - parameter upper: number Int
     :return: random number Int
     By DaRkDOG
     */
     public static func random (lower: Int , upper: Int) -> Int {
-        var delta = upper - lower + 1;
-        var random_value = Int(arc4random_uniform(UInt32(delta)))
+        let delta = upper - lower + 1;
+        let random_value = Int(arc4random_uniform(UInt32(delta)))
         return lower + random_value
     }
     
@@ -187,12 +187,12 @@ public extension Int {
 public extension Double {
     /**
     Create a random num Double
-    :param: lower number Double
-    :param: upper number Double
+    - parameter lower: number Double
+    - parameter upper: number Double
     :return: random number Double
     By DaRkDOG
     */
-    public static func random(#lower: Double, upper: Double) -> Double {
+    public static func random(lower lower: Double, upper: Double) -> Double {
         let r = Double(arc4random(UInt64)) / Double(UInt64.max)
         return (r * (upper - lower)) + lower
     }
@@ -200,12 +200,12 @@ public extension Double {
 public extension Float {
     /**
     Create a random num Float
-    :param: lower number Float
-    :param: upper number Float
+    - parameter lower: number Float
+    - parameter upper: number Float
     :return: random number Float
     By DaRkDOG
     */
-    public static func random(#lower: Float, upper: Float) -> Float {
+    public static func random(lower lower: Float, upper: Float) -> Float {
         let r = Float(arc4random(UInt32)) / Float(UInt32.max)
         return (r * (upper - lower)) + lower
     }
@@ -213,7 +213,7 @@ public extension Float {
 
 public extension CGFloat {
     
-    public static func random(#lower:CGFloat, upper:CGFloat) -> CGFloat {
+    public static func random(lower lower:CGFloat, upper:CGFloat) -> CGFloat {
         return CGFloat(Float.random(lower: Float(lower), upper:Float(upper)))
     }
 }
@@ -283,7 +283,7 @@ extension String {
     
     func indexOf(target: String) -> Int
     {
-        var range = self.rangeOfString(target)
+        let range = self.rangeOfString(target)
         if let range = range {
             return distance(self.startIndex, range.startIndex)
         } else {
@@ -300,7 +300,7 @@ extension String {
 extension Array {
     func indexOf<T : Equatable>(object:T) -> Int?
     {
-        for (index,obj) in enumerate(self)
+        for (index,obj) in self.enumerate()
         {
             if let typed_obj = obj as? T
             {
@@ -313,7 +313,7 @@ extension Array {
         return nil
     }
     
-    func last(how_many:Int) -> Array<T>
+    func last(how_many:Int) -> Array<Element>
     {
         
         let lower = count - how_many
@@ -322,9 +322,9 @@ extension Array {
         return Array(self[lower...upper])
     }
     
-    func shuffle() -> Array<T>
+    func shuffle() -> Array<Element>
     {
-        return self.sorted({ (a, b) -> Bool in
+        return self.sort({ (a, b) -> Bool in
             return Float.random(lower:0, upper:1) > 0.5
         })
     }
@@ -346,7 +346,7 @@ extension SKNode
     {
         if(parent == nil)
         {
-            println("[ERROR] -- can't convert coordinate spaces if I'm not in the display tree!")
+            print("[ERROR] -- can't convert coordinate spaces if I'm not in the display tree!")
         }
         
         position = new_parent.convertPoint(position, fromNode: parent!)
@@ -358,13 +358,10 @@ extension SKNode
     {
         if let actual_parent = parent
         {
-            var index = find(actual_parent.children as! [SKNode], self)
             removeFromParent()
             actual_parent.insertChild(self, atIndex: 0)
-            
-            index = find(actual_parent.children as! [SKNode], self)
         }else{
-            println("[ERROR] Cannot call moveToBack on a node with no parent!")
+            print("[ERROR] Cannot call moveToBack on a node with no parent!")
             fatalError("Cannot call moveToBack on a node with no parent!")
         }
     }
@@ -376,7 +373,7 @@ extension SKNode
             removeFromParent()
             actual_parent.addChild(self)
         }else{
-            println("[ERROR] Cannot call moveToFront on a node with no parent!")            
+            print("[ERROR] Cannot call moveToFront on a node with no parent!")            
             fatalError("Cannot call moveToFront on a node with no parent!")
         }
     }
@@ -448,11 +445,11 @@ extension SKNode
         var working_scale = self.scale
         var current_parent = self.parent
         
-        println("STARTING WITH SCALE \(self.scale)    -   \(self.name)")
+        print("STARTING WITH SCALE \(self.scale)    -   \(self.name)")
         
         while(current_parent != nil)
         {
-            println("MULTIPLY BY \(current_parent!.scale)")
+            print("MULTIPLY BY \(current_parent!.scale)")
             working_scale = working_scale * current_parent!.scale
             current_parent = current_parent!.parent
         }

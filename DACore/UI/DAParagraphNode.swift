@@ -64,7 +64,7 @@ class DAMultilineLabel : SKSpriteNode
     {
         if let new_text_image = imageFromText(_text)
         {
-            var new_texture = SKTexture(image: new_text_image)
+            let new_texture = SKTexture(image: new_text_image)
             
             texture = new_texture
             
@@ -80,7 +80,7 @@ class DAMultilineLabel : SKSpriteNode
     
     func imageFromText(text:String) -> UIImage?
     {
-        var paragraph_style = NSMutableParagraphStyle()
+        let paragraph_style = NSMutableParagraphStyle()
         paragraph_style.lineBreakMode = NSLineBreakMode.ByWordWrapping
         paragraph_style.alignment = horizontalNSTextAlignment
         paragraph_style.lineSpacing = 1
@@ -89,13 +89,16 @@ class DAMultilineLabel : SKSpriteNode
         if (font == nil)
         {
             font = UIFont(name: "Helvetica", size: _fontSize)
-            println("The font you specified was unavailable. Defaulted to Helvetica.");
+            print("The font you specified was unavailable. Defaulted to Helvetica.");
         }
         
-        var text_attributes = NSMutableDictionary()
-        text_attributes.setObject(font!, forKey: NSFontAttributeName)
-        text_attributes.setObject(paragraph_style, forKey: NSParagraphStyleAttributeName)
-        text_attributes.setObject(_fontColor, forKey: NSForegroundColorAttributeName)
+        var text_attributes = [String:AnyObject]()
+        text_attributes[NSFontAttributeName] = font!
+        text_attributes[NSParagraphStyleAttributeName] = paragraph_style
+        text_attributes[NSForegroundColorAttributeName] = _fontColor
+//        text_attributes.setObject(font!, forKey: NSFontAttributeName)
+//        text_attributes.setObject(paragraph_style, forKey: NSParagraphStyleAttributeName)
+//        text_attributes.setObject(_fontColor, forKey: NSForegroundColorAttributeName)
         
         if(_paragraphWidth == 0)
         {
@@ -103,11 +106,15 @@ class DAMultilineLabel : SKSpriteNode
         }
         
         let texture_size = CGSize(width: _paragraphWidth, height: 2048)
+        
+        //var texture_rect = (text as NSString).boundingRectWithSize(texture_size, options: NSStringDrawingOptions.UsesLineFragmentOrigin, attributes: text_attributes, context: nil)
+        
         var texture_rect = (text as NSString).boundingRectWithSize(texture_size,
             options: NSStringDrawingOptions.UsesLineFragmentOrigin,
-            attributes: text_attributes as [NSObject:AnyObject],
-            context: nil
+            attributes: text_attributes,
+            context:nil
         )
+        
         
         //iOS7 uses fractional size values.  So we needed to ceil it to make sure we have enough room for display.
         texture_rect.size = CGSize(width: ceil(texture_rect.size.width), height: ceil(texture_rect.size.height))
@@ -120,7 +127,7 @@ class DAMultilineLabel : SKSpriteNode
         size = texture_rect.size
         
         UIGraphicsBeginImageContextWithOptions(texture_rect.size, false, 0)
-        (text as NSString).drawInRect(texture_rect, withAttributes: text_attributes as [NSObject : AnyObject])
+        (text as NSString).drawInRect(texture_rect, withAttributes: text_attributes)
         
         let image = UIGraphicsGetImageFromCurrentImageContext()
         

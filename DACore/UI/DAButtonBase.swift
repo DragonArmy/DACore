@@ -61,11 +61,11 @@ class DAButtonBase : DAContainerBase
         return false
     }
     
-    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent)
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
         if(recursiveHidden())
         {
-            println("PARENT IS HIDDEN, NO TOUCH FOR YOU")
+            print("PARENT IS HIDDEN, NO TOUCH FOR YOU")
             return
         }
         
@@ -86,7 +86,7 @@ class DAButtonBase : DAContainerBase
     }
     
     
-    override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent)
+    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
         if(!isTouching)
         {
@@ -99,9 +99,9 @@ class DAButtonBase : DAContainerBase
         }
         
         
-        if let touch = touches.first as? UITouch
+        if let touch = touches.first
         {
-            var location: CGPoint = touch.locationInNode(parent)
+            let location: CGPoint = touch.locationInNode(parent!)
 
             //use touchRect instead of self b/c our size can change based on input
             if CGRectContainsPoint(touchRect!, location)
@@ -114,7 +114,7 @@ class DAButtonBase : DAContainerBase
         }
     }
     
-    override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent)
+    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
         if(!isTouching)
         {
@@ -127,9 +127,9 @@ class DAButtonBase : DAContainerBase
         }
         
         
-        if let touch = touches.first as? UITouch
+        if let touch = touches.first
         {
-            var location: CGPoint = touch.locationInNode(parent)
+            let location: CGPoint = touch.locationInNode(parent!)
             
             //use touchRect instead of self b/c our size can change based on input
             if CGRectContainsPoint(touchRect!, location)
@@ -152,7 +152,7 @@ class DAButtonBase : DAContainerBase
                 
                 if let sfx = DAButtonBase.buttonSound
                 {
-                    println("PLAYING SOUND \(sfx)");
+                    print("PLAYING SOUND \(sfx)");
                     DASoundManager.playSound(sfx);
                 }
             }

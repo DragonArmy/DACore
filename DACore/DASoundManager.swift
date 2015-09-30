@@ -29,12 +29,17 @@ public class DASoundManager
         let url = NSBundle.mainBundle().URLForResource(filename, withExtension: nil)
         if (url == nil)
         {
-            println("[ERROR] No file: \(filename)")
+            print("[ERROR] No file: \(filename)")
             return
         }
         
         var error: NSError? = nil
-        musicPlayer = AVAudioPlayer(contentsOfURL: url, error: &error)
+        do {
+            musicPlayer = try AVAudioPlayer(contentsOfURL: url!)
+        } catch let error1 as NSError {
+            error = error1
+            musicPlayer = nil
+        }
         
         if let player = musicPlayer
         {
@@ -42,7 +47,7 @@ public class DASoundManager
             player.prepareToPlay()
             player.play()
         } else {
-            println("Could not create music player: \(error!)")
+            print("Could not create music player: \(error!)")
         }
     }
     
@@ -80,24 +85,29 @@ public class DASoundManager
             return
         }
         
-        println("PLAY SOUND \(filename)");
+        print("PLAY SOUND \(filename)");
         
         let url = NSBundle.mainBundle().URLForResource(filename, withExtension: nil)
         if (url == nil)
         {
-            println("NO SFX FOUND: \(filename)")
+            print("NO SFX FOUND: \(filename)")
             return
         }
         
         var error: NSError? = nil
-        soundPlayers[filename] = AVAudioPlayer(contentsOfURL: url, error: &error)
+        do {
+            soundPlayers[filename] = try AVAudioPlayer(contentsOfURL: url!)
+        } catch let error1 as NSError {
+            error = error1
+            soundPlayers[filename] = nil
+        }
         if let player = soundPlayers[filename]
         {
             player.numberOfLoops = 0
             player.prepareToPlay()
             player.play()
         } else {
-            println("Could not create sfx player: \(error!)")
+            print("Could not create sfx player: \(error!)")
         }
     }
 }

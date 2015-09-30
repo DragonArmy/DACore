@@ -59,7 +59,7 @@ class GameScene: SKScene
     
     func printAnimationGroup(group:CAAnimationGroup, withDepth depth:Int)
     {
-        for sub_anim in group.animations
+        for sub_anim in group.animations!
         {
             if let sub_group = sub_anim as? CAAnimationGroup
             {
@@ -68,7 +68,7 @@ class GameScene: SKScene
                 if let keyframe = sub_anim as? CAKeyframeAnimation
                 {
                     //println("DEPTH \(depth): \(keyframe)      \(keyframe.keyPath)")
-                    println("          keyTimes:\(keyframe.keyTimes)    (\(keyframe.keyTimes.count))")
+                    print("          keyTimes:\(keyframe.keyTimes)    (\(keyframe.keyTimes!.count))")
                 }else{
                     //println("DEPTH \(depth): \(sub_anim)")
                 }

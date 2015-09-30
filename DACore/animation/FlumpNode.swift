@@ -40,7 +40,7 @@ class FlumpNode : DAMetaNode
     
     func goto(movie_name:String) -> FlumpNode
     {
-        println("GOTO \(movie_name)")
+        print("GOTO \(movie_name)")
         isLooping = false
         stop()
         
@@ -49,7 +49,7 @@ class FlumpNode : DAMetaNode
         //if we don't have a restPose, our "reset()" state is our rest pose
         if(restPose == nil)
         {
-            println("NO REST POSE, BAIL OUT")
+            print("NO REST POSE, BAIL OUT")
             return self
         }
         
@@ -60,21 +60,19 @@ class FlumpNode : DAMetaNode
             {
                 if let child = containerWithName(layer.name)
                 {
-                    var animation:SKAction
-
                     if let rest_layer = restPose!.layerWithName(layer.name)
                     {
                         child.runAction(layer.getGoto(rest_layer))
                     }else{
-                        println("[ERROR] CANNOT FIND LAYER \(layer.name) IN REST POSE \(restPose!.name)")
+                        print("[ERROR] CANNOT FIND LAYER \(layer.name) IN REST POSE \(restPose!.name)")
                     }
                 }else{
-                    println("LAYER NAMED \(layer.name) NOT FOUND!")
+                    print("LAYER NAMED \(layer.name) NOT FOUND!")
                 }
             }
             
         }else{
-            println("[ERROR] CANNOT FIND MOVIE " + movie_name)
+            print("[ERROR] CANNOT FIND MOVIE " + movie_name)
         }
         
         return self
@@ -115,7 +113,7 @@ class FlumpNode : DAMetaNode
                 {
                     if child.hidden
                     {
-                        println("\(layer.name) is hidden, we're not going to animate it")
+                        print("\(layer.name) is hidden, we're not going to animate it")
                         continue
                     }
                     
@@ -133,7 +131,7 @@ class FlumpNode : DAMetaNode
                             let reset = layer.getReset(rest_layer)
                             loop = SKAction.sequence([animation, reset])
                         }else{
-                            println("[ERROR] CANNOT FIND LAYER \(layer.name) IN REST POSE \(restPose!.name)")
+                            print("[ERROR] CANNOT FIND LAYER \(layer.name) IN REST POSE \(restPose!.name)")
                             animation = SKAction()
                             loop = SKAction()
                         }
@@ -150,7 +148,7 @@ class FlumpNode : DAMetaNode
                 }
             }
         }else{
-            println("UNABLE TO PLAY MOVIE \(movie_name) -- MAYBE YOU FORGOT TO LOAD IT?")
+            print("UNABLE TO PLAY MOVIE \(movie_name) -- MAYBE YOU FORGOT TO LOAD IT?")
         }
     }
     

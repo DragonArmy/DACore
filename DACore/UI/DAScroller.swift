@@ -184,7 +184,7 @@ class DAScroller
     
     func updateDrag(touch_position:CGFloat)
     {
-        var absolute_position = _basePosition - (touch_position - _baseTouchPosition)
+        let absolute_position = _basePosition - (touch_position - _baseTouchPosition)
         var diff:CGFloat = 0 //amount of movement needed to bring absolutePos back in bounds
         
         if(absolute_position < _boundsMin)
@@ -192,15 +192,15 @@ class DAScroller
             
             diff = _boundsMin - absolute_position
             
-            var result = (1.0 - (1.0 / ((diff * EDGE_SQUISH_RATIO / EDGE_SQUISH) + 1.0))) * EDGE_SQUISH
+            let result = (1.0 - (1.0 / ((diff * EDGE_SQUISH_RATIO / EDGE_SQUISH) + 1.0))) * EDGE_SQUISH
 
             _position = _boundsMin - result
         }else if(absolute_position > _boundsMax){
 
             diff = absolute_position - _boundsMax
-            println("DIFF: \(diff)")
+            print("DIFF: \(diff)")
             
-            var result = (1.0 - (1.0 / ((diff * EDGE_SQUISH_RATIO / EDGE_SQUISH) + 1.0))) * EDGE_SQUISH
+            let result = (1.0 - (1.0 / ((diff * EDGE_SQUISH_RATIO / EDGE_SQUISH) + 1.0))) * EDGE_SQUISH
             
             _position = _boundsMax + result
         }else{
@@ -238,7 +238,7 @@ class DAScroller
         }
     }
     
-    func setBounds(#min:CGFloat, max:CGFloat)
+    func setBounds(min min:CGFloat, max:CGFloat)
     {
         _boundsMin = min
         _boundsMax = max

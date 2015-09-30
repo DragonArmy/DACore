@@ -82,7 +82,7 @@ class DATabButton : DAContainerBase
     {
         allLinkedNodes.insert(node)
         
-        if let current_nodes = linkedNodes[state]
+        if(linkedNodes[state] != nil)
         {
             linkedNodes[state]!.insert(node)
         }else{
@@ -101,7 +101,7 @@ class DATabButton : DAContainerBase
         }
         
         var got_one = false
-        for(key, node_set) in linkedNodes
+        for node_set in linkedNodes.values
         {
             if node_set.contains(node)
             {
@@ -125,7 +125,7 @@ class DATabButton : DAContainerBase
         }
             
         //if we're not in the cycle (i.e. locked), stay where we are
-        if let index = find(cycle, currentState)
+        if let index = cycle.indexOf(currentState)
         {
             let next_index = (index + 1) % cycle.count
             return cycle[next_index]
@@ -136,7 +136,7 @@ class DATabButton : DAContainerBase
     
     func handleButtonClick(button:DAButtonBase)
     {
-        var next_state = nextStateInCycle
+        let next_state = nextStateInCycle
         if(_currentState != next_state)
         {
             stateWillChange.fire(self)
@@ -151,31 +151,28 @@ class DATabButton : DAContainerBase
     {
         var any_state:String = ""
         
-        for any_node in children
+        for node in children
         {
-            if let button = any_node as? DAButtonBase
+            if let button = node as? DAButtonBase
             {
                 button.onButtonClick.listen(self, callback:handleButtonClick)
             }
             
-            if let node = any_node as? SKNode
+            if let state = node.name?.split("_").last
             {
-                if let state = node.name?.split("_").last
+                states.insert(state)
+                if(any_state == "")
                 {
-                    states.insert(state)
-                    if(any_state == "")
-                    {
-                        any_state = state
-                    }
+                    any_state = state
                 }
-                
-                content.append(node)
             }
+            
+            content.append(node)
         }
         
         if(any_state == "")
         {
-            println("[ERROR] cannont have a Tab with no states!")
+            print("[ERROR] cannont have a Tab with no states!")
         }
         
         //println("SETTING INITIAL STATE: " + any_state)

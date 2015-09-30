@@ -42,23 +42,22 @@ class BaseModel
         allData[allKey] = [AnyObject]()
         allCache[allKey] = Dictionary<String, AnyObject>()
         
-        var error : NSError?
-        
         // load the data from the bundle
-        if let data = String(contentsOfURL: NSBundle.mainBundle().URLForResource(filename, withExtension: ".csv")!, encoding: NSUTF8StringEncoding, error: &error)
+        do
         {
+            var data = try String(contentsOfURL: NSBundle.mainBundle().URLForResource(filename, withExtension: ".csv")!, encoding: NSUTF8StringEncoding)
             // removing the trailing whitespace if there is any
-            let data = data.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+            data = data.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
             
             // split the data based on a newline character
             let text = data.split("\n")
-
+            
             //we require 2 rows:
             // 1) column name
             // 2) column type
             if(text.count < 2)
             {
-                println("ERROR: \(filename) does not contain enough information. Please update the google spreadsheet and try again.")
+                print("ERROR: \(filename) does not contain enough information. Please update the google spreadsheet and try again.")
                 return
             }
             
@@ -69,7 +68,7 @@ class BaseModel
             // if there isn't an id, remove it
             if (variableNames.count == 0)
             {
-                println("ERROR: no data found in \(filename)")
+                print("ERROR: no data found in \(filename)")
                 return
             }
             
@@ -85,7 +84,7 @@ class BaseModel
                 }
                 
                 //create an object and assign variables from
-                var object = self();
+                let object = self.init();
                 
                 // get the variables from the data
                 var raw_data = objectData.componentsSeparatedByString(",")
@@ -114,7 +113,7 @@ class BaseModel
                             }
                         }
                         
-//                        println("REJOINED DATA: \(working_string)")
+                        //                        println("REJOINED DATA: \(working_string)")
                         dataVariables.append(working_string)
                     }else{
                         dataVariables.append(raw_data[i])
@@ -131,34 +130,34 @@ class BaseModel
                 {
                     if (variable >= dataVariables.count)
                     {
-                        println("ERROR: no data found for \(variableNames[variable]) on line \(i) of \(filename)")
+                        print("ERROR: no data found for \(variableNames[variable]) on line \(i) of \(filename)")
                         continue
                     }
                     
                     // parse out all the data based on types
                     switch(variableTypes[variable].lowercaseString)
                     {
-                        case "color":
-                            if !contains(dataVariables[variable], "#")
-                            {
-                                object.objectVariables[variableNames[variable]] = ("#" + dataVariables[variable]).lowercaseString.toColor()
-                            }
-                            else
-                            {
-                                object.objectVariables[variableNames[variable]] = dataVariables[variable].lowercaseString.toColor()
-                            }
+                    case "color":
+                        if !dataVariables[variable].characters.contains("#")
+                        {
+                            object.objectVariables[variableNames[variable]] = ("#" + dataVariables[variable]).lowercaseString.toColor()
+                        }
+                        else
+                        {
+                            object.objectVariables[variableNames[variable]] = dataVariables[variable].lowercaseString.toColor()
+                        }
                         break
-                        case "int":
-                            object.objectVariables[variableNames[variable]] = dataVariables[variable].toInt()
+                    case "int":
+                        object.objectVariables[variableNames[variable]] = Int(dataVariables[variable])
                         break
-                        case "float":
-                            object.objectVariables[variableNames[variable]] = dataVariables[variable].toFloat()
+                    case "float":
+                        object.objectVariables[variableNames[variable]] = dataVariables[variable].toFloat()
                         break
-                        case "bool":
-                            object.objectVariables[variableNames[variable]] = dataVariables[variable].lowercaseString == "true"
+                    case "bool":
+                        object.objectVariables[variableNames[variable]] = dataVariables[variable].lowercaseString == "true"
                         break
-                        default:
-                            object.objectVariables[variableNames[variable]] = dataVariables[variable]
+                    default:
+                        object.objectVariables[variableNames[variable]] = dataVariables[variable]
                         break
                     }
                 }
@@ -167,8 +166,10 @@ class BaseModel
                 allCache[allKey]![dataVariables[0]] = object
                 allData[allKey]!.append(object as AnyObject)
             }
-        } else {
-            println("ERROR READING FILE \(filename)")
+            
+            
+        } catch {
+            print("ERROR READING FILE \(filename)")
         }
     }
     
@@ -179,13 +180,13 @@ class BaseModel
     
     static func find<T>(id:String) -> T?
     {
-        var return_value = allCache[allKey]![id] as! T?
+        let return_value = allCache[allKey]![id] as! T?
         return return_value
     }
     
     static func parseInt(value : String) -> Int?
     {
-        return value.toInt()
+        return Int(value)
     }
     
     static func parseFloat(value : String) -> Float?
