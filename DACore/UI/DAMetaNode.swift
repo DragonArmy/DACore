@@ -26,7 +26,7 @@ class DAMetaNode : DAContainer
     var labels          = [String:SKLabelNode]()
     var paragraphs      = [String:DAParagraphNode]()
     
-    var positions       = [SKNode:CGPoint]()
+    var positions       = [String:CGPoint]()
     
     private let SPRITES_PER_FRAME = 10
     private var asynchSpriteQueue = [(SKNode, Dictionary<String, AnyObject>)]()
@@ -106,7 +106,7 @@ class DAMetaNode : DAContainer
         
         super.init()
         
-        let container = processContainerNode(from_node.cachedMetadata, withAsynch: asynch_sprites)
+        let container = processContainerNode(from_node.cachedMetadata, withAsynch: asynch_sprites) as! DAResetNode
         container.resetPosition = nil
         
         var offset_x:CGFloat = 0
@@ -133,7 +133,7 @@ class DAMetaNode : DAContainer
                 
                 
                 //update our positions so we can reset properly
-                positions[node] = node.position
+                positions[node.name!] = node.position
                 
                 if let resettable = node as? DAResetNode
                 {
@@ -201,11 +201,6 @@ class DAMetaNode : DAContainer
     }
     
     //SUPER DUPER HELPFUL TYPED GETTERS
-    //why use untyped more-verbose code like
-    //    node.childNodeWithName("//scale9_frame") as? DAScale9
-    //when you could instead do
-    //    node.scale9WithName("frame")
-    
     func containerWithName(container_name:String) -> DAContainer?
     {
         if(container_name.split("_").first! == "container")
@@ -224,16 +219,6 @@ class DAMetaNode : DAContainer
         }
         
         return paragraphs[paragraph_name]
-    }
-    
-    func scale9WithName(scale9_name:String) -> DAScale9?
-    {
-        if(scale9_name.split("_").first! == "scale9")
-        {
-            println("[ERROR] scale9WithName provides the scale9_, you may omit it from your call!")
-        }
-        
-        return childNodeWithName("//scale9_" + scale9_name) as? DAScale9
     }
     
     func progressWithName(progress_name:String) -> DAProgressBar?
@@ -355,7 +340,7 @@ class DAMetaNode : DAContainer
                         got_one = true
                         
                         let node_child = processContainerNode(node, withAsynch: asynch)
-                        node_child.resetPosition = nil
+                        (node_child as! DAResetNode).resetPosition = nil
 
                         var offset_x:CGFloat = 0
                         var offset_y:CGFloat = 0
@@ -390,7 +375,7 @@ class DAMetaNode : DAContainer
                                 
                                 
                                 //update our positions so we can reset properly
-                                positions[node] = node.position
+                                positions[node.name!] = node.position
 
                                 if let resettable = node as? DAResetNode
                                 {
@@ -493,7 +478,7 @@ class DAMetaNode : DAContainer
         return child_nodes
     }
     
-    func processContainerNode(node:Dictionary<String, AnyObject>, withAsynch asynch:Bool) -> DAResetNode
+    func processContainerNode(node:Dictionary<String, AnyObject>, withAsynch asynch:Bool) -> SKNode
     {
         var container:DAResetNode?
         
@@ -502,6 +487,7 @@ class DAMetaNode : DAContainer
 
             let container_type = container_name.split("_")[0]
             
+            var ignore_children = false
             switch(container_type)
             {
                 case "container":
@@ -521,12 +507,14 @@ class DAMetaNode : DAContainer
                 case "tab":
                     container = DATabButton()
                 case "scale9":
-                    container = DAScale9()
+                    //SHHH, NOT ACTUALLY A CONTAINER
+                    return processScale9Node(node)
                 case "paragraph":
                     let children = node["children"] as! NSArray as! [AnyObject]
                     let paragraph_name = container_name.replace("paragraph_",withString:"")
                 
                     container = processParagraphNode(paragraph_name, withChildren: children)
+                    ignore_children = true
                 default:
                     println("ERROR: UNRECOGNIZED CONTAINER TYPE: \(container_type)")
                     container = DAContainer()
@@ -579,17 +567,7 @@ class DAMetaNode : DAContainer
             }
         }
         
-        //process scale9 after pivot just in case we need it
-        if let scale9 = container as? DAScale9
-        {
-            if let size = node["size"] as? NSArray as? [NSNumber] as? [CGFloat]
-            {
-                scale9.baseWidth = size[0]
-                scale9.baseHeight = size[1]
-            }
-        }
-        
-        positions[container!] = container!.position
+        positions[container!.name!] = container!.position
         container!.resetPosition = container!.position
         
         container!.cachedMetadata = node
@@ -597,10 +575,85 @@ class DAMetaNode : DAContainer
         return container!
     }
     
+    func processScale9Node(node:Dictionary<String, AnyObject>) -> SKSpriteNode
+    {
+        var center:CGRect?
+        var sprite:SKSpriteNode?
+        var size:CGRect?
+        
+        let children = node["children"] as! NSArray as! [AnyObject]
+        
+        for raw_node in children
+        {
+            if let node = raw_node as? Dictionary<String,AnyObject>
+            {
+                if let node_type = node["type"] as? NSString as? String
+                {
+                    switch node_type
+                    {
+                    case "image":
+                        sprite = processImageNodeSynchronously(node) as? SKSpriteNode
+                    case "placeholder":
+                        processPlaceholderNode(node)
+                        
+                        if let name = node["name"] as? NSString as? String
+                        {
+                            if(name == "size")
+                            {
+                                size = placeholderWithName(name)!
+                            }else if(name == "center"){
+                                center = placeholderWithName(name)!
+                            }else{
+                                println("GOT \(name)")
+                            }
+                            
+                        }
+                    default:
+                        fatalError("PARAGRAPH containers can only contain a single image and two placeholders")
+                    }
+                }
+            }
+        }
+        
+        if sprite != nil
+        {
+            
+            let full_width = sprite!.width
+            let full_height = sprite!.height
+            
+            let left = center!.minX - sprite!.frame.minX
+            let top = sprite!.frame.maxY - center!.maxY
+            
+            let right = sprite!.frame.maxX - center!.maxX
+            let bottom = center!.minY - sprite!.frame.minY
+            
+            let x = left / full_width
+            let y = bottom / full_height
+            let w = center!.width / full_width
+            let h = center!.height / full_height
+            
+            sprite!.centerRect = CGRect(x:x, y:y, width:w, height:h)
+//            sprite!.centerRect = CGRect(x:0.5, y:0.25, width:0.25, height:0.25)
+            
+//            sprite!.xScale = size!.width / sprite!.width
+//            sprite!.yScale = size!.height / sprite!.height
+            sprite!.width = size!.width
+            sprite!.height = size!.height
+            
+            if let position = node["position"] as? NSArray as? [NSNumber] as? [CGFloat]
+            {
+                sprite!.position = CGPoint(x:position[0], y:position[1])
+            }
+            
+            return sprite!
+        }
+        
+        
+        return SKSpriteNode()
+    }
+    
     func processParagraphNode(name:String, withChildren children:[AnyObject]) -> DAParagraphNode
     {
-        println("********* PROCESS PARAGRAPH NODE")
-        
         var node = DAParagraphNode()
         node.name = name
         
@@ -677,7 +730,6 @@ class DAMetaNode : DAContainer
             if let name = node["name"] as? NSString as? String
             {
                 label.name = name
-                println("PROCESSING \(name) label");
             }
             
             if let position = node["position"] as? NSArray as? [NSNumber] as? [CGFloat]
@@ -716,7 +768,7 @@ class DAMetaNode : DAContainer
             
             labels[label.name!] = label
             
-            positions[label] = label.position
+            positions[label.name!] = label.position
             return label
         }
         
@@ -775,11 +827,11 @@ class DAMetaNode : DAContainer
                     container.name = btn_name
                 }
                 
-                positions[container] = container.position
+                positions[container.name!] = container.position
                 return container
             }
             
-            positions[sprite] = sprite.position
+            positions[sprite.name!] = sprite.position
             return sprite
         }
         

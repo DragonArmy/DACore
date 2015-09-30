@@ -75,7 +75,6 @@ class DAMultilineLabel : SKSpriteNode
             }else{
                 anchorPoint = _explicitAnchorPoint!
             }
-            println("SET ANCHOR TO \(anchorPoint)")
         }
     }
     
@@ -113,8 +112,6 @@ class DAMultilineLabel : SKSpriteNode
         //iOS7 uses fractional size values.  So we needed to ceil it to make sure we have enough room for display.
         texture_rect.size = CGSize(width: ceil(texture_rect.size.width), height: ceil(texture_rect.size.height))
         
-        println("TEXTURE RECT: \(texture_rect)")
-        
         if(texture_rect.size.width == 0 || texture_rect.size.height == 0)
         {
             return nil
@@ -122,7 +119,6 @@ class DAMultilineLabel : SKSpriteNode
         
         size = texture_rect.size
         
-        println("DRAWING PARAGRAPH TEXT: \(text)")
         UIGraphicsBeginImageContextWithOptions(texture_rect.size, false, 0)
         (text as NSString).drawInRect(texture_rect, withAttributes: text_attributes as [NSObject : AnyObject])
         

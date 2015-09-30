@@ -7,8 +7,19 @@
 //  Copyright (c) 2015 Dragon Army. All rights reserved.
 //
 
+import UIKit
 import Foundation
 import SpriteKit
+
+
+extension UIApplication
+{
+    public static func isSimulator() -> Bool
+    {
+        return TARGET_IPHONE_SIMULATOR == 1
+    }
+}
+
 
 /**
 Arc Random for Double and Float

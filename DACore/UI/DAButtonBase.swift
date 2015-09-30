@@ -11,6 +11,8 @@ import SpriteKit
 
 class DAButtonBase : DAContainerBase
 {
+    static var buttonSound:String?
+    
     //SIGNALS
     let onButtonDown = Signal<DAButtonBase>()
     let onButtonUp = Signal<DAButtonBase>()
@@ -20,6 +22,7 @@ class DAButtonBase : DAContainerBase
     var isTouching:Bool = false
     
     var touchRect:CGRect?
+    var enabled = true
     
     override init()
     {
@@ -66,7 +69,15 @@ class DAButtonBase : DAContainerBase
             return
         }
         
-        onButtonDown.fire(self);
+        if(scene == nil)
+        {
+            return
+        }
+        
+        if(enabled)
+        {
+            onButtonDown.fire(self);
+        }
         
         touchRect = calculateAccumulatedFrame()
         
@@ -81,6 +92,12 @@ class DAButtonBase : DAContainerBase
         {
             return
         }
+        
+        if(scene == nil)
+        {
+            return
+        }
+        
         
         if let touch = touches.first as? UITouch
         {
@@ -104,6 +121,12 @@ class DAButtonBase : DAContainerBase
             return
         }
         
+        if(scene == nil)
+        {
+            return
+        }
+        
+        
         if let touch = touches.first as? UITouch
         {
             var location: CGPoint = touch.locationInNode(parent)
@@ -121,8 +144,18 @@ class DAButtonBase : DAContainerBase
         {
             isButtonDown = false
             
-            onButtonUp.fire(self)
-            onButtonClick.fire(self)
+            if(enabled)
+            {
+                onButtonUp.fire(self)
+                onButtonClick.fire(self)
+                
+                
+                if let sfx = DAButtonBase.buttonSound
+                {
+                    println("PLAYING SOUND \(sfx)");
+                    DASoundManager.playSound(sfx);
+                }
+            }
         }
     }
 

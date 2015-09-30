@@ -89,11 +89,6 @@ class GameScene: SKScene
         return metaNode.containerWithName(container_name)
     }
     
-    func scale9WithName(scale9_name:String) -> DAScale9?
-    {
-        return metaNode.scale9WithName(scale9_name)
-    }
-    
     func progressWithName(progress_name:String) -> DAProgressBar?
     {
         return metaNode.progressWithName(progress_name)
