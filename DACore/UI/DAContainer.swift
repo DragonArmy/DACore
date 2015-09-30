@@ -65,12 +65,9 @@ class DAContainerBase : DAResetNode
     
     override init()
     {
-        print("INITIALIZE DA CONTAINER")
         super.init();
         
-        print("ADD INNER CONTAINER")
         super.addChild(innerContainer)
-        print("ADDED INNER CONTAINER")
     }
     
     required init(coder: NSCoder) {
