@@ -256,7 +256,7 @@ class Flump
     {
         for file_root in file_root_list
         {
-            //println("QUEUING ANIMATION: \(file_root)")
+            //print("QUEUING ANIMATION: \(file_root)")
             
             
             if #available(iOS 8.0, *) {
@@ -266,7 +266,7 @@ class Flump
                 let closure_file = file_root
                 dispatch_async(backgroundQueue) {
                     Flump.loadAnimation(closure_file)
-                    //println("FINISHED LOADING \(closure_file)")
+                    //print("FINISHED LOADING \(closure_file)")
                 }
                 
             } else {
@@ -276,7 +276,7 @@ class Flump
                 let closure_file = file_root
                 dispatch_async(backgroundQueue) {
                     Flump.loadAnimation(closure_file)
-                    //println("FINISHED LOADING \(closure_file)")
+                    //print("FINISHED LOADING \(closure_file)")
                 }
                 
             }
@@ -299,7 +299,7 @@ class Flump
         
         if(Flump.LoadedAnimations[file_root] != nil)
         {
-            //println("ALREADY LOADED \(file_root) ANIMATIONS")
+            //print("ALREADY LOADED \(file_root) ANIMATIONS")
             return
         }
         
@@ -326,14 +326,13 @@ class Flump
     
     static func parseFlumpJSON(animation_data:String)
     {
-        //println("PARSING FLUMP JSON")
+        //print("PARSING FLUMP JSON")
         
         if(animation_data.isEmpty)
         {
             print("[FLUMP ERROR] You must provide metadata!")
         }
         
-        var error:NSError?
         let data = animation_data.dataUsingEncoding(NSUTF8StringEncoding)!
         
         if let json = try! NSJSONSerialization.JSONObjectWithData(data, options: []) as? Dictionary<String, AnyObject>

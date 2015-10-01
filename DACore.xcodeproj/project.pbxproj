@@ -15,7 +15,6 @@
 		BE6B72EE1B90DB43009342FE /* BaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72DC1B90DB43009342FE /* BaseModel.swift */; };
 		BE6B72EF1B90DB43009342FE /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72DD1B90DB43009342FE /* Extensions.swift */; };
 		BE6B72F01B90DB43009342FE /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72DE1B90DB43009342FE /* GameScene.swift */; };
-		BE6B72F11B90DB43009342FE /* SkinnedCharacter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72DF1B90DB43009342FE /* SkinnedCharacter.swift */; };
 		BE6B72F21B90DB43009342FE /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72E11B90DB43009342FE /* Signal.swift */; };
 		BE6B72F31B90DB43009342FE /* DAButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72E31B90DB43009342FE /* DAButton.swift */; };
 		BE6B72F41B90DB43009342FE /* DAButtonBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72E41B90DB43009342FE /* DAButtonBase.swift */; };
@@ -23,10 +22,12 @@
 		BE6B72F61B90DB43009342FE /* DAMetaNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72E61B90DB43009342FE /* DAMetaNode.swift */; };
 		BE6B72F71B90DB43009342FE /* DAProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72E71B90DB43009342FE /* DAProgressBar.swift */; };
 		BE6B72F81B90DB43009342FE /* DAResetNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72E81B90DB43009342FE /* DAResetNode.swift */; };
-		BE6B72F91B90DB43009342FE /* DAScale9.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72E91B90DB43009342FE /* DAScale9.swift */; };
 		BE6B72FA1B90DB43009342FE /* DAScaleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72EA1B90DB43009342FE /* DAScaleButton.swift */; };
 		BE6B72FB1B90DB43009342FE /* DATabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B72EB1B90DB43009342FE /* DATabButton.swift */; };
 		BE6F5D6F1B90ED0900B2F417 /* DAScroller.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6F5D6E1B90ED0900B2F417 /* DAScroller.swift */; };
+		BED738271BBC80F500A8B478 /* DAParagraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED738261BBC80F500A8B478 /* DAParagraphNode.swift */; };
+		BED7382B1BBC810B00A8B478 /* modal_landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = BED738291BBC810B00A8B478 /* modal_landscape.png */; };
+		BED7382C1BBC810B00A8B478 /* modal_portrait.png in Resources */ = {isa = PBXBuildFile; fileRef = BED7382A1BBC810B00A8B478 /* modal_portrait.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,7 +52,6 @@
 		BE6B72DC1B90DB43009342FE /* BaseModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseModel.swift; sourceTree = "<group>"; };
 		BE6B72DD1B90DB43009342FE /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		BE6B72DE1B90DB43009342FE /* GameScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
-		BE6B72DF1B90DB43009342FE /* SkinnedCharacter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SkinnedCharacter.swift; sourceTree = "<group>"; };
 		BE6B72E11B90DB43009342FE /* Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Signal.swift; sourceTree = "<group>"; };
 		BE6B72E31B90DB43009342FE /* DAButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAButton.swift; sourceTree = "<group>"; };
 		BE6B72E41B90DB43009342FE /* DAButtonBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAButtonBase.swift; sourceTree = "<group>"; };
@@ -59,10 +59,12 @@
 		BE6B72E61B90DB43009342FE /* DAMetaNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAMetaNode.swift; sourceTree = "<group>"; };
 		BE6B72E71B90DB43009342FE /* DAProgressBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAProgressBar.swift; sourceTree = "<group>"; };
 		BE6B72E81B90DB43009342FE /* DAResetNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAResetNode.swift; sourceTree = "<group>"; };
-		BE6B72E91B90DB43009342FE /* DAScale9.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAScale9.swift; sourceTree = "<group>"; };
 		BE6B72EA1B90DB43009342FE /* DAScaleButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAScaleButton.swift; sourceTree = "<group>"; };
 		BE6B72EB1B90DB43009342FE /* DATabButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DATabButton.swift; sourceTree = "<group>"; };
 		BE6F5D6E1B90ED0900B2F417 /* DAScroller.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAScroller.swift; sourceTree = "<group>"; };
+		BED738261BBC80F500A8B478 /* DAParagraphNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAParagraphNode.swift; sourceTree = "<group>"; };
+		BED738291BBC810B00A8B478 /* modal_landscape.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = modal_landscape.png; sourceTree = "<group>"; };
+		BED7382A1BBC810B00A8B478 /* modal_portrait.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = modal_portrait.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,15 +107,15 @@
 		BE6B72BF1B90DA77009342FE /* DACore */ = {
 			isa = PBXGroup;
 			children = (
-				BE6B72D91B90DB43009342FE /* animation */,
+				BE6B72C21B90DA77009342FE /* DACore.h */,
 				BE6B72DC1B90DB43009342FE /* BaseModel.swift */,
 				BE6B72DD1B90DB43009342FE /* Extensions.swift */,
 				BE6B72DE1B90DB43009342FE /* GameScene.swift */,
-				BE6B72DF1B90DB43009342FE /* SkinnedCharacter.swift */,
+				BE6B72D91B90DB43009342FE /* animation */,
+				BED738281BBC810B00A8B478 /* assets */,
+				BE6B72C01B90DA77009342FE /* Supporting Files */,
 				BE6B72E01B90DB43009342FE /* thirdparty */,
 				BE6B72E21B90DB43009342FE /* UI */,
-				BE6B72C21B90DA77009342FE /* DACore.h */,
-				BE6B72C01B90DA77009342FE /* Supporting Files */,
 			);
 			path = DACore;
 			sourceTree = "<group>";
@@ -163,18 +165,27 @@
 		BE6B72E21B90DB43009342FE /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				BE6F5D6E1B90ED0900B2F417 /* DAScroller.swift */,
 				BE6B72E31B90DB43009342FE /* DAButton.swift */,
 				BE6B72E41B90DB43009342FE /* DAButtonBase.swift */,
 				BE6B72E51B90DB43009342FE /* DAContainer.swift */,
 				BE6B72E61B90DB43009342FE /* DAMetaNode.swift */,
+				BED738261BBC80F500A8B478 /* DAParagraphNode.swift */,
 				BE6B72E71B90DB43009342FE /* DAProgressBar.swift */,
 				BE6B72E81B90DB43009342FE /* DAResetNode.swift */,
-				BE6B72E91B90DB43009342FE /* DAScale9.swift */,
 				BE6B72EA1B90DB43009342FE /* DAScaleButton.swift */,
+				BE6F5D6E1B90ED0900B2F417 /* DAScroller.swift */,
 				BE6B72EB1B90DB43009342FE /* DATabButton.swift */,
 			);
 			path = UI;
+			sourceTree = "<group>";
+		};
+		BED738281BBC810B00A8B478 /* assets */ = {
+			isa = PBXGroup;
+			children = (
+				BED738291BBC810B00A8B478 /* modal_landscape.png */,
+				BED7382A1BBC810B00A8B478 /* modal_portrait.png */,
+			);
+			path = assets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -233,6 +244,7 @@
 		BE6B72B41B90DA77009342FE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0640;
 				ORGANIZATIONNAME = "Dragon Army";
 				TargetAttributes = {
@@ -267,6 +279,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BED7382C1BBC810B00A8B478 /* modal_portrait.png in Resources */,
+				BED7382B1BBC810B00A8B478 /* modal_landscape.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,7 +299,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BE6B72F01B90DB43009342FE /* GameScene.swift in Sources */,
-				BE6B72F91B90DB43009342FE /* DAScale9.swift in Sources */,
+				BED738271BBC80F500A8B478 /* DAParagraphNode.swift in Sources */,
 				BE6B72F21B90DB43009342FE /* Signal.swift in Sources */,
 				BE6B72F51B90DB43009342FE /* DAContainer.swift in Sources */,
 				BE6B72FB1B90DB43009342FE /* DATabButton.swift in Sources */,
@@ -293,7 +307,6 @@
 				BE6B72F81B90DB43009342FE /* DAResetNode.swift in Sources */,
 				BE6B72EE1B90DB43009342FE /* BaseModel.swift in Sources */,
 				BE6B72F71B90DB43009342FE /* DAProgressBar.swift in Sources */,
-				BE6B72F11B90DB43009342FE /* SkinnedCharacter.swift in Sources */,
 				BE6F5D6F1B90ED0900B2F417 /* DAScroller.swift in Sources */,
 				BE6B72ED1B90DB43009342FE /* FlumpNode.swift in Sources */,
 				BE6B72F61B90DB43009342FE /* DAMetaNode.swift in Sources */,

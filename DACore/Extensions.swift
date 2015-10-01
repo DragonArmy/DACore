@@ -110,7 +110,8 @@ extension Set
         }
         
         let n = Int(arc4random_uniform(UInt32(self.count)))
-        let i = advance(self.startIndex, n)
+        
+        let i = self.startIndex.advancedBy(n)
         return self[i] as? T
     }
 }
@@ -131,7 +132,7 @@ public extension UIColor {
         var alpha: CGFloat = 1.0
         
         if rgba.hasPrefix("#") {
-            let index   = advance(rgba.startIndex, 1)
+            let index   = rgba.startIndex.advancedBy(1)
             let hex     = rgba.substringFromIndex(index)
             let scanner = NSScanner(string: hex)
             var hexValue: CUnsignedLongLong = 0
@@ -270,7 +271,7 @@ extension String {
     }
     
     subscript (i: Int) -> Character {
-        return self[advance(self.startIndex, i)]
+        return self[self.startIndex.advancedBy(i)]
     }
     
     subscript (i: Int) -> String {
@@ -278,14 +279,14 @@ extension String {
     }
     
     subscript (r: Range<Int>) -> String {
-        return substringWithRange(Range(start: advance(startIndex, r.startIndex), end: advance(startIndex, r.endIndex)))
+        return substringWithRange(Range(start: startIndex.advancedBy(r.startIndex), end: startIndex.advancedBy(r.endIndex)))
     }
     
     func indexOf(target: String) -> Int
     {
         let range = self.rangeOfString(target)
         if let range = range {
-            return distance(self.startIndex, range.startIndex)
+            return startIndex.distanceTo(range.startIndex)
         } else {
             return -1
         }

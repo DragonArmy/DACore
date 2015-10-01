@@ -52,7 +52,7 @@ class DAButtonBase : DAContainerBase
         {
             if(temp_parent!.hidden)
             {
-                //println("\(temp_parent!) \(temp_parent!.name) is hidden")
+                //print("\(temp_parent!) \(temp_parent!.name) is hidden")
                 return true
             }
             temp_parent = temp_parent!.parent

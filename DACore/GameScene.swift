@@ -67,10 +67,10 @@ class GameScene: SKScene
             }else{
                 if let keyframe = sub_anim as? CAKeyframeAnimation
                 {
-                    //println("DEPTH \(depth): \(keyframe)      \(keyframe.keyPath)")
+                    //print("DEPTH \(depth): \(keyframe)      \(keyframe.keyPath)")
                     print("          keyTimes:\(keyframe.keyTimes)    (\(keyframe.keyTimes!.count))")
                 }else{
-                    //println("DEPTH \(depth): \(sub_anim)")
+                    //print("DEPTH \(depth): \(sub_anim)")
                 }
             }
             

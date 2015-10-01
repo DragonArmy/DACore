@@ -75,7 +75,7 @@ class BaseModel
             // parse through all the data
             for var i = 2; i < text.count; i++
             {
-                var objectData = text[i]
+                let objectData = text[i]
                 
                 // if the string is empty, skip it
                 if(objectData.isEmpty)
@@ -113,7 +113,7 @@ class BaseModel
                             }
                         }
                         
-                        //                        println("REJOINED DATA: \(working_string)")
+                        //                        print("REJOINED DATA: \(working_string)")
                         dataVariables.append(working_string)
                     }else{
                         dataVariables.append(raw_data[i])

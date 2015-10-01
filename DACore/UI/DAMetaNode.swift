@@ -72,7 +72,7 @@ class DAMetaNode : DAContainer
     {
         for (file_root, omit_device_tag) in file_root_list
         {
-            //println("QUEUING METADATA: \(file_root)")
+            //print("QUEUING METADATA: \(file_root)")
             
             if #available(iOS 8.0, *) {
                 let qualityOfServiceClass = QOS_CLASS_BACKGROUND
@@ -83,7 +83,7 @@ class DAMetaNode : DAContainer
                 
                 dispatch_async(backgroundQueue) {
                     DAMetaNode.loadMetadata([(closure_file, closure_omit)])
-                    //println("FINISHED LOADING \(closure_file)")
+                    //print("FINISHED LOADING \(closure_file)")
                 }
                 
             } else {
@@ -95,7 +95,7 @@ class DAMetaNode : DAContainer
                 
                 dispatch_async(backgroundQueue) {
                     DAMetaNode.loadMetadata([(closure_file, closure_omit)])
-                    //println("FINISHED LOADING \(closure_file)")
+                    //print("FINISHED LOADING \(closure_file)")
                 }
             }
             
@@ -125,7 +125,7 @@ class DAMetaNode : DAContainer
         
         if let dacon = container as? DAContainer
         {
-            //println("\(node_child.name!) X/Y = \(dacon.x),\(dacon.y)     PIVOT = \(dacon.pivotX),\(dacon.pivotY)")
+            //print("\(node_child.name!) X/Y = \(dacon.x),\(dacon.y)     PIVOT = \(dacon.pivotX),\(dacon.pivotY)")
             offset_x = dacon.pivotX
             offset_y = dacon.pivotY
         }
@@ -167,7 +167,7 @@ class DAMetaNode : DAContainer
             processMetadata(DAMetaNode.LoadedMetadata[file_root]!, withAsynchSprites:asynch_sprites)
         }else{
             //synchronously load metadata if we initialize a MetaNode
-            //println("SYNCHRONOUS LOAD: \(file_root)")
+            //print("SYNCHRONOUS LOAD: \(file_root)")
 
             DAMetaNode.loadMetadata([(file_root, omit_device_tag)])
             
@@ -303,7 +303,7 @@ class DAMetaNode : DAContainer
     let DEBUG = false
     func processMetadata(json:Dictionary<String,AnyObject>, withAsynchSprites asynch:Bool)
     {
-        //println("PROCESS METADATA    asynch=\(asynch)")
+        //print("PROCESS METADATA    asynch=\(asynch)")
         if let root_width = json["root_width"] as? NSNumber as? Int
         {
             rootWidth = root_width
@@ -354,7 +354,7 @@ class DAMetaNode : DAContainer
 
                         if let dacon = node_child as? DAContainer
                         {
-                            //println("\(node_child.name!) X/Y = \(dacon.x),\(dacon.y)     PIVOT = \(dacon.pivotX),\(dacon.pivotY)")
+                            //print("\(node_child.name!) X/Y = \(dacon.x),\(dacon.y)     PIVOT = \(dacon.pivotX),\(dacon.pivotY)")
                             offset_x = dacon.pivotX
                             offset_y = dacon.pivotY
                         }
@@ -420,17 +420,17 @@ class DAMetaNode : DAContainer
          
             let (placeholder, node) = asynchSpriteQueue.removeAtIndex(0)
             
-            //println("**************************************************")
-            //println(node)
-            //println(placeholder)
+            //print("**************************************************")
+            //print(node)
+            //print(placeholder)
             let real_node = self.processImageNodeSynchronously(node)
-            //println(real_node)
+            //print(real_node)
             placeholder.addChild(real_node)
             
             
             asynchImageAdded(real_node)
             
-//            println("ASYNCH SPRITE LOADED: \(real_node.name)")
+//            print("ASYNCH SPRITE LOADED: \(real_node.name)")
             
             if(asynchSpriteQueue.count <= 0)
             {
@@ -674,7 +674,7 @@ class DAMetaNode : DAContainer
                             processPlaceholderNode(node)
                             if let name = node["name"] as? NSString as? String
                             {
-                                //println("ADD PLACEHOLDER \(name)")
+                                //print("ADD PLACEHOLDER \(name)")
                                 placeholder = placeholders[name]!
                             }
                         default:
@@ -847,7 +847,7 @@ class DAMetaNode : DAContainer
             {
                 if let name = node["name"] as? NSString as? String
                 {
-                    //println("ADD PLACEHOLDER \(name)")
+                    //print("ADD PLACEHOLDER \(name)")
                     placeholders[name] = CGRect(x: position[0] - size[0]/2.0, y: position[1] - size[1]/2.0, width: size[0], height: size[1])
                     
                     if(name.rangeOfString("modal", options: [], range: nil, locale: nil) != nil)
@@ -860,8 +860,15 @@ class DAMetaNode : DAContainer
                             modal.alpha = 0.5
                             return modal
                         } else {
-                            // Fallback on earlier versions
-                            print("TODO: USE THE IMAGE MODAL")
+                            
+                            if(rootWidth > rootHeight)
+                            {
+                                let modal = SKSpriteNode(fileNamed:"modal_landscape.png")!
+                                return modal
+                            }else{
+                                let modal = SKSpriteNode(fileNamed:"modal_portrait.png")!
+                                return modal
+                            }
                         }
                         
                     }
@@ -880,7 +887,7 @@ class DAMetaNode : DAContainer
     
     func printDisplayTree(node:SKNode, currentDepth depth:Int)
     {
-        let tab = "".join(Array<String>(count: depth, repeatedValue: "  ")) + "->"
+        let tab = Array<String>(count: depth, repeatedValue: "  ").joinWithSeparator("") + "->"
         let node_name = (node.name == nil ? node.description : node.name!)
         print("\(tab) \(node_name)     \(node.position)")
         

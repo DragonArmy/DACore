@@ -20,7 +20,7 @@ class DAResetNode : SKNode
     {
         if let reset = resetPosition
         {
-//            println("RESET \(name) to \(reset)")
+//            print("RESET \(name) to \(reset)")
             position = reset
             
             setScale(1)
@@ -30,7 +30,7 @@ class DAResetNode : SKNode
             
         }else{
             //IF WE DON'T HAVE A SPECIFIC RESET SET... DO NOTHING!
-//            println("NO RESET FOUND FOR \(name)")
+//            print("NO RESET FOUND FOR \(name)")
         }
         
         for child in children
