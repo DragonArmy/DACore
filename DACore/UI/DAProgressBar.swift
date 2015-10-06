@@ -63,7 +63,7 @@ class DAProgressBar : DAContainerBase
                     print("BUT IT WASN'T A SPRITE")
                 }
             }else{
-                print("[ERROR] PROGRESS BAR " + self.name! + " IS MISSING " + short_name + "_fill")
+                print("[ERROR] PROGRESS BAR \(self.name!) IS MISSING \(short_name) _fill")
             }
         }
     }
