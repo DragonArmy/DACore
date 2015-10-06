@@ -26,8 +26,6 @@ class DAMetaNode : DAContainer
     var labels          = [String:SKLabelNode]()
     var paragraphs      = [String:DAParagraphNode]()
     
-    var positions       = [String:CGPoint]()
-    
     private let SPRITES_PER_FRAME = 10
     private var asynchSpriteQueue = [(SKNode, Dictionary<String, AnyObject>)]()
     
@@ -138,10 +136,6 @@ class DAMetaNode : DAContainer
             //offset us to our container's location since we're discarding the shell
             node.x += offset_x
             node.y += offset_y
-            
-            
-            //update our positions so we can reset properly
-            positions[node.name!] = node.position
             
             if let resettable = node as? DAResetNode
             {
@@ -377,9 +371,6 @@ class DAMetaNode : DAContainer
                             node.x += offset_x
                             node.y += offset_y
                             
-                            
-                            //update our positions so we can reset properly
-                            positions[node.name!] = node.position
 
                             if let resettable = node as? DAResetNode
                             {
@@ -570,7 +561,6 @@ class DAMetaNode : DAContainer
             }
         }
         
-        positions[container!.name!] = container!.position
         container!.resetPosition = container!.position
         
         container!.cachedMetadata = node
@@ -768,7 +758,6 @@ class DAMetaNode : DAContainer
             
             labels[label.name!] = label
             
-            positions[label.name!] = label.position
             return label
         }
         
@@ -827,11 +816,9 @@ class DAMetaNode : DAContainer
                     container.name = btn_name
                 }
                 
-                positions[container.name!] = container.position
                 return container
             }
             
-            positions[sprite.name!] = sprite.position
             return sprite
         }
         
