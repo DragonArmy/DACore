@@ -11,7 +11,12 @@ import SpriteKit
 
 class DAButtonBase : DAContainerBase
 {
-    static var buttonSound:String?
+    static var TOUCH_EXPANSION:CGFloat = 10
+    
+    //THIS SHOULD BE SET IN YOUR GAMECONTROLLER BEFORE ANY BUTTONS ARE CREATED
+    static var DEFAULT_BUTTON_SOUND:String?
+    
+    var buttonSound:String?
     
     //SIGNALS
     let onButtonDown = Signal<DAButtonBase>()
@@ -29,6 +34,8 @@ class DAButtonBase : DAContainerBase
         super.init()
         
         userInteractionEnabled = true
+        
+        buttonSound = DAButtonBase.DEFAULT_BUTTON_SOUND
     }
     
     required init(coder: NSCoder)
@@ -63,6 +70,8 @@ class DAButtonBase : DAContainerBase
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
+        isTouching = false;
+        
         if(recursiveHidden())
         {
             print("PARENT IS HIDDEN, NO TOUCH FOR YOU")
@@ -83,6 +92,12 @@ class DAButtonBase : DAContainerBase
         
         isTouching = true
         isButtonDown = true
+        
+        if let sfx = buttonSound
+        {
+//            print("PLAYING SOUND \(sfx)")
+            DASoundManager.playSound(sfx);
+        }
     }
     
     
@@ -103,8 +118,10 @@ class DAButtonBase : DAContainerBase
         {
             let location: CGPoint = touch.locationInNode(parent!)
 
+            let expanded_rect = touchRect!.insetBy(dx: -DAButtonBase.TOUCH_EXPANSION, dy: -DAButtonBase.TOUCH_EXPANSION)
+            
             //use touchRect instead of self b/c our size can change based on input
-            if CGRectContainsPoint(touchRect!, location)
+            if CGRectContainsPoint(expanded_rect, location)
             {
                 isButtonDown = true
             }else{
@@ -131,8 +148,10 @@ class DAButtonBase : DAContainerBase
         {
             let location: CGPoint = touch.locationInNode(parent!)
             
+            let expanded_rect = touchRect!.insetBy(dx: -DAButtonBase.TOUCH_EXPANSION, dy: -DAButtonBase.TOUCH_EXPANSION)
+            
             //use touchRect instead of self b/c our size can change based on input
-            if CGRectContainsPoint(touchRect!, location)
+            if CGRectContainsPoint(expanded_rect, location)
             {
                 isButtonDown = true
             }else{
@@ -148,13 +167,6 @@ class DAButtonBase : DAContainerBase
             {
                 onButtonUp.fire(self)
                 onButtonClick.fire(self)
-                
-                
-                if let sfx = DAButtonBase.buttonSound
-                {
-                    print("PLAYING SOUND \(sfx)");
-                    DASoundManager.playSound(sfx);
-                }
             }
         }
     }
