@@ -9,13 +9,22 @@
 import Foundation
 import SpriteKit
 
+/*  NOTE: a bit misnamed (didn't want to fix all the projects)
+ *  this is actually just a TabContainer...
+ *
+ *  But if there are buttons, it will automagically wire them up
+ *  and dispatch magic stateWillChange and stateDidChange callbacks.
+ *
+ */
+
+
 class DATabButton : DAContainerBase
 {
     let stateWillChange = Signal<DATabButton>()
     let stateDidChange = Signal<DATabButton>()
     
     var states = Set<String>()
-    var content:[SKNode] = []
+    var content:[SKNode] = [] //a cache of all our starting children
     
     var cycle:[String] = []
     
