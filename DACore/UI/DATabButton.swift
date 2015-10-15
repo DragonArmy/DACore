@@ -104,11 +104,13 @@ class DATabButton : DAContainerBase
     
     func unlinkNode(node:SKNode, fromState state:String)
     {
+        //remove the linked node from the requested state
         if var current_nodes = linkedNodes[state]
         {
             current_nodes.remove(node)
         }
         
+        //see if any other states are using that node
         var got_one = false
         for node_set in linkedNodes.values
         {
