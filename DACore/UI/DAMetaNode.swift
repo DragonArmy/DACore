@@ -403,7 +403,7 @@ class DAMetaNode : DAContainer
     
     func asynchProcessImage()
     {
-        var tries = SPRITES_PER_FRAME
+        var tries = min(asynchSpriteQueue.count, SPRITES_PER_FRAME)
         
         while(tries > 0)
         {
@@ -411,22 +411,15 @@ class DAMetaNode : DAContainer
          
             let (placeholder, node) = asynchSpriteQueue.removeAtIndex(0)
             
-            //print("**************************************************")
-            //print(node)
-            //print(placeholder)
             let real_node = self.processImageNodeSynchronously(node)
-            //print(real_node)
-            placeholder.addChild(real_node)
-            
+
+            if let index = placeholder.indexInParent()
+            {
+                placeholder.parent!.insertChild(real_node, atIndex: index)
+                placeholder.removeFromParent()
+            }
             
             asynchImageAdded(real_node)
-            
-//            print("ASYNCH SPRITE LOADED: \(real_node.name)")
-            
-            if(asynchSpriteQueue.count <= 0)
-            {
-                tries = 0
-            }
         }
         
         if(asynchSpriteQueue.count > 0)
