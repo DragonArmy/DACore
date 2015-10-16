@@ -57,6 +57,17 @@ class GameScene: SKScene
         
     }
     
+    override func willMoveFromView(view: SKView)
+    {
+    }
+    
+    override func update(currentTime: NSTimeInterval)
+    {
+        super.update(currentTime)
+        
+        DAMetaNode.processAsynchImages(self)
+    }
+    
     func printAnimationGroup(group:CAAnimationGroup, withDepth depth:Int)
     {
         for sub_anim in group.animations!

@@ -8,7 +8,6 @@
 //
 
 import UIKit
-import Foundation
 import SpriteKit
 
 
@@ -170,18 +169,15 @@ public extension UIColor {
 }
 
 
-public extension Int {
-    /**
-    Create a random num Int
-    - parameter lower: number Int
-    - parameter upper: number Int
-    :return: random number Int
-    By DaRkDOG
-    */
-    public static func random (lower: Int , upper: Int) -> Int {
+public extension Int
+{
+    public static func random (lower: Int , upper: Int) -> Int
+    {
         let delta = upper - lower + 1;
         let random_value = Int(arc4random_uniform(UInt32(delta)))
-        return lower + random_value
+//        print(lower)
+//        print(random_value)
+        return (lower + random_value)
     }
     
 }

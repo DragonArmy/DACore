@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 Dragon Army. All rights reserved.
 //
 
-import Foundation
 import SpriteKit
 
 /* this started as just an alias so I could disambiguate between between something I was explicitly using as
@@ -59,6 +58,20 @@ class DAContainerBase : DAResetNode
         {
             innerContainer.y = value;
         }
+    }
+    
+    override var name:String?
+    {
+        get
+        {
+            return super.name
+        }
+        set(value)
+        {
+            super.name = value
+            innerContainer.name = "inner_\(name!)"
+        }
+        
     }
     
     var innerContainer = SKNode()

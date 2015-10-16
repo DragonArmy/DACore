@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 Dragon Army. All rights reserved.
 //
 
-import Foundation
 import SpriteKit
 
 class FlumpNode : DAMetaNode
@@ -23,13 +22,28 @@ class FlumpNode : DAMetaNode
         super.init()
     }
     
-    init?(file_root:String, fromContainer container_name:String?, restPose rest_pose:String?, resolutionIndependent omit_device_tag:Bool)
+    convenience init?(fileRoot file_root:String, fromContainer container_name:String?, restPose rest_pose:String?, resolutionIndependent omit_device_tag:Bool)
     {
-        super.init(file_root:file_root, fromContainer:container_name, resolutionIndependent:omit_device_tag, asynchSprites:true)
+        //default asynch
+        self.init(fileRoot:file_root, fromContainer:container_name, restPose:rest_pose, resolutionIndependent:omit_device_tag, asynchSprites:true)
+    }
+    
+    init?(fileRoot file_root:String, fromContainer container_name:String?, restPose rest_pose:String?, resolutionIndependent omit_device_tag:Bool, asynchSprites with_asynch:Bool)
+    {
+        super.init(file_root:file_root, fromContainer:container_name, resolutionIndependent:omit_device_tag, asynchSprites:with_asynch)
         
         if(rest_pose != nil)
         {
-            restPose = Flump.LoadedMovies[rest_pose!]
+            if(Flump.LoadedMovies.keys.contains(rest_pose!))
+            {
+                restPose = Flump.LoadedMovies[rest_pose!]
+            }else{
+                print("UNABLE TO FIND REST POSE \(rest_pose!)")
+                for key in Flump.LoadedMovies.keys
+                {
+                    print("         -> \(key)")
+                }
+            }
         }
     }
     

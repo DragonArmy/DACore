@@ -7,7 +7,6 @@
 // ported to Swift from RXScroller https://gist.github.com/MattRix/9885857
 //
 
-import Foundation
 import SpriteKit
 
 func ==(left:DAScroller, right:DAScroller) -> Bool

@@ -6,12 +6,31 @@
 //  Copyright (c) 2015 Dragon Army. All rights reserved.
 //
 
-import Foundation
 import SpriteKit
+
+
+class AsynchSprite
+{
+    weak var metaNode:DAMetaNode?
+    weak var placeholder:SKNode?
+    
+    var node:Dictionary<String, AnyObject>
+    
+    init(metaNode meta_node:DAMetaNode, node:Dictionary<String, AnyObject>, withPlaceholder placeholder:SKNode)
+    {
+        self.metaNode = meta_node
+        self.node = node
+        self.placeholder = placeholder
+    }
+}
 
 class DAMetaNode : DAContainer
 {
     private static var LoadedMetadata = [String : Dictionary<String,AnyObject>]()
+    
+    private static let SPRITES_PER_FRAME = 25
+    private static var UnsortedAsynchSprites = [AsynchSprite]()
+    private static var SortedAsynchSprites = [String:[AsynchSprite]]()
     
     private static var deviceTag:String = "_iphone6"
     
@@ -26,8 +45,7 @@ class DAMetaNode : DAContainer
     var labels          = [String:SKLabelNode]()
     var paragraphs      = [String:DAParagraphNode]()
     
-    private let SPRITES_PER_FRAME = 10
-    private var asynchSpriteQueue = [(SKNode, Dictionary<String, AnyObject>)]()
+
     
     static func setup(device_tag:String)
     {
@@ -150,6 +168,8 @@ class DAMetaNode : DAContainer
         rootContainer = container_name
         
         super.init()
+        
+        name = file_root
         
         if(file_root == "")
         {
@@ -387,13 +407,6 @@ class DAMetaNode : DAContainer
                 }
             }
         }
-        
-        
-        
-        if(asynch && asynchSpriteQueue.count > 0)
-        {
-            dispatch_after_delay(0.01, block: asynchProcessImage)
-        }
     }
     
     func asynchImageAdded(image:SKNode)
@@ -401,31 +414,85 @@ class DAMetaNode : DAContainer
         //override me if you have any custom post processing stuff to do!
     }
     
-    func asynchProcessImage()
+    static func processAsynchImages(currentScene:SKScene)
     {
-        var tries = min(asynchSpriteQueue.count, SPRITES_PER_FRAME)
-        
-        while(tries > 0)
+        print("CURRENT SCENE: \(currentScene)")
+        if(currentScene.name == nil)
         {
-            tries -= 1
-         
-            let (placeholder, node) = asynchSpriteQueue.removeAtIndex(0)
+            print("[ERROR] CANNOT ASYNCH LOAD SPRITES WITH NO SCENE NAME   \(currentScene)")
+            return
+        }
+    
+        for(var i = 0; i < UnsortedAsynchSprites.count; i++)
+        {
+            let asynch = UnsortedAsynchSprites[i];
             
-            let real_node = self.processImageNodeSynchronously(node)
-
-            if let index = placeholder.indexInParent()
+            if let meta_node = asynch.metaNode
             {
-                placeholder.parent!.insertChild(real_node, atIndex: index)
-                placeholder.removeFromParent()
+                if let scene = meta_node.scene
+                {
+                    if(scene.name == nil)
+                    {
+                        print("[ERROR] CANNOT ASYNCH LOAD SPRITES WITH NO SCENE NAME")
+                    }else{
+                        if(SortedAsynchSprites.keys.contains(scene.name!))
+                        {
+                            SortedAsynchSprites[scene.name!]!.append(asynch)
+                            UnsortedAsynchSprites.removeAtIndex(i)
+                            i--
+                        }else{
+                            SortedAsynchSprites[scene.name!] = [asynch]
+                            UnsortedAsynchSprites.removeAtIndex(i)
+                            i--
+                        }
+                    }
+                }
+            }
+        }
+        
+        if(UnsortedAsynchSprites.count > 0)
+        {
+            print("UNSORTED ASYNCH SPRITES: \(UnsortedAsynchSprites.count)")
+            for sprite in UnsortedAsynchSprites
+            {
+                print("UNSORTED: \(sprite.metaNode)")
+            }
+        }
+        
+        if(SortedAsynchSprites.keys.contains(currentScene.name!) && SortedAsynchSprites[currentScene.name!]!.count > 0)
+        {
+            var sorted = SortedAsynchSprites[currentScene.name!]!;
+            print("SORTED ASYNCH SPRITES: \(sorted.count)")
+            
+            for(var i = 0; i < min(sorted.count, SPRITES_PER_FRAME); i++)
+            {
+                let asynch_sprite = sorted.removeAtIndex(0)
+                if let meta_node = asynch_sprite.metaNode
+                {
+                    meta_node.asynchProcessImage(asynch_sprite)
+                }
+                
             }
             
-            asynchImageAdded(real_node)
+            //we got out a copy, so put back the new shorter version!
+            SortedAsynchSprites[currentScene.name!] = sorted
+            
+            print("REMAINING: \(sorted.count)")
         }
         
-        if(asynchSpriteQueue.count > 0)
+    }
+    
+    func asynchProcessImage(asynch_sprite:AsynchSprite)
+    {
+        print("PROCESSING \(asynch_sprite.metaNode!)")
+        
+        if let placeholder = asynch_sprite.placeholder
         {
-            dispatch_after_delay(0.01, block: asynchProcessImage)
+            let real_node = self.processImageNodeSynchronously(asynch_sprite.node)
+            placeholder.addChild(real_node)
+            asynchImageAdded(real_node)
         }
+
     }
     
     //processChildren works a little differently in that it returns the children...
@@ -765,7 +832,7 @@ class DAMetaNode : DAContainer
             if let image_name = node["name"] as? NSString as? String
             {
                 placeholder.name = "placeholder_\(image_name)"
-                asynchSpriteQueue.append( (placeholder, node) )
+                DAMetaNode.UnsortedAsynchSprites.append(AsynchSprite(metaNode:self, node: node, withPlaceholder: placeholder))
             }
             
             return placeholder
@@ -832,25 +899,11 @@ class DAMetaNode : DAContainer
                     
                     if(name.rangeOfString("modal", options: [], range: nil, locale: nil) != nil)
                     {
-                     
-                        if #available(iOS 8.0, *) {
-                            let modal = SKShapeNode(rect: placeholders[name]!)
-                            modal.name = "modal"
-                            modal.fillColor = "#230211".toColor()
-                            modal.alpha = 0.5
-                            return modal
-                        } else {
-                            
-                            if(rootWidth > rootHeight)
-                            {
-                                let modal = SKSpriteNode(fileNamed:"modal_landscape.png")!
-                                return modal
-                            }else{
-                                let modal = SKSpriteNode(fileNamed:"modal_portrait.png")!
-                                return modal
-                            }
-                        }
-                        
+                        let modal = SKSpriteNode(color: "#230211".toColor(), size: placeholders[name]!.size)
+                        modal.alpha = 0.5
+                        modal.name = "modal"
+                        modal.position = placeholders[name]!.center
+                        return modal
                     }
                     
                 }
@@ -862,6 +915,7 @@ class DAMetaNode : DAContainer
     
     func printDisplayTree()
     {
+        print("------------------------ DISPLAY TREE ------------------------")
         printDisplayTree(self, currentDepth:0)
     }
     

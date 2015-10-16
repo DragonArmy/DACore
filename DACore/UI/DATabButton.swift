@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 Dragon Army. All rights reserved.
 //
 
-import Foundation
 import SpriteKit
 
 /*  NOTE: a bit misnamed (didn't want to fix all the projects)
