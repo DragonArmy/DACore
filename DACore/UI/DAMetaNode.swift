@@ -29,8 +29,7 @@ class DAMetaNode : DAContainer
     private static var LoadedMetadata = [String : Dictionary<String,AnyObject>]()
     
     private static let SPRITES_PER_FRAME = 25
-    private static var UnsortedAsynchSprites = [AsynchSprite]()
-    private static var SortedAsynchSprites = [String:[AsynchSprite]]()
+    private static var ASYNCH_SPRITES = [AsynchSprite]()
     
     private static var deviceTag:String = "_iphone6"
     
@@ -416,70 +415,25 @@ class DAMetaNode : DAContainer
     
     static func processAsynchImages(currentScene:SKScene)
     {
-        print("CURRENT SCENE: \(currentScene)")
-        if(currentScene.name == nil)
+        if(ASYNCH_SPRITES.count > 0)
         {
-            print("[ERROR] CANNOT ASYNCH LOAD SPRITES WITH NO SCENE NAME   \(currentScene)")
-            return
-        }
-    
-        for(var i = 0; i < UnsortedAsynchSprites.count; i++)
-        {
-            let asynch = UnsortedAsynchSprites[i];
-            
-            if let meta_node = asynch.metaNode
-            {
-                if let scene = meta_node.scene
-                {
-                    if(scene.name == nil)
-                    {
-                        print("[ERROR] CANNOT ASYNCH LOAD SPRITES WITH NO SCENE NAME")
-                    }else{
-                        if(SortedAsynchSprites.keys.contains(scene.name!))
-                        {
-                            SortedAsynchSprites[scene.name!]!.append(asynch)
-                            UnsortedAsynchSprites.removeAtIndex(i)
-                            i--
-                        }else{
-                            SortedAsynchSprites[scene.name!] = [asynch]
-                            UnsortedAsynchSprites.removeAtIndex(i)
-                            i--
-                        }
-                    }
-                }
-            }
+            print("ASYNCH SPRITES: \(ASYNCH_SPRITES.count)")
         }
         
-        if(UnsortedAsynchSprites.count > 0)
+        for(var i = 0; i < min(ASYNCH_SPRITES.count, SPRITES_PER_FRAME); i++)
         {
-            print("UNSORTED ASYNCH SPRITES: \(UnsortedAsynchSprites.count)")
-            for sprite in UnsortedAsynchSprites
+            let asynch_sprite = ASYNCH_SPRITES.removeAtIndex(0)
+            if let meta_node = asynch_sprite.metaNode
             {
-                print("UNSORTED: \(sprite.metaNode)")
-            }
-        }
-        
-        if(SortedAsynchSprites.keys.contains(currentScene.name!) && SortedAsynchSprites[currentScene.name!]!.count > 0)
-        {
-            var sorted = SortedAsynchSprites[currentScene.name!]!;
-            print("SORTED ASYNCH SPRITES: \(sorted.count)")
-            
-            for(var i = 0; i < min(sorted.count, SPRITES_PER_FRAME); i++)
-            {
-                let asynch_sprite = sorted.removeAtIndex(0)
-                if let meta_node = asynch_sprite.metaNode
-                {
-                    meta_node.asynchProcessImage(asynch_sprite)
-                }
-                
+                meta_node.asynchProcessImage(asynch_sprite)
             }
             
-            //we got out a copy, so put back the new shorter version!
-            SortedAsynchSprites[currentScene.name!] = sorted
-            
-            print("REMAINING: \(sorted.count)")
         }
         
+        if(ASYNCH_SPRITES.count > 0)
+        {
+            print("REMAINING: \(ASYNCH_SPRITES.count)")
+        }
     }
     
     func asynchProcessImage(asynch_sprite:AsynchSprite)
@@ -491,6 +445,8 @@ class DAMetaNode : DAContainer
             let real_node = self.processImageNodeSynchronously(asynch_sprite.node)
             placeholder.addChild(real_node)
             asynchImageAdded(real_node)
+        }else{
+            print("[WARNING] ONE OF YOUR ASYNCH PLACEHOLDERS HAS GONE ROGUE")
         }
 
     }
@@ -832,7 +788,7 @@ class DAMetaNode : DAContainer
             if let image_name = node["name"] as? NSString as? String
             {
                 placeholder.name = "placeholder_\(image_name)"
-                DAMetaNode.UnsortedAsynchSprites.append(AsynchSprite(metaNode:self, node: node, withPlaceholder: placeholder))
+                DAMetaNode.ASYNCH_SPRITES.append(AsynchSprite(metaNode:self, node: node, withPlaceholder: placeholder))
             }
             
             return placeholder
