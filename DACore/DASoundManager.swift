@@ -17,6 +17,8 @@ public class DASoundManager
     
     
     public static var musicPlayer:AVAudioPlayer?
+    public static var crossfadePlayer:AVAudioPlayer?
+    
     public static var soundPlayers = [String:AVAudioPlayer]()
     
     public static func playMusic(filename: String)
@@ -26,28 +28,99 @@ public class DASoundManager
             return
         }
         
+        musicPlayer = createMusicPlayer(filename)
+    }
+    
+    public static func crossFadeToMusic(filename:String)
+    {
+        if(!MUSIC_ENABLED)
+        {
+            return
+        }
+    
+        if(musicPlayer == nil)
+        {
+            playMusic(filename)
+            return
+        }
+        
+        if(!musicPlayer!.playing)
+        {
+            playMusic(filename)
+            return
+        }
+        
+        //if we didn't bail out for playMusic, start the crossfade
+        //we actually set the NEW track as our main track so that if we pause/stop that one gets resumed
+
+        crossfadePlayer = musicPlayer
+        musicPlayer = createMusicPlayer(filename)
+        
+        musicPlayer!.volume = 0.025
+        crossfadePlayer!.volume = 0.975
+        dispatch_after_delay(0.02, block: justKeepFading)
+    }
+    
+    private static func justKeepFading()
+    {
+        if(crossfadePlayer == nil)
+        {
+            musicPlayer!.volume = 1
+            return
+        }
+        
+        musicPlayer!.volume += 0.025
+        crossfadePlayer!.volume -= 0.025
+    
+        if(musicPlayer!.volume < 1.0)
+        {
+            print("CROSSFADE AT \(musicPlayer!.volume)")
+            dispatch_after_delay(0.02, block: justKeepFading)
+        }else{
+            crossfadePlayer = nil
+        }
+    }
+    
+    private static func createMusicPlayer(filename:String) -> AVAudioPlayer?
+    {
+        var music_player:AVAudioPlayer?
+        
         let url = NSBundle.mainBundle().URLForResource(filename, withExtension: nil)
         if (url == nil)
         {
             print("[ERROR] No file: \(filename)")
-            return
+            return nil
         }
         
         var error: NSError? = nil
         do {
-            musicPlayer = try AVAudioPlayer(contentsOfURL: url!)
+            music_player = try AVAudioPlayer(contentsOfURL: url!)
         } catch let error1 as NSError {
             error = error1
-            musicPlayer = nil
+            music_player = nil
         }
         
-        if let player = musicPlayer
+        if let player = music_player
         {
             player.numberOfLoops = -1
             player.prepareToPlay()
             player.play()
         } else {
             print("Could not create music player: \(error!)")
+        }
+        
+        return music_player
+    }
+    
+    public static func stopMusic()
+    {
+        if let player = musicPlayer
+        {
+            if player.playing
+            {
+                player.pause()
+                player.currentTime = 0
+            }
         }
     }
     
