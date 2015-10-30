@@ -95,7 +95,7 @@ struct FlumpLayer : Equatable
                 lastFrame = frames[i]
             }
         }
-
+        
         return SKAction.sequence(actions)
     }
     
@@ -372,102 +372,106 @@ class Flump
                                 print("[ERROR] MovieClip found with name-less layer")
                             }
                             
-                            if let keyframes = json_layer["keyframes"] as? [Dictionary<String, AnyObject>]
+                            if let keyframes_raw = json_layer["keyframes"]
                             {
-                                for keyframe in keyframes
+                                if let keyframes = keyframes_raw as? [Dictionary<String, AnyObject>]
+                            
                                 {
-                                    let duration = NSTimeInterval((keyframe["duration"] as! NSNumber as Float) / frame_rate)
-                                    let symbol = keyframe["ref"] as? NSString as? String
-                                    let start_frame = keyframe["index"] as! NSNumber as Float
-                                    let end_frame = start_frame + (keyframe["duration"] as! NSNumber as Float)
-                                    
-                                    var tweened = true
-                                    if let json_tweened = keyframe["tweened"] as? Bool
+                                    for keyframe in keyframes
                                     {
-                                        tweened = json_tweened
-                                    }
-                                    
-                                    var pivot:CGPoint? = nil
-                                    var position:CGPoint? = nil
-                                    var rotation:CGFloat? = nil
-                                    var x_scale:CGFloat? = nil
-                                    var y_scale:CGFloat? = nil
-                                    var alpha:CGFloat? = nil
-                                    var label:String? = nil
-                                    
-                                    if let kf_pivot = keyframe["pivot"] as? [NSNumber]
-                                    {
-                                        pivot = CGPoint(x: kf_pivot[0] as CGFloat, y: kf_pivot[1] as CGFloat)
-                                    }else{
-                                        pivot = CGPoint(x:0,y:0)
-                                    }
-                                    
-                                    //POSITION DEFAULTS TO (0,0)
-                                    //MUTLIPLY Y by -1 TO CORRECT FOR Y-POS
-                                    if let kf_position = keyframe["loc"] as? [NSNumber]
-                                    {
-                                        position = CGPoint(x: CGFloat(kf_position[0].floatValue), y: -1*CGFloat(kf_position[1].floatValue))
-                                    }else{
-                                        position = CGPoint(x: 0, y: 0)
-                                    }
-                                    
-                                    //SCALE DEFAULTS TO 1
-                                    if let kf_scale = keyframe["scale"] as? [NSNumber]
-                                    {
-                                        x_scale = CGFloat(kf_scale[0].floatValue)
-                                        y_scale = CGFloat(kf_scale[1].floatValue)
-                                    }else{
-                                        x_scale = 1
-                                        y_scale = 1
-                                    }
-                                    
-                                    //ROTATION DEFAULTS TO 0
-                                    //MUTLIPLY R by -1 TO CORRECT FOR Y-POS
-                                    if let kf_skew = keyframe["skew"] as? [NSNumber]
-                                    {
-                                        rotation = -1*CGFloat(kf_skew[0].floatValue)
+                                        let duration = NSTimeInterval((keyframe["duration"] as! NSNumber as Float) / frame_rate)
+                                        let symbol = keyframe["ref"] as? NSString as? String
+                                        let start_frame = keyframe["index"] as! NSNumber as Float
+                                        let end_frame = start_frame + (keyframe["duration"] as! NSNumber as Float)
                                         
-                                        //JANKY SKEW SUPPORT
-                                        //basically, if our skew is (0,PI) that's a flipX
-                                        if(rotation == 0 && kf_skew[1].floatValue != 0)
+                                        var tweened = true
+                                        if let json_tweened = keyframe["tweened"] as? Bool
                                         {
-                                            if(abs(kf_skew[1].floatValue - 3.1416) < 0.1)
-                                            {
-                                                x_scale = x_scale! * -1
-                                            }
+                                            tweened = json_tweened
                                         }
                                         
-                                    }else{
-                                        rotation = 0
-                                    }
-                                    
-                                    //ALPHA DEFAULTS TO 1
-                                    if let kf_alpha = keyframe["alpha"] as? NSNumber
-                                    {
-                                        alpha = CGFloat(kf_alpha.floatValue)
-                                    }else{
-                                        alpha = 1
-                                    }
-                                    
-                                    if let kf_label = keyframe["label"] as? NSString as? String
-                                    {
-                                        label = kf_label
-                                    }
-                                    
-                                    layer_keyframes.append(FlumpKeyframe(symbolName: symbol,
-                                            startFrame: start_frame,
-                                            endFrame: end_frame,
-                                            duration: duration,
-                                            tweened: tweened,
-                                            pivot: pivot!,
-                                            position: position!,
-                                            rotation: rotation!,
-                                            xScale: x_scale!,
-                                            yScale: y_scale!,
-                                            alpha: alpha!,
-                                            label: label
+                                        var pivot:CGPoint? = nil
+                                        var position:CGPoint? = nil
+                                        var rotation:CGFloat? = nil
+                                        var x_scale:CGFloat? = nil
+                                        var y_scale:CGFloat? = nil
+                                        var alpha:CGFloat? = nil
+                                        var label:String? = nil
+                                        
+                                        if let kf_pivot = keyframe["pivot"] as? [NSNumber]
+                                        {
+                                            pivot = CGPoint(x: kf_pivot[0] as CGFloat, y: kf_pivot[1] as CGFloat)
+                                        }else{
+                                            pivot = CGPoint(x:0,y:0)
+                                        }
+                                        
+                                        //POSITION DEFAULTS TO (0,0)
+                                        //MUTLIPLY Y by -1 TO CORRECT FOR Y-POS
+                                        if let kf_position = keyframe["loc"] as? [NSNumber]
+                                        {
+                                            position = CGPoint(x: CGFloat(kf_position[0].floatValue), y: -1*CGFloat(kf_position[1].floatValue))
+                                        }else{
+                                            position = CGPoint(x: 0, y: 0)
+                                        }
+                                        
+                                        //SCALE DEFAULTS TO 1
+                                        if let kf_scale = keyframe["scale"] as? [NSNumber]
+                                        {
+                                            x_scale = CGFloat(kf_scale[0].floatValue)
+                                            y_scale = CGFloat(kf_scale[1].floatValue)
+                                        }else{
+                                            x_scale = 1
+                                            y_scale = 1
+                                        }
+                                        
+                                        //ROTATION DEFAULTS TO 0
+                                        //MUTLIPLY R by -1 TO CORRECT FOR Y-POS
+                                        if let kf_skew = keyframe["skew"] as? [NSNumber]
+                                        {
+                                            rotation = -1*CGFloat(kf_skew[0].floatValue)
+                                            
+                                            //JANKY SKEW SUPPORT
+                                            //basically, if our skew is (0,PI) that's a flipX
+                                            if(rotation == 0 && kf_skew[1].floatValue != 0)
+                                            {
+                                                if(abs(kf_skew[1].floatValue - 3.1416) < 0.1)
+                                                {
+                                                    x_scale = x_scale! * -1
+                                                }
+                                            }
+                                            
+                                        }else{
+                                            rotation = 0
+                                        }
+                                        
+                                        //ALPHA DEFAULTS TO 1
+                                        if let kf_alpha = keyframe["alpha"] as? NSNumber
+                                        {
+                                            alpha = CGFloat(kf_alpha.floatValue)
+                                        }else{
+                                            alpha = 1
+                                        }
+                                        
+                                        if let kf_label = keyframe["label"] as? NSString as? String
+                                        {
+                                            label = kf_label
+                                        }
+                                        
+                                        layer_keyframes.append(FlumpKeyframe(symbolName: symbol,
+                                                startFrame: start_frame,
+                                                endFrame: end_frame,
+                                                duration: duration,
+                                                tweened: tweened,
+                                                pivot: pivot!,
+                                                position: position!,
+                                                rotation: rotation!,
+                                                xScale: x_scale!,
+                                                yScale: y_scale!,
+                                                alpha: alpha!,
+                                                label: label
+                                            )
                                         )
-                                    )
+                                    }
                                 }
                             }
                             
