@@ -201,6 +201,7 @@ class DAMetaNode : DAContainer
         }
     }
     
+    
     convenience init?(file_root:String, resolutionIndependent omit_device_tag:Bool)
     {
         self.init(file_root:file_root, fromContainer:nil, resolutionIndependent:omit_device_tag, asynchSprites:false)
@@ -415,11 +416,6 @@ class DAMetaNode : DAContainer
     
     static func processAsynchImages(currentScene:SKScene)
     {
-        if(ASYNCH_SPRITES.count > 0)
-        {
-            print("ASYNCH SPRITES: \(ASYNCH_SPRITES.count)")
-        }
-        
         for(var i = 0; i < min(ASYNCH_SPRITES.count, SPRITES_PER_FRAME); i++)
         {
             let asynch_sprite = ASYNCH_SPRITES.removeAtIndex(0)
@@ -429,16 +425,11 @@ class DAMetaNode : DAContainer
             }
             
         }
-        
-        if(ASYNCH_SPRITES.count > 0)
-        {
-            print("REMAINING: \(ASYNCH_SPRITES.count)")
-        }
     }
     
     func asynchProcessImage(asynch_sprite:AsynchSprite)
     {
-        print("PROCESSING \(asynch_sprite.metaNode!)")
+//        print("PROCESSING \(asynch_sprite.metaNode!)")
         
         if let placeholder = asynch_sprite.placeholder
         {
