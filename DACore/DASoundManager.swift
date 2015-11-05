@@ -15,6 +15,8 @@ public class DASoundManager
     static var MUSIC_ENABLED = true
     static var SFX_ENABLED = true
     
+    static var MUSIC_VOLUME:Float = 1.0
+    
     
     public static var musicPlayer:AVAudioPlayer?
     public static var crossfadePlayer:AVAudioPlayer?
@@ -102,6 +104,7 @@ public class DASoundManager
         
         if let player = music_player
         {
+            player.volume = DASoundManager.MUSIC_VOLUME
             player.numberOfLoops = -1
             player.prepareToPlay()
             player.play()
