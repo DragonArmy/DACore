@@ -229,7 +229,7 @@ class DAMetaNode : DAContainer
             print("[ERROR] containerWithName provides the container_, you may omit it from your call!")
         }
         
-        return childNodeWithName("//container_" + container_name) as? DAContainer
+        return childNodeWithName(".//container_" + container_name) as? DAContainer
     }
     
     func paragraphWithName(paragraph_name:String) -> DAParagraphNode?
@@ -249,7 +249,7 @@ class DAMetaNode : DAContainer
             print("[ERROR] progressWithName provides the progress_, you may omit it from your call!")
         }
         
-        return childNodeWithName("//progress_" + progress_name) as? DAProgressBar
+        return childNodeWithName(".//progress_" + progress_name) as? DAProgressBar
     }
     
     func tabWithName(tab_name:String) -> DATabButton?
@@ -259,13 +259,13 @@ class DAMetaNode : DAContainer
             print("[ERROR] tabWithName provides the progress_, you may omit it from your call!")
         }
         
-        return childNodeWithName("//tab_" + tab_name) as? DATabButton
+        return childNodeWithName(".//tab_" + tab_name) as? DATabButton
     }
     
     //simplest of the getters, doesn't prefix anything
     func imageWithName(image_name:String) -> SKSpriteNode?
     {
-        let maybe_image = childNodeWithName("//" + image_name)
+        let maybe_image = childNodeWithName(".//" + image_name)
         
         if maybe_image == nil
         {

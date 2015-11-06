@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Dragon Army. All rights reserved.
 //
 
+import Foundation
 import SpriteKit
 
 /* this started as just an alias so I could disambiguate between between something I was explicitly using as
@@ -136,6 +137,22 @@ class DAContainerBase : DAResetNode
         innerContainer.enumerateChildNodesWithName(name, usingBlock: block)
     }
     
+    func judder(amount:CGFloat)
+    {
+        reset()
+        for child in children
+        {
+            if let rnode = child as? DAResetNode
+            {
+                rnode.position = CGPoint(x: rnode.position.x + CGFloat.random(lower: -amount, upper:amount), y: rnode.position.y + CGFloat.random(lower: -amount, upper:amount))
+                rnode.resetPosition = rnode.position
+            }
+            
+        }
+        
+        self.position = CGPoint(x: self.position.x + CGFloat.random(lower: -amount, upper: amount), y: self.position.y + CGFloat.random(lower:amount, upper:amount))
+        self.resetPosition = self.position
+    }
     
     func convertToMask(mask:SKNode)
     {
@@ -155,5 +172,6 @@ class DAContainerBase : DAResetNode
         crop.maskNode = mask
         mask.removeFromParent()
         old_inner.removeFromParent()
-    }
+    }    
+
 }
