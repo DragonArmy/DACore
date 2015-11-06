@@ -135,4 +135,25 @@ class DAContainerBase : DAResetNode
     {
         innerContainer.enumerateChildNodesWithName(name, usingBlock: block)
     }
+    
+    
+    func convertToMask(mask:SKNode)
+    {
+        let old_inner = innerContainer
+        
+        let crop = SKCropNode()
+        
+        innerContainer = crop
+        innerContainer.position = old_inner.position
+        addChild(innerContainer)
+        
+        for child in old_inner.children
+        {
+            child.transferInPlace(innerContainer)
+        }
+
+        crop.maskNode = mask
+        mask.removeFromParent()
+        old_inner.removeFromParent()
+    }
 }
