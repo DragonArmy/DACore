@@ -25,11 +25,6 @@ public class DASoundManager
     
     public static func playMusic(filename: String)
     {
-        if(!MUSIC_ENABLED)
-        {
-            return
-        }
-        
         musicPlayer = createMusicPlayer(filename)
     }
     
@@ -107,7 +102,12 @@ public class DASoundManager
             player.volume = DASoundManager.MUSIC_VOLUME
             player.numberOfLoops = -1
             player.prepareToPlay()
-            player.play()
+            
+            if(MUSIC_ENABLED)
+            {
+                player.play()    
+            }
+            
         } else {
             print("Could not create music player: \(error!)")
         }
