@@ -137,6 +137,9 @@ class FlumpNode : DAMetaNode
         isPlaying = true
         isLooping = is_looping
         
+        //only set a callback on the first layer
+        var first = true
+        
         if let movie = Flump.LoadedMovies[movie_name]
         {
             currentMovie = movie_name
@@ -160,7 +163,14 @@ class FlumpNode : DAMetaNode
                         
                         child.runAction(SKAction.repeatActionForever(loop), withKey:"robot")
                     }else{
-                        child.runAction(animation, completion: onSinglePlayComplete)
+                        if(first)
+                        {
+                            child.runAction(animation, completion: onSinglePlayComplete)
+                            first = false
+                        }else{
+                            child.runAction(animation)
+                        }
+                        
                     }
 
                 }
@@ -174,10 +184,10 @@ class FlumpNode : DAMetaNode
     {
         isPlaying = false
         
-        //clear the callback after the first one!
-        //if a movie has 10 layers onSinglePlayComplete will fire 10 times
-        playOnceCallback()
+        //clear our handler before calling it in case the callback starts a new animation
+        let cached_callback = playOnceCallback
         playOnceCallback = {}
+        cached_callback()
     }
     
     func stop() -> FlumpNode
