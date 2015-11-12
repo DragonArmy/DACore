@@ -31,7 +31,7 @@ class DAMetaNode : DAContainer
     private static let SPRITES_PER_FRAME = 25
     private static var ASYNCH_SPRITES = [AsynchSprite]()
     
-    private static var deviceTag:String = "_iphone6"
+    static var deviceTag:String = "_iphone6"
     
     private var fileRoot:String
     private var rootContainer:String?
@@ -582,7 +582,7 @@ class DAMetaNode : DAContainer
         var size:CGRect?
         
         let children = node["children"] as! NSArray as [AnyObject]
-        
+
         for raw_node in children
         {
             if let node = raw_node as? Dictionary<String,AnyObject>
@@ -617,23 +617,7 @@ class DAMetaNode : DAContainer
         
         if sprite != nil
         {
-            
-            let full_width = sprite!.width
-            let full_height = sprite!.height
-            
-            let left = center!.minX - sprite!.frame.minX
-            let bottom = center!.minY - sprite!.frame.minY
-            
-            let x = left / full_width
-            let y = bottom / full_height
-            let w = center!.width / full_width
-            let h = center!.height / full_height
-            
-            sprite!.centerRect = CGRect(x:x, y:y, width:w, height:h)
-//            sprite!.centerRect = CGRect(x:0.5, y:0.25, width:0.25, height:0.25)
-            
-//            sprite!.xScale = size!.width / sprite!.width
-//            sprite!.yScale = size!.height / sprite!.height
+            sprite!.centerRect = DAMetaNode.getCenterRect(outerRect:sprite!.frame, innerRect:center!)
             sprite!.width = size!.width
             sprite!.height = size!.height
             
@@ -647,6 +631,22 @@ class DAMetaNode : DAContainer
         
         
         return SKSpriteNode()
+    }
+    
+    static func getCenterRect(outerRect outer:CGRect, innerRect inner:CGRect) -> CGRect
+    {
+        let full_width = outer.width
+        let full_height = outer.height
+        
+        let left = inner.minX - outer.minX
+        let bottom = inner.minY - outer.minY
+        
+        let x = left / full_width
+        let y = bottom / full_height
+        let w = inner.width / full_width
+        let h = inner.height / full_height
+        
+        return CGRect(x:x, y:y, width:w, height:h)
     }
     
     func processParagraphNode(name:String, withChildren children:[AnyObject]) -> DAParagraphNode
@@ -792,29 +792,28 @@ class DAMetaNode : DAContainer
     {
         if let image_name = node["name"] as? NSString as? String
         {
-            let image_type = image_name.split("_")[0]
+            let image = SKSpriteNode(imageNamed:image_name)
             
-            let sprite = SKSpriteNode(imageNamed:image_name)
-            
-            sprite.name = node["name"] as? NSString as? String
+            image.name = node["name"] as? NSString as? String
             
             if let position = node["position"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
-                sprite.position = CGPoint(x:position[0], y:position[1])
+                image.position = CGPoint(x:position[0], y:position[1])
             }
             
+            let image_type = image_name.split("_")[0]
             if(image_type == "flipX")
             {
-                sprite.xScale = -1
+                image.xScale = -1
             }
-            
+
             //simple scale button!
             if(image_type == "scalebtn")
             {
                 let container = DAScaleButton()
-                container.position = sprite.position
-                sprite.position = CGPoint(x:0,y:0)
-                container.addChild(sprite)
+                container.position = image.position
+                image.position = CGPoint(x:0,y:0)
+                container.addChild(image)
                 container.updateDisplay()
                 
                 if let btn_name = (node["name"] as? NSString as? String)?.replace("scalebtn_",withString:"")
@@ -826,7 +825,7 @@ class DAMetaNode : DAContainer
                 return container
             }
             
-            return sprite
+            return image
         }
         
         return SKSpriteNode()
