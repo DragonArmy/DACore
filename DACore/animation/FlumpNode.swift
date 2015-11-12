@@ -161,7 +161,12 @@ class FlumpNode : DAMetaNode
                         let reset = layer.getReset(layer)
                         let loop = SKAction.sequence([animation,reset])
                         
-                        child.runAction(SKAction.repeatActionForever(loop), withKey:"robot")
+                        child.runAction(loop, completion: {
+                            self.doPlay(movie_name, withLoop:true)
+                        })
+                        
+                        //not sure why, but using repeatAcitonForever creates a hitch in the animation
+//                        child.runAction(SKAction.repeatActionForever(loop), withKey:"robot")
                     }else{
                         if(first)
                         {
