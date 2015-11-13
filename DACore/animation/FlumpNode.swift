@@ -28,9 +28,9 @@ class FlumpNode : DAMetaNode
         self.init(fileRoot:file_root, fromContainer:container_name, restPose:rest_pose, resolutionIndependent:omit_device_tag, asynchSprites:true)
     }
     
-    init?(fileRoot file_root:String, fromContainer container_name:String?, restPose rest_pose:String?, resolutionIndependent omit_device_tag:Bool, asynchSprites with_asynch:Bool)
+    init?(fileRoot file_root:String, fromContainer container_name:String?, restPose rest_pose:String?, resolutionIndependent omit_device_tag:Bool, asynchSprites with_asynch:Bool, useTextureCache use_texture_cache:Bool=false)
     {
-        super.init(file_root:file_root, fromContainer:container_name, resolutionIndependent:omit_device_tag, asynchSprites:with_asynch)
+        super.init(file_root:file_root, fromContainer:container_name, resolutionIndependent:omit_device_tag, asynchSprites:with_asynch, useTextureCache:use_texture_cache)
         
         if(rest_pose != nil)
         {

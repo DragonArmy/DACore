@@ -256,28 +256,13 @@ class Flump
         for file_root in file_root_list
         {
             //print("QUEUING ANIMATION: \(file_root)")
+            let qualityOfServiceClass = DISPATCH_QUEUE_PRIORITY_BACKGROUND
+            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
             
-            
-            if #available(iOS 8.0, *) {
-                let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-                let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-                
-                let closure_file = file_root
-                dispatch_async(backgroundQueue) {
-                    Flump.loadAnimation(closure_file)
-                    //print("FINISHED LOADING \(closure_file)")
-                }
-                
-            } else {
-                let qualityOfServiceClass = DISPATCH_QUEUE_PRIORITY_BACKGROUND
-                let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-                
-                let closure_file = file_root
-                dispatch_async(backgroundQueue) {
-                    Flump.loadAnimation(closure_file)
-                    //print("FINISHED LOADING \(closure_file)")
-                }
-                
+            let closure_file = file_root
+            dispatch_async(backgroundQueue) {
+                Flump.loadAnimation(closure_file)
+                //print("FINISHED LOADING \(closure_file)")
             }
 
         }

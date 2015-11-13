@@ -105,6 +105,7 @@ public class DASoundManager
             
             if(MUSIC_ENABLED)
             {
+                print("MUSIC ENABLED -- PLAY")
                 player.play()    
             }
             

@@ -13,14 +13,31 @@ class AsynchSprite
 {
     weak var metaNode:DAMetaNode?
     weak var placeholder:SKNode?
+    var useTextureCache:Bool = false
     
     var node:Dictionary<String, AnyObject>
     
-    init(metaNode meta_node:DAMetaNode, node:Dictionary<String, AnyObject>, withPlaceholder placeholder:SKNode)
+    init(metaNode meta_node:DAMetaNode, node:Dictionary<String, AnyObject>, withPlaceholder placeholder:SKNode, useTextureCache use_texture_cache:Bool=false)
     {
         self.metaNode = meta_node
         self.node = node
+        self.useTextureCache = use_texture_cache
         self.placeholder = placeholder
+    }
+}
+
+class DATextureCache
+{
+    private static var cache = [String:SKTexture]()
+    
+    static func get(texture_name:String) -> SKTexture
+    {
+        if(!cache.keys.contains(texture_name))
+        {
+            cache[texture_name] = SKTexture(imageNamed:texture_name)
+        }
+    
+        return cache[texture_name]!
     }
 }
 
@@ -89,29 +106,15 @@ class DAMetaNode : DAContainer
         {
             //print("QUEUING METADATA: \(file_root)")
             
-            if #available(iOS 8.0, *) {
-                let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-                let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-                
-                let closure_file = file_root
-                let closure_omit = omit_device_tag
-                
-                dispatch_async(backgroundQueue) {
-                    DAMetaNode.loadMetadata([(closure_file, closure_omit)])
-                    //print("FINISHED LOADING \(closure_file)")
-                }
-                
-            } else {
-                let qualityOfServiceClass = DISPATCH_QUEUE_PRIORITY_BACKGROUND
-                let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-                
-                let closure_file = file_root
-                let closure_omit = omit_device_tag
-                
-                dispatch_async(backgroundQueue) {
-                    DAMetaNode.loadMetadata([(closure_file, closure_omit)])
-                    //print("FINISHED LOADING \(closure_file)")
-                }
+           let qualityOfServiceClass = DISPATCH_QUEUE_PRIORITY_BACKGROUND
+            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+            
+            let closure_file = file_root
+            let closure_omit = omit_device_tag
+            
+            dispatch_async(backgroundQueue) {
+                DAMetaNode.loadMetadata([(closure_file, closure_omit)])
+                //print("FINISHED LOADING \(closure_file)")
             }
             
         }
@@ -124,7 +127,7 @@ class DAMetaNode : DAContainer
         super.init()
     }
     
-    init(from_node:DAResetNode, asynchSprites asynch_sprites:Bool)
+    init(from_node:DAResetNode, asynchSprites asynch_sprites:Bool, useTextureCache use_texture_cache:Bool=false)
     {
         print("CREATING DAMetaNode from existing node!")
         fileRoot = ""
@@ -161,7 +164,7 @@ class DAMetaNode : DAContainer
         }
     }
     
-    init(file_root:String, fromContainer container_name:String?, resolutionIndependent omit_device_tag:Bool, asynchSprites asynch_sprites:Bool)
+    init(file_root:String, fromContainer container_name:String?, resolutionIndependent omit_device_tag:Bool, asynchSprites asynch_sprites:Bool, useTextureCache use_texture_cache:Bool=false)
     {
         fileRoot = file_root
         rootContainer = container_name
@@ -177,7 +180,7 @@ class DAMetaNode : DAContainer
         
         if(DAMetaNode.LoadedMetadata.indexForKey(file_root) != nil)
         {
-            processMetadata(DAMetaNode.LoadedMetadata[file_root]!, withAsynchSprites:asynch_sprites)
+            processMetadata(DAMetaNode.LoadedMetadata[file_root]!, withAsynchSprites: asynch_sprites, useTextureCache: use_texture_cache)
         }else{
             //synchronously load metadata if we initialize a MetaNode
             //print("SYNCHRONOUS LOAD: \(file_root)")
@@ -186,7 +189,7 @@ class DAMetaNode : DAContainer
             
             if let json = DAMetaNode.LoadedMetadata[file_root]
             {
-                processMetadata(json, withAsynchSprites:asynch_sprites)
+                processMetadata(json, withAsynchSprites:asynch_sprites, useTextureCache:use_texture_cache)
             }else{
                 print("UNABLE TO LOAD \(file_root)")
                 return
@@ -315,7 +318,7 @@ class DAMetaNode : DAContainer
     }
     
     let DEBUG = false
-    func processMetadata(json:Dictionary<String,AnyObject>, withAsynchSprites asynch:Bool)
+    func processMetadata(json:Dictionary<String,AnyObject>, withAsynchSprites asynch:Bool, useTextureCache use_texture_cache:Bool=false)
     {
         //print("PROCESS METADATA    asynch=\(asynch)")
         if let root_width = json["root_width"] as? NSNumber as? Int
@@ -340,7 +343,7 @@ class DAMetaNode : DAContainer
         {
             if(rootContainer == nil)
             {
-                let node_children = processChildren(children, withAsynch:asynch);
+                let node_children = processChildren(children, withAsynch:asynch, useTextureCache:use_texture_cache);
                 
                 for node_child in node_children
                 {
@@ -433,7 +436,7 @@ class DAMetaNode : DAContainer
         
         if let placeholder = asynch_sprite.placeholder
         {
-            let real_node = self.processImageNodeSynchronously(asynch_sprite.node)
+            let real_node = self.processImageNodeSynchronously(asynch_sprite.node, useTextureCache: asynch_sprite.useTextureCache)
             placeholder.addChild(real_node)
             asynchImageAdded(real_node)
         }else{
@@ -445,7 +448,7 @@ class DAMetaNode : DAContainer
     //processChildren works a little differently in that it returns the children...
     //you don't have to actually do anything with them, but for compound objects such
     //as buttons and progress bars this is required
-    func processChildren(children:[AnyObject], withAsynch asynch:Bool) -> [SKNode]
+    func processChildren(children:[AnyObject], withAsynch asynch:Bool, useTextureCache use_texture_cache:Bool=false) -> [SKNode]
     {
         var child_nodes:[SKNode] = []
         
@@ -458,11 +461,11 @@ class DAMetaNode : DAContainer
                     switch node_type
                     {
                     case "container":
-                        child_nodes.append( processContainerNode(node, withAsynch:asynch) )
+                        child_nodes.append( processContainerNode(node, withAsynch:asynch, useTextureCache: use_texture_cache) )
                     case "text":
                         child_nodes.append( processTextNode(node) )
                     case "image":
-                        child_nodes.append( processImageNode(node, withAsynch:asynch) )
+                        child_nodes.append( processImageNode(node, withAsynch:asynch, useTextureCache:use_texture_cache) )
                     case "placeholder":
                         if let modal = processPlaceholderNode(node)
                         {
@@ -479,7 +482,7 @@ class DAMetaNode : DAContainer
         return child_nodes
     }
     
-    func processContainerNode(node:Dictionary<String, AnyObject>, withAsynch asynch:Bool) -> SKNode
+    func processContainerNode(node:Dictionary<String, AnyObject>, withAsynch asynch:Bool, useTextureCache use_texture_cache:Bool=false) -> SKNode
     {
         var container:DAResetNode?
         
@@ -509,7 +512,7 @@ class DAMetaNode : DAContainer
                     container = DATabButton()
                 case "scale9":
                     //SHHH, NOT ACTUALLY A CONTAINER
-                    return processScale9Node(node)
+                    return processScale9Node(node, useTextureCache: use_texture_cache)
                 case "paragraph":
                     let children = node["children"] as! NSArray as [AnyObject]
                     let paragraph_name = container_name.replace("paragraph_",withString:"")
@@ -575,7 +578,7 @@ class DAMetaNode : DAContainer
         return container!
     }
     
-    func processScale9Node(node:Dictionary<String, AnyObject>) -> SKSpriteNode
+    func processScale9Node(node:Dictionary<String, AnyObject>, useTextureCache use_texture_cache:Bool=false) -> SKSpriteNode
     {
         var center:CGRect?
         var sprite:SKSpriteNode?
@@ -592,7 +595,7 @@ class DAMetaNode : DAContainer
                     switch node_type
                     {
                     case "image":
-                        sprite = processImageNodeSynchronously(node) as? SKSpriteNode
+                        sprite = processImageNodeSynchronously(node, useTextureCache:use_texture_cache) as? SKSpriteNode
                     case "placeholder":
                         processPlaceholderNode(node)
                         
@@ -771,7 +774,7 @@ class DAMetaNode : DAContainer
         return SKLabelNode()
     }
     
-    func processImageNode(node:Dictionary<String, AnyObject>, withAsynch asynch:Bool) -> SKNode
+    func processImageNode(node:Dictionary<String, AnyObject>, withAsynch asynch:Bool, useTextureCache use_texture_cache:Bool=false) -> SKNode
     {
         if(asynch)
         {
@@ -779,20 +782,27 @@ class DAMetaNode : DAContainer
             if let image_name = node["name"] as? NSString as? String
             {
                 placeholder.name = "placeholder_\(image_name)"
-                DAMetaNode.ASYNCH_SPRITES.append(AsynchSprite(metaNode:self, node: node, withPlaceholder: placeholder))
+                DAMetaNode.ASYNCH_SPRITES.append(AsynchSprite(metaNode:self, node: node, withPlaceholder: placeholder, useTextureCache: use_texture_cache))
             }
             
             return placeholder
         }else{
-            return processImageNodeSynchronously(node)
+            return processImageNodeSynchronously(node, useTextureCache:use_texture_cache)
         }
     }
     
-    func processImageNodeSynchronously(node:Dictionary<String, AnyObject>) -> SKNode
+    func processImageNodeSynchronously(node:Dictionary<String, AnyObject>, useTextureCache use_texture_cache:Bool) -> SKNode
     {
         if let image_name = node["name"] as? NSString as? String
         {
-            let image = SKSpriteNode(imageNamed:image_name)
+            var image:SKSpriteNode
+            
+            if(use_texture_cache)
+            {
+                image = SKSpriteNode(texture:DATextureCache.get(image_name))
+            }else{
+                image = SKSpriteNode(imageNamed:image_name)
+            }
             
             image.name = node["name"] as? NSString as? String
             
