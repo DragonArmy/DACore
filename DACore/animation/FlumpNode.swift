@@ -49,7 +49,7 @@ class FlumpNode : DAMetaNode
             }
         }
         
-        userInteractionEnabled = true
+        //userInteractionEnabled = true
     }
     
     required init(coder: NSCoder)
