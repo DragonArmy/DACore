@@ -10,6 +10,9 @@ import SpriteKit
 
 class FlumpNode : DAMetaNode
 {
+    let onTouchesBegan = Signal<UITouch>()
+    let onTouchesEnded = Signal<UITouch>()
+    
     var currentMovie = "NONE"
     var restPose:FlumpMovie? = nil
     var isLooping = true
@@ -45,11 +48,28 @@ class FlumpNode : DAMetaNode
                 }
             }
         }
+        
+        userInteractionEnabled = true
     }
     
     required init(coder: NSCoder)
     {
         fatalError("NSCoding not supported")
+    }
+    
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
+    {
+        if let touch:UITouch = touches.anyItem()
+        {
+            onTouchesBegan.fire(touch)
+        }
+    }
+    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?)
+    {
+        if let touch:UITouch = touches.anyItem()
+        {
+            onTouchesEnded.fire(touch)
+        }
     }
     
     func goto(movie_name:String) -> FlumpNode

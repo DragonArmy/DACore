@@ -155,6 +155,13 @@ public class DASoundManager
         }
     }
     
+    public static func playSound(filename:String, withDelay delay:Double)
+    {
+        dispatch_after_delay(delay, block: {
+            playSound(filename)
+        })
+    }
+    
     public static func playSound(filename: String)
     {
         if(!SFX_ENABLED)
