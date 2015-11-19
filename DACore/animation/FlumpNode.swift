@@ -59,6 +59,8 @@ class FlumpNode : DAMetaNode
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
+        super.touchesBegan(touches, withEvent: event)
+        
         if let touch:UITouch = touches.anyItem()
         {
             onTouchesBegan.fire(touch)
@@ -66,6 +68,8 @@ class FlumpNode : DAMetaNode
     }
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
+        super.touchesEnded(touches, withEvent: event)
+        
         if let touch:UITouch = touches.anyItem()
         {
             onTouchesEnded.fire(touch)

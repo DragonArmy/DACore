@@ -28,6 +28,9 @@ class DAButtonBase : DAContainerBase
     var touchRect:CGRect?
     var enabled = true
     
+    var lastPress = NSDate()
+    var cooldown:Double = 0.0
+    
     override init()
     {
         super.init()
@@ -81,6 +84,14 @@ class DAButtonBase : DAContainerBase
         {
             return
         }
+        
+        let press_time = NSDate()
+        if(press_time.timeIntervalSinceDate(lastPress) < cooldown)
+        {
+            print("TOO SOON")
+            return
+        }
+        
         
         if(enabled)
         {
@@ -164,6 +175,7 @@ class DAButtonBase : DAContainerBase
             
             if(enabled)
             {
+                lastPress = NSDate()
                 onButtonUp.fire(self)
                 onButtonClick.fire(self)
             }
