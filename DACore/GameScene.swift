@@ -13,25 +13,27 @@ import GLKit
 class GameScene: SKScene
 {
     var spriteKitRoot = SKNode()
-    var metaNode = DAMetaNode(file_root: "")!
+    var metaNode:DAMetaNode
     
     private var _metaNodeFileRoot:String = ""
     private var _metaNodeContainerRoot:String? = nil
     
     init(size:CGSize, fromFile file_root:String, fromContainer container_root:String?)
     {
+        _metaNodeFileRoot = file_root
+        _metaNodeContainerRoot = container_root
+        
+        metaNode = DAMetaNode(file_root: _metaNodeFileRoot, fromContainer: _metaNodeContainerRoot)!
+        
         super.init(size:size)
         
         addChild(spriteKitRoot)
         spriteKitRoot.name = "spriteKitRoot"
         
-        _metaNodeFileRoot = file_root
-        _metaNodeContainerRoot = container_root
-        
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
         scaleMode = SKSceneScaleMode.AspectFit
         
-        loadMetadata()
+        spriteKitRoot.addChild(metaNode);
     }
     
     convenience init(size:CGSize, fromFile file_root:String)
@@ -44,6 +46,8 @@ class GameScene: SKScene
     }
     
     override init(size:CGSize) {
+        metaNode = DAMetaNode()
+        
         super.init(size:size)
         
         addChild(spriteKitRoot)
@@ -86,12 +90,6 @@ class GameScene: SKScene
             }
             
         }
-    }
-    
-    func loadMetadata()
-    {
-        metaNode = DAMetaNode(file_root: _metaNodeFileRoot, fromContainer: _metaNodeContainerRoot)!
-        spriteKitRoot.addChild(metaNode);
     }
     
     //helpers that just forward on to metaNode to make Controller logic cleaner
