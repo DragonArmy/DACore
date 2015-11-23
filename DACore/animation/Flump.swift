@@ -270,7 +270,7 @@ class Flump
     
     static func isLoaded(file_root:String) -> Bool
     {
-        if(LoadedMovies[file_root] != nil)
+        if(LoadedAnimations[file_root] != nil)
         {
             return true
         }
