@@ -172,12 +172,12 @@ class BaseModel
         }
     }
     
-    static func find<T>(id:Int) -> T?
+    static func findByIntID<T>(id:Int) -> T?
     {
-        return find("\(id)")
+        return findByStringID("\(id)")
     }
     
-    static func find<T>(id:String) -> T?
+    static func findByStringID<T>(id:String) -> T?
     {
         let return_value = allCache[allKey]![id] as! T?
         return return_value
