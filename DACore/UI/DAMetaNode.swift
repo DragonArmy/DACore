@@ -674,7 +674,6 @@ class DAMetaNode : DAContainer
                             processPlaceholderNode(node)
                             if let name = node["name"] as? NSString as? String
                             {
-                                //print("ADD PLACEHOLDER \(name)")
                                 placeholder = placeholders[name]!
                             }
                         default:
@@ -850,7 +849,6 @@ class DAMetaNode : DAContainer
             {
                 if let name = node["name"] as? NSString as? String
                 {
-                    print("ADD PLACEHOLDER \(name)")
                     placeholders[name] = CGRect(x: position[0] - size[0]/2.0, y: position[1] - size[1]/2.0, width: size[0], height: size[1])
                     
                     if(name.rangeOfString("modal", options: [], range: nil, locale: nil) != nil)
