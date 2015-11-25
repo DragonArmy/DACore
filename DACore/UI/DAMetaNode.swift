@@ -430,6 +430,27 @@ class DAMetaNode : DAContainer
         }
     }
     
+    func finalizeImages()
+    {
+        var final_count = 0
+        for(var i = 0; i < DAMetaNode.ASYNCH_SPRITES.count; i++)
+        {
+            let asynch_sprite = DAMetaNode.ASYNCH_SPRITES[i]
+            if let meta_node = asynch_sprite.metaNode
+            {
+                if meta_node == self
+                {
+                    final_count += 1
+                    DAMetaNode.ASYNCH_SPRITES.removeAtIndex(i)
+                    i -= 1
+                    
+                    asynchProcessImage(asynch_sprite)
+                }
+            }
+        }
+        print("\(name) FINALIZED \(final_count) IMAGES")
+    }
+    
     func asynchProcessImage(asynch_sprite:AsynchSprite)
     {
 //        print("PROCESSING \(asynch_sprite.metaNode!)")
