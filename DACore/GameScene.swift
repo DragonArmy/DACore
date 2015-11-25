@@ -65,11 +65,16 @@ class GameScene: SKScene
     {
     }
     
+    var gameSceneLastUpdate = NSDate()
     override func update(currentTime: NSTimeInterval)
     {
+        gameSceneLastUpdate = NSDate()
         super.update(currentTime)
-        
-        DAMetaNode.processAsynchImages(self)
+    }
+    
+    override func didFinishUpdate()
+    {
+        DAMetaNode.processAsynchImages(gameSceneLastUpdate)
     }
     
     func printAnimationGroup(group:CAAnimationGroup, withDepth depth:Int)

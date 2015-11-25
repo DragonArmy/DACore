@@ -46,7 +46,7 @@ class DAMetaNode : DAContainer
     private static var LoadedMetadata = [String : Dictionary<String,AnyObject>]()
     
     private static let SPRITES_PER_FRAME = 25
-    private static var ASYNCH_SPRITES = [AsynchSprite]()
+    static var ASYNCH_SPRITES = [AsynchSprite]()
     
     static var deviceTag:String = "_iphone6"
     
@@ -416,18 +416,37 @@ class DAMetaNode : DAContainer
     {
         //override me if you have any custom post processing stuff to do!
     }
-    
-    static func processAsynchImages(currentScene:SKScene)
+
+    static let FRAME_BUDGET = Double(1)/Double(60)
+    static func processAsynchImages(frame_start:NSDate)
     {
-        for(var i = 0; i < min(ASYNCH_SPRITES.count, SPRITES_PER_FRAME); i++)
+        if(ASYNCH_SPRITES.count == 0)
         {
+            return
+        }
+        
+        let elapsed = NSDate().timeIntervalSinceDate(frame_start)
+
+        if(elapsed < FRAME_BUDGET)
+        {
+            print("LOAD ASYNCH IMAGE (\(ASYNCH_SPRITES.count) remaining)")
+            
             let asynch_sprite = ASYNCH_SPRITES.removeAtIndex(0)
             if let meta_node = asynch_sprite.metaNode
             {
                 meta_node.asynchProcessImage(asynch_sprite)
             }
-            
         }
+        
+//        for(var i = 0; i < min(ASYNCH_SPRITES.count, SPRITES_PER_FRAME); i++)
+//        {
+//            let asynch_sprite = ASYNCH_SPRITES.removeAtIndex(0)
+//            if let meta_node = asynch_sprite.metaNode
+//            {
+//                meta_node.asynchProcessImage(asynch_sprite)
+//            }
+//            
+//        }
     }
     
     func finalizeImages()
