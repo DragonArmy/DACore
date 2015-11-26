@@ -425,18 +425,21 @@ class DAMetaNode : DAContainer
             return
         }
         
-        let elapsed = NSDate().timeIntervalSinceDate(frame_start)
-
-        if(elapsed < FRAME_BUDGET)
+        var elapsed = NSDate().timeIntervalSinceDate(frame_start)
+        var count = 0
+        while(ASYNCH_SPRITES.count > 0 && elapsed < FRAME_BUDGET)
         {
-            print("LOAD ASYNCH IMAGE (\(ASYNCH_SPRITES.count) remaining)")
-            
+            count += 1
             let asynch_sprite = ASYNCH_SPRITES.removeAtIndex(0)
             if let meta_node = asynch_sprite.metaNode
             {
                 meta_node.asynchProcessImage(asynch_sprite)
             }
+            
+            elapsed = NSDate().timeIntervalSinceDate(frame_start)
         }
+        
+        print("LOADED \(count) ASYNCH IMAGE(S) (\(ASYNCH_SPRITES.count) remaining)")
         
 //        for(var i = 0; i < min(ASYNCH_SPRITES.count, SPRITES_PER_FRAME); i++)
 //        {
