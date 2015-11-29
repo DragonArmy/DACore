@@ -52,7 +52,6 @@ class DAProgressBar : DAContainerBase
         {
             if let fill = self.childNodeWithName("//" + short_name + "_fill")
             {
-                print("FILL SPRITE FOUND: \(fill)")
                 if let fill_sprite = fill as? SKSpriteNode
                 {
                     fill_sprite.anchorPoint = CGPoint(x:0.0, y:0.5)
