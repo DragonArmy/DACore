@@ -28,16 +28,78 @@ class AsynchSprite
 
 class DATextureCache
 {
+    private static var textureAliases = [String:String]()
     private static var cache = [String:SKTexture]()
     
-    static func get(texture_name:String) -> SKTexture
+    static func get(var texture_name:String) -> SKTexture
     {
+        if(texture_name.indexOf(".png") == -1)
+        {
+            texture_name = "\(texture_name).png"
+        }
+        
+        if(textureAliases.keys.contains(texture_name))
+        {
+            texture_name = textureAliases[texture_name]!
+        }
+        
         if(!cache.keys.contains(texture_name))
         {
-            cache[texture_name] = SKTexture(imageNamed:texture_name)
+            let texture = SKTexture(imageNamed:texture_name)
+            cache[texture_name] = texture
+            return texture
         }
-    
         return cache[texture_name]!
+    }
+    
+    
+    static func loadAliases(atlas_name:String)
+    {
+        let count_before = textureAliases.keys.count
+        if let url = NSBundle.mainBundle().URLForResource(atlas_name, withExtension: "plist")
+        {
+            let data = NSDictionary(contentsOfURL: url)
+            
+            if let images = data?.valueForKey("images") as? NSArray
+            {
+                for image_any in images
+                {
+                    if let image = image_any as? NSDictionary
+                    {
+                        if let subimages = image.valueForKey("subimages") as? NSArray
+                        {
+                            for sub_any in subimages
+                            {
+                                if let sub = sub_any as? NSDictionary
+                                {
+                                    let aliases = sub.valueForKey("aliases") as! NSArray as! [String]
+                                    if(aliases.count > 0)
+                                    {
+                                        let main_image = sub.valueForKey("name") as! NSString as String
+                                        
+                                        for alias in aliases
+                                        {
+                                            if(textureAliases.keys.contains(alias))
+                                            {
+                                                fatalError("already aliased \(alias) to \(textureAliases[alias]!)")
+                                            }
+                                            
+                                            textureAliases[alias] = main_image
+//                                            print("\(alias) -> \(main_image)")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }else{
+            print("COULD NOT FIND \(atlas_name)")
+        }
+        
+        let count_after = textureAliases.keys.count
+        print("SUCCESSFULLY ALIASED \(count_after-count_before) TEXTURES")
     }
 }
 
@@ -45,9 +107,7 @@ class DAMetaNode : DAContainer
 {
     private static var LoadedMetadata = [String : Dictionary<String,AnyObject>]()
     
-    private static let SPRITES_PER_FRAME = 25
     static var ASYNCH_SPRITES = [AsynchSprite]()
-    
     static var deviceTag:String = "_iphone6"
     
     private var fileRoot:String
@@ -61,7 +121,7 @@ class DAMetaNode : DAContainer
     var labels          = [String:SKLabelNode]()
     var paragraphs      = [String:DAParagraphNode]()
     
-
+    var ASYNCH_ENABLED = true
     
     static func setup(device_tag:String)
     {
@@ -365,7 +425,7 @@ class DAMetaNode : DAContainer
                     {
                         got_one = true
                         
-                        let node_child = processContainerNode(node, withAsynch: asynch)
+                        let node_child = processContainerNode(node, withAsynch: asynch, useTextureCache: use_texture_cache)
                         (node_child as! DAResetNode).resetPosition = nil
 
                         var offset_x:CGFloat = 0
@@ -419,7 +479,7 @@ class DAMetaNode : DAContainer
         //override me if you have any custom post processing stuff to do!
     }
 
-    static let FRAME_BUDGET = Double(1)/Double(60)
+    static let FRAME_BUDGET = Double(1.0/60.0)
     static func processAsynchImages(frame_start:NSDate)
     {
         if(ASYNCH_SPRITES.count == 0)
@@ -441,17 +501,10 @@ class DAMetaNode : DAContainer
             elapsed = NSDate().timeIntervalSinceDate(frame_start)
         }
         
-        print("LOADED \(count) ASYNCH IMAGE(S) (\(ASYNCH_SPRITES.count) remaining)")
-        
-//        for(var i = 0; i < min(ASYNCH_SPRITES.count, SPRITES_PER_FRAME); i++)
-//        {
-//            let asynch_sprite = ASYNCH_SPRITES.removeAtIndex(0)
-//            if let meta_node = asynch_sprite.metaNode
-//            {
-//                meta_node.asynchProcessImage(asynch_sprite)
-//            }
-//            
-//        }
+        if(count > 0)
+        {
+            print("LOADED \(count) ASYNCH IMAGE(S) (\(ASYNCH_SPRITES.count) remaining)")
+        }
     }
     
     func finalizeImages()
@@ -587,7 +640,7 @@ class DAMetaNode : DAContainer
                 //I HAVE ABANDONED MY CHILD
             }else{
                 
-                let node_children = processChildren(children, withAsynch:asynch)
+                let node_children = processChildren(children, withAsynch: asynch, useTextureCache: use_texture_cache)
                 for node_child in node_children
                 {
                         container?.addChild(node_child)
@@ -824,7 +877,7 @@ class DAMetaNode : DAContainer
     
     func processImageNode(node:Dictionary<String, AnyObject>, withAsynch asynch:Bool, useTextureCache use_texture_cache:Bool=false) -> SKNode
     {
-        if(asynch)
+        if(asynch && ASYNCH_ENABLED)
         {
             let placeholder = SKNode()
             if let image_name = node["name"] as? NSString as? String
