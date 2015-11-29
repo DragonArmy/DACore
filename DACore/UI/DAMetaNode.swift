@@ -172,7 +172,7 @@ class DAMetaNode : DAContainer
         super.init()
         
         name = file_root
-        print("LOADING \(file_root) -------------------")
+        
         if(file_root == "")
         {
             return
@@ -182,6 +182,8 @@ class DAMetaNode : DAContainer
         {
             processMetadata(DAMetaNode.LoadedMetadata[file_root]!, withAsynchSprites: asynch_sprites, useTextureCache: use_texture_cache)
         }else{
+            print("LOADING \(file_root) -------------------")
+            
             //synchronously load metadata if we initialize a MetaNode
             //print("SYNCHRONOUS LOAD: \(file_root)")
 
@@ -470,7 +472,11 @@ class DAMetaNode : DAContainer
                 }
             }
         }
-        print("\(name) FINALIZED \(final_count) IMAGES")
+        
+        if(final_count > 0)
+        {
+            print("\(name) FINALIZED \(final_count) IMAGES")
+        }
     }
     
     func asynchProcessImage(asynch_sprite:AsynchSprite)

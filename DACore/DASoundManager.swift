@@ -105,8 +105,8 @@ public class DASoundManager
             
             if(MUSIC_ENABLED)
             {
-                print("MUSIC ENABLED -- PLAY")
-                player.play()    
+//                print("MUSIC ENABLED -- PLAY")
+                player.play()
             }
             
         } else {
@@ -169,7 +169,7 @@ public class DASoundManager
             return
         }
         
-        print("PLAY SOUND \(filename)");
+//        print("PLAY SOUND \(filename)");
         
         let url = NSBundle.mainBundle().URLForResource(filename, withExtension: nil)
         if (url == nil)
