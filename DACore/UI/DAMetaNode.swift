@@ -52,6 +52,11 @@ class DATextureCache
         return cache[texture_name]!
     }
     
+    static func loadAtlas(atlas_name:String) -> SKTextureAtlas
+    {
+        DATextureCache.loadAliases(atlas_name)
+        return SKTextureAtlas(named: atlas_name)
+    }
     
     static func loadAliases(atlas_name:String)
     {
