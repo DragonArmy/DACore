@@ -21,6 +21,7 @@ class DATabButton : DAContainerBase
 {
     let stateWillChange = Signal<DATabButton>()
     let stateDidChange = Signal<DATabButton>()
+    let signalTabClicked = Signal<DATabButton>()
     
     var states = Set<String>()
     var content:[SKNode] = [] //a cache of all our starting children
@@ -147,8 +148,10 @@ class DATabButton : DAContainerBase
     func handleButtonClick(button:DAButtonBase)
     {
         let next_state = nextStateInCycle
-        if(_currentState != next_state)
+        if(_currentState == next_state)
         {
+            signalTabClicked.fire(self)
+        }else{
             stateWillChange.fire(self)
             
             currentState = next_state
