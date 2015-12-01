@@ -15,7 +15,7 @@ class DAResetNode : SKNode
     
     var resetPosition : CGPoint?
     
-    func reset()
+    func reset(recursive:Bool=true)
     {
         if let reset = resetPosition
         {
@@ -32,11 +32,19 @@ class DAResetNode : SKNode
 //            print("NO RESET FOUND FOR \(name)")
         }
         
+        if(recursive)
+        {
+            resetChildren(recursive)
+        }
+    }
+    
+    func resetChildren(recursive:Bool=false)
+    {
         for child in children
         {
             if let resettable = child as? DAResetNode
             {
-                resettable.reset()
+                resettable.reset(recursive)
             }
         }
     }

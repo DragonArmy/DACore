@@ -81,7 +81,7 @@ class FlumpNode : DAMetaNode
         isLooping = false
         stop()
         
-        reset()
+        resetChildren(false)
         
         //if we don't have a restPose, our "reset()" state is our rest pose
         if(restPose == nil)
