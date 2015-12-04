@@ -8,12 +8,22 @@
 
 import SpriteKit
 
+enum DAProgressBarType : Int
+{
+    case SCALE
+    case SLIDE
+}
+
+
 class DAProgressBar : DAContainerBase
 {
-    var progressSprite:SKSpriteNode? = nil
+    private var progressSprite:SKSpriteNode? = nil
     
+    var progressBarType:DAProgressBarType = .SCALE
     
     private var _progress:Float = 1.0
+    private var _progressX:CGFloat = 0
+    
     var progress:Float
     {
         get
@@ -22,6 +32,7 @@ class DAProgressBar : DAContainerBase
         }
         set(value)
         {
+            print("[PROGRESS] VALUE=\(value)")
             if(value == _progress)
             {
                 return
@@ -32,8 +43,16 @@ class DAProgressBar : DAContainerBase
                 setupProgressSprite()
             }
             
-            _progress = value
-            progressSprite?.xScale = CGFloat(value)
+            _progress = max(0,min(1,value))
+            
+            if(progressBarType == .SCALE)
+            {
+                progressSprite!.xScale = CGFloat(value)
+            }else{
+                //it seems like masked sprites maybe don't respect their anchors?
+                progressSprite!.x = _progressX - CGFloat((1-value))*progressSprite!.width
+                print("SET X TO \(progressSprite!.x)   (\(progressSprite!.width))      \(value)")
+            }
         }
     }
     
@@ -56,6 +75,7 @@ class DAProgressBar : DAContainerBase
                 {
                     fill_sprite.anchorPoint = CGPoint(x:0.0, y:0.5)
                     fill_sprite.x -= fill_sprite.width/2
+                    _progressX = fill_sprite.x
                     progressSprite = fill_sprite
                 }else{
                     print("BUT IT WASN'T A SPRITE")
