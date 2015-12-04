@@ -157,9 +157,14 @@ public class DASoundManager
     
     public static func playSound(filename:String, withDelay delay:Double)
     {
-        dispatch_after_delay(delay, block: {
+        if(delay > 0)
+        {
+            dispatch_after_delay(delay, block: {
+                playSound(filename)
+            })
+        }else{
             playSound(filename)
-        })
+        }
     }
     
     public static func playSound(filename: String)
@@ -178,20 +183,30 @@ public class DASoundManager
             return
         }
         
-        var error: NSError? = nil
-        do {
-            soundPlayers[filename] = try AVAudioPlayer(contentsOfURL: url!)
-        } catch let error1 as NSError {
-            error = error1
-            soundPlayers[filename] = nil
+        if(soundPlayers[filename] == nil)
+        {
+            var error: NSError? = nil
+            do {
+                soundPlayers[filename] = try AVAudioPlayer(contentsOfURL: url!)
+            } catch let error1 as NSError {
+                error = error1
+                soundPlayers[filename] = nil
+                print("Could not create sfx player: \(error!)")
+            }
         }
+        
         if let player = soundPlayers[filename]
         {
-            player.numberOfLoops = 0
-            player.prepareToPlay()
-            player.play()
+            if(player.playing)
+            {
+                player.currentTime = 0
+            }else{
+                player.numberOfLoops = 0
+                player.prepareToPlay()
+                player.play()
+            }
         } else {
-            print("Could not create sfx player: \(error!)")
+            print("UNABLE TO PLAY SOUND \(filename)")
         }
     }
 }
