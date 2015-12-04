@@ -32,7 +32,7 @@ class DAProgressBar : DAContainerBase
         }
         set(value)
         {
-            print("[PROGRESS] VALUE=\(value)")
+//            print("[PROGRESS] VALUE=\(value)")
             if(value == _progress)
             {
                 return
