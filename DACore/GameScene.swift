@@ -12,6 +12,9 @@ import GLKit
 
 class GameScene: SKScene
 {
+    let onFinishUpdate = Signal<NSDate>()
+    
+    
     var spriteKitRoot = SKNode()
     var metaNode:DAMetaNode
     
@@ -59,6 +62,8 @@ class GameScene: SKScene
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
         scaleMode = SKSceneScaleMode.AspectFit
         
+        
+        onFinishUpdate.listen(self, callback:DAMetaNode.processAsynchImages)
     }
     
     override func willMoveFromView(view: SKView)
@@ -74,7 +79,7 @@ class GameScene: SKScene
     
     override func didFinishUpdate()
     {
-        DAMetaNode.processAsynchImages(gameSceneLastUpdate)
+        onFinishUpdate.fire(gameSceneLastUpdate)
     }
     
     func printAnimationGroup(group:CAAnimationGroup, withDepth depth:Int)
