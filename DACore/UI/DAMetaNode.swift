@@ -113,7 +113,25 @@ class DAMetaNode : DAContainer
     private static var LoadedMetadata = [String : Dictionary<String,AnyObject>]()
     
     static var ASYNCH_SPRITES = [AsynchSprite]()
-    static var deviceTag:String = "_iphone6"
+    
+    private static var _deviceTag:String = "NOT SET"
+    private static let NOT_SET = "NOT SET"
+    static var deviceTag:String
+    {
+        get
+        {
+            if(_deviceTag == NOT_SET)
+            {
+                print("[WARNING] CALLS TO deviceTag WHILE VALUE IS NOT SET")
+            }
+            return _deviceTag
+        }
+        set(value)
+        {
+            _deviceTag = value
+        }
+    }
+
     
     private var fileRoot:String
     private var rootContainer:String?
