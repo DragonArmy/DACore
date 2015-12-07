@@ -179,12 +179,14 @@ class FlumpNode : DAMetaNode
                         continue
                     }
                     
-                    let key = "\(movie.name)::\(layer.name)"
-                    if(!FlumpNode.animationCache.keys.contains(key))
-                    {
-                        FlumpNode.animationCache[key] = layer.getAction()
-                    }
-                    let animation = FlumpNode.animationCache[key]!
+//                    let key = "\(movie.name)::\(layer.name)"
+//                    if(!FlumpNode.animationCache.keys.contains(key))
+//                    {
+//                        FlumpNode.animationCache[key] = layer.getAction()
+//                    }
+//                    let animation = FlumpNode.animationCache[key]!
+                    
+                    let animation = layer.getAction()
                     
                     if(isLooping)
                     {
