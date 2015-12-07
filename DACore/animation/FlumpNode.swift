@@ -153,6 +153,7 @@ class FlumpNode : DAMetaNode
         return self
     }
     
+    private static var animationCache = [String:SKAction]()
     private func doPlay(movie_name:String, withLoop is_looping:Bool)
     {
         //will stop & reset & go to first frame
@@ -178,7 +179,12 @@ class FlumpNode : DAMetaNode
                         continue
                     }
                     
-                    let animation = layer.getAction()
+                    let key = "\(movie.name)::\(layer.name)"
+                    if(!FlumpNode.animationCache.keys.contains(key))
+                    {
+                        FlumpNode.animationCache[key] = layer.getAction()
+                    }
+                    let animation = FlumpNode.animationCache[key]!
                     
                     if(isLooping)
                     {
