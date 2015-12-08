@@ -35,13 +35,14 @@ class FlumpNode : DAMetaNode
     {
         super.init(file_root:file_root, fromContainer:container_name, resolutionIndependent:omit_device_tag, asynchSprites:with_asynch, useTextureCache:use_texture_cache)
         
-        if(rest_pose != nil)
+        
+        if let rest = rest_pose
         {
-            if(Flump.LoadedMovies.keys.contains(rest_pose!))
+            if(Flump.LoadedMovies.keys.contains(rest))
             {
-                restPose = Flump.LoadedMovies[rest_pose!]
+                restPose = Flump.LoadedMovies[rest]
             }else{
-                print("UNABLE TO FIND REST POSE \(rest_pose!)")
+                print("UNABLE TO FIND REST POSE \(rest)")
                 for key in Flump.LoadedMovies.keys
                 {
                     print("         -> \(key)")
