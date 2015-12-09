@@ -17,6 +17,11 @@ class DAButtonBase : DAContainerBase
     
     var buttonSound:String?
     
+    var blocksTouches = true
+    //how far is your touch allowed to wander before we assume you're touching something behind?
+    var wanderAmount:CGFloat = 40.0
+    var initialTouchPos = CGPoint.zero
+    
     //SIGNALS
     let onButtonDown = Signal<DAButtonBase>()
     let onButtonUp = Signal<DAButtonBase>()
@@ -24,6 +29,7 @@ class DAButtonBase : DAContainerBase
 
     var isButtonDown:Bool = false
     var isTouching:Bool = false
+    var lastTouch:NSTimeInterval = 0
     
     var touchRect:CGRect?
     var enabled = true
@@ -85,6 +91,36 @@ class DAButtonBase : DAContainerBase
             return
         }
         
+        
+        /********** TOUCH FORWARDING **********/
+        if(!blocksTouches)
+        {
+            let touch = touches.first!
+            if(touch.timestamp > lastTouch)
+            {
+                lastTouch = touch.timestamp
+                let touch_pos = touch.locationInNode(scene!)
+                initialTouchPos = touch_pos
+
+                let hit_nodes = scene!.nodesAtPoint(touch_pos)
+                for node in hit_nodes
+                {
+                    if(node == self)
+                    {
+                        continue
+                    }
+                    
+                    if(node.userInteractionEnabled)
+                    {
+                        node.touchesBegan(touches, withEvent: event)
+                    }
+                }
+            }
+        }
+        /********** END TOUCH FORWARDING **********/
+        
+        
+        
         let press_time = NSDate()
         if(press_time.timeIntervalSinceDate(lastPress) < cooldown)
         {
@@ -105,24 +141,58 @@ class DAButtonBase : DAContainerBase
         
         if let sfx = buttonSound
         {
-//            print("PLAYING SOUND \(sfx)")
-            DASoundManager.playSound(sfx);
+            //on passthrough buttons, play the SFX on button release so we don't get false clicks
+            if(blocksTouches)
+            {
+                DASoundManager.playSound(sfx);
+            }
         }
     }
     
     
     override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
-        if(!isTouching)
-        {
-            return
-        }
-        
         if(scene == nil)
         {
             return
         }
         
+        /********** TOUCH FORWARDING **********/
+        if(!blocksTouches)
+        {
+            let touch = touches.first!
+            if(touch.timestamp > lastTouch)
+            {
+                lastTouch = touch.timestamp
+                let touch_pos = touch.locationInNode(scene!)
+                
+                if((touch_pos - initialTouchPos).magnitude() > wanderAmount)
+                {
+                    isTouching = false
+                    isButtonDown = false
+                }
+                
+                let hit_nodes = scene!.nodesAtPoint(touch_pos)
+                for node in hit_nodes
+                {
+                    if(node == self)
+                    {
+                        continue
+                    }
+                    
+                    if(node.userInteractionEnabled)
+                    {
+                        node.touchesMoved(touches, withEvent: event)
+                    }
+                }
+            }
+        }
+        /********** END TOUCH FORWARDING **********/
+        
+        if(!isTouching)
+        {
+            return
+        }
         
         if let touch = touches.first
         {
@@ -143,12 +213,39 @@ class DAButtonBase : DAContainerBase
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
-        if(!isTouching)
+        if(scene == nil)
         {
             return
         }
         
-        if(scene == nil)
+        /********** TOUCH FORWARDING **********/
+        if(!blocksTouches)
+        {
+            let touch = touches.first!
+            if(touch.timestamp > lastTouch)
+            {
+                lastTouch = touch.timestamp
+                let touch_pos = touch.locationInNode(scene!)
+                let touch_view = touch.locationInView(scene!.view)
+                print("POSITION IN SCENE: \(touch_pos)        VIEW: \(touch_view)")
+                let hit_nodes = scene!.nodesAtPoint(touch_pos)
+                for node in hit_nodes
+                {
+                    if(node == self)
+                    {
+                        continue
+                    }
+                    
+                    if(node.userInteractionEnabled)
+                    {
+                        node.touchesEnded(touches, withEvent: event)
+                    }
+                }
+            }
+        }
+        /********** END TOUCH FORWARDING **********/
+        
+        if(!isTouching)
         {
             return
         }
@@ -178,6 +275,15 @@ class DAButtonBase : DAContainerBase
                 lastPress = NSDate()
                 onButtonUp.fire(self)
                 onButtonClick.fire(self)
+            }
+            
+            if let sfx = buttonSound
+            {
+                //on passthrough buttons, play the SFX on button release so we don't get false clicks
+                if(!blocksTouches)
+                {
+                    DASoundManager.playSound(sfx);
+                }
             }
         }
     }
