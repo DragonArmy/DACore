@@ -979,7 +979,7 @@ class DAMetaNode : DAContainer
                     if(name.rangeOfString("modal", options: [], range: nil, locale: nil) != nil)
                     {
                         let modal = SKSpriteNode(color: "#230211".toColor(), size: placeholders[name]!.size)
-                        modal.alpha = 0.5
+                        modal.alpha = 0.7
                         modal.name = "modal"
                         modal.position = placeholders[name]!.center
                         return modal
