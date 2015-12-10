@@ -13,6 +13,8 @@ class FlumpNode : DAMetaNode
     let onTouchesBegan = Signal<UITouch>()
     let onTouchesEnded = Signal<UITouch>()
     
+    let onLoop = Signal<String>()
+    
     var currentMovie = "NONE"
     var restPose:FlumpMovie? = nil
     var isLooping = true
@@ -195,6 +197,7 @@ class FlumpNode : DAMetaNode
                         let loop = SKAction.sequence([animation,reset])
                         
                         child.runAction(loop, completion: {
+                            self.onLoop.fire(movie_name)
                             self.doPlay(movie_name, withLoop:true)
                         })
                         
