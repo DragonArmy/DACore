@@ -11,6 +11,7 @@ import SpriteKit
 class DAButtonBase : DAContainerBase
 {
     static var TOUCH_EXPANSION:CGFloat = 10
+    static var DEFAULT_TOUCH_COOLDOWN:Double = 0.0
     
     //THIS SHOULD BE SET IN YOUR GAMECONTROLLER BEFORE ANY BUTTONS ARE CREATED
     static var DEFAULT_BUTTON_SOUND:String?
@@ -44,6 +45,7 @@ class DAButtonBase : DAContainerBase
         userInteractionEnabled = true
         
         buttonSound = DAButtonBase.DEFAULT_BUTTON_SOUND
+        cooldown = DAButtonBase.DEFAULT_TOUCH_COOLDOWN
     }
     
     required init(coder: NSCoder)
