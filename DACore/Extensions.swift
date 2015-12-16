@@ -45,6 +45,22 @@ public extension CGPoint
     }
 }
 
+public extension CGVector
+{
+    func magnitude() -> CGFloat
+    {
+        return hypot(dx, dy)
+    }
+    
+    func clamp(target_magnitude:CGFloat) -> CGPoint
+    {
+        let current_magnitude = magnitude()
+        let scale_factor = target_magnitude / current_magnitude
+        
+        return CGPointMake(dx*scale_factor, dy*scale_factor)
+    }
+}
+
 public extension CGRect
 {
     var center:CGPoint
@@ -54,16 +70,32 @@ public extension CGRect
 }
 
 // CGPoint addition, which I do all the frickin time
-public func + (left: CGPoint, right: CGPoint) -> CGPoint {
+public func + (left: CGPoint, right: CGPoint) -> CGPoint
+{
     return CGPoint(x: left.x + right.x, y: left.y + right.y)
 }
 
-public func - (left: CGPoint, right: CGPoint) -> CGPoint {
+public func - (left: CGPoint, right: CGPoint) -> CGPoint
+{
     return CGPoint(x: left.x - right.x, y: left.y - right.y)
 }
 
-public func += (inout left: CGPoint, right: CGPoint) {
+public func += (inout left: CGPoint, right: CGPoint)
+{
     left = left + right
+}
+
+public func * (left:CGPoint, right:CGFloat) -> CGPoint
+{
+    return CGPoint(x:left.x*right, y:left.y*right)
+}
+public func * (left:CGFloat, right:CGPoint) -> CGPoint
+{
+    return right*left
+}
+public func *= (inout left: CGPoint, right: CGFloat)
+{
+    left = left*right
 }
 
 //hashable XY coordinate
