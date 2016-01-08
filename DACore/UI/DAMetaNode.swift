@@ -108,6 +108,26 @@ class DATextureCache
     }
 }
 
+class DAFont
+{
+    private static var aliases = [String:String]()
+    
+    static func getFont(font:String) -> String
+    {
+        if(aliases.keys.contains(font))
+        {
+            return aliases[font]!
+        }else{
+            return font
+        }
+    }
+    
+    static func aliasFont(metaFont:String, installedFont:String)
+    {
+        aliases[metaFont] = installedFont
+    }
+}
+
 class DAMetaNode : DAContainer
 {
     private static var LoadedMetadata = [String : Dictionary<String,AnyObject>]()
@@ -149,6 +169,16 @@ class DAMetaNode : DAContainer
     static func setup(device_tag:String)
     {
         DAMetaNode.deviceTag = device_tag
+        
+        
+        let available_fonts = UIFont.familyNames()
+        for(var i:Int = 0; i < available_fonts.count; i++)
+        {
+            let font_family = available_fonts[i]
+            let font_names = UIFont.fontNamesForFamilyName(font_family)
+
+            print("\(font_family): \(font_names)")
+        }
     }
     
     // tuple of (String,bool) is for file_root and whether it's resolutionIndependent or not
@@ -817,7 +847,7 @@ class DAMetaNode : DAContainer
         paragraph.fontColor = label!.fontColor!
         paragraph.horizontalAlignmentMode = label!.horizontalAlignmentMode
         paragraph.fontSize = label!.fontSize
-        paragraph.fontName = label!.fontName!
+        paragraph.fontName = DAFont.getFont(label!.fontName!)
         paragraph.text = label!.text!
         
         paragraph.paragraphWidth = placeholder!.width
@@ -847,7 +877,7 @@ class DAMetaNode : DAContainer
         
         if let font = node["font"] as? NSString as? String
         {
-            let label = SKLabelNode(fontNamed: font)
+            let label = SKLabelNode(fontNamed: DAFont.getFont(font))
             
             label.verticalAlignmentMode = SKLabelVerticalAlignmentMode.Center
             
@@ -886,7 +916,7 @@ class DAMetaNode : DAContainer
                 }else if(align == "right"){
                     label.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Right
                 }else{
-                    print("[MetaNode] -- INVALID LABEL ORIENTATION ON LABEL \(label.name)")
+                    print("[MetaNode] -- INVALID LABEL ORIENTATION ON LABEL \(label.name) -- \(align)")
                 }
             }
             
