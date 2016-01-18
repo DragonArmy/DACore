@@ -958,7 +958,7 @@ class DAMetaNode : DAContainer
                 image = SKSpriteNode(imageNamed:image_name)
             }
             
-            image.name = node["name"] as? NSString as? String
+            image.name = image_name
             
             if let position = node["position"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
