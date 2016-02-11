@@ -8,7 +8,7 @@
 //
 
 import UIKit
-import SpriteKit
+
 
 
 extension UIApplication
@@ -29,74 +29,7 @@ public func arc4random <T: IntegerLiteralConvertible> (type: T.Type) -> T {
     return r
 }
 
-public extension CGPoint
-{
-    func magnitude() -> CGFloat
-    {
-        return hypot(x, y)
-    }
-    
-    func clamp(target_magnitude:CGFloat) -> CGPoint
-    {
-        let current_magnitude = magnitude()
-        let scale_factor = target_magnitude / current_magnitude
-        
-        return CGPointMake(x*scale_factor, y*scale_factor)
-    }
-}
 
-public extension CGVector
-{
-    func magnitude() -> CGFloat
-    {
-        return hypot(dx, dy)
-    }
-    
-    func clamp(target_magnitude:CGFloat) -> CGPoint
-    {
-        let current_magnitude = magnitude()
-        let scale_factor = target_magnitude / current_magnitude
-        
-        return CGPointMake(dx*scale_factor, dy*scale_factor)
-    }
-}
-
-public extension CGRect
-{
-    var center:CGPoint
-    {
-            return CGPointMake(CGRectGetMidX(self), CGRectGetMidY(self))
-    }
-}
-
-// CGPoint addition, which I do all the frickin time
-public func + (left: CGPoint, right: CGPoint) -> CGPoint
-{
-    return CGPoint(x: left.x + right.x, y: left.y + right.y)
-}
-
-public func - (left: CGPoint, right: CGPoint) -> CGPoint
-{
-    return CGPoint(x: left.x - right.x, y: left.y - right.y)
-}
-
-public func += (inout left: CGPoint, right: CGPoint)
-{
-    left = left + right
-}
-
-public func * (left:CGPoint, right:CGFloat) -> CGPoint
-{
-    return CGPoint(x:left.x*right, y:left.y*right)
-}
-public func * (left:CGFloat, right:CGPoint) -> CGPoint
-{
-    return right*left
-}
-public func *= (inout left: CGPoint, right: CGFloat)
-{
-    left = left*right
-}
 
 //hashable XY coordinate
 struct XY : Hashable, Equatable, CustomStringConvertible
@@ -293,9 +226,9 @@ extension String {
         return self.stringByReplacingOccurrencesOfString(target, withString: replacement, options: NSStringCompareOptions.LiteralSearch, range: nil)
     }
     
-    func toColor() -> SKColor
+    func toUIColor() -> UIColor
     {
-        return SKColor(rgba: self)
+        return UIColor(rgba:self)
     }
     
     subscript (i: Int) -> Character {
@@ -355,159 +288,75 @@ extension Array {
     }
 }
 
-extension SKNode
+public extension CGPoint
 {
-    func indexInParent() -> Int?
+    func magnitude() -> CGFloat
     {
-        if(parent == nil)
-        {
-            return nil
-        }
+        return hypot(x, y)
+    }
+    
+    func clamp(target_magnitude:CGFloat) -> CGPoint
+    {
+        let current_magnitude = magnitude()
+        let scale_factor = target_magnitude / current_magnitude
         
-        return parent!.children.indexOf(self)
+        return CGPointMake(x*scale_factor, y*scale_factor)
     }
-    
-    func transferInPlace(new_parent:SKNode)
-    {
-        if(parent == nil)
-        {
-            print("[ERROR] -- can't convert coordinate spaces if I'm not in the display tree!")
-        }
-        
-        position = new_parent.convertPoint(position, fromNode: parent!)
-        removeFromParent()
-        new_parent.addChild(self)
-    }
-    
-    func moveToBack()
-    {
-        if let actual_parent = parent
-        {
-            removeFromParent()
-            actual_parent.insertChild(self, atIndex: 0)
-        }else{
-            print("[ERROR] Cannot call moveToBack on a node with no parent!")
-            fatalError("Cannot call moveToBack on a node with no parent!")
-        }
-    }
-    
-    func moveToFront()
-    {
-        if let actual_parent = parent
-        {
-            removeFromParent()
-            actual_parent.addChild(self)
-        }else{
-            print("[ERROR] Cannot call moveToFront on a node with no parent!")            
-            fatalError("Cannot call moveToFront on a node with no parent!")
-        }
-    }
-    
-    var x : CGFloat
-    {
-        get
-        {
-            return position.x
-        }
-        
-        set(value)
-        {
-            position = CGPointMake(value, position.y)
-        }
-    }
-    
-    var y : CGFloat
-    {
-        get
-        {
-           return position.y
-        }
-        
-        set(value)
-        {
-            position = CGPointMake(position.x, value)
-        }
-    }
-    
-    var width : CGFloat
-    {
-        get
-        {
-            return calculateAccumulatedFrame().width
-        }
-        
-        set(value)
-        {
-            let base_width = calculateAccumulatedFrame().width / xScale
-            xScale = value / base_width
-        }
-    }
-    
-    var height : CGFloat
-    {
-        get
-        {
-            return calculateAccumulatedFrame().height
-        }
-        
-        set(value)
-        {
-            let base_height = calculateAccumulatedFrame().height / yScale
-            yScale = value / base_height
-        }
-    }
-    
-    var scale : CGFloat
-    {
-        get
-        {
-            return xScale
-        }
-    }
-    
-    var globalScale : CGFloat
-    {
-        var working_scale = self.scale
-        var current_parent = self.parent
-        
-        print("STARTING WITH SCALE \(self.scale)    -   \(self.name)")
-        
-        while(current_parent != nil)
-        {
-            print("MULTIPLY BY \(current_parent!.scale)")
-            working_scale = working_scale * current_parent!.scale
-            current_parent = current_parent!.parent
-        }
-        return working_scale
-    }
-    
 }
 
-extension SKSpriteNode
+public extension CGVector
 {
-    var anchorX : CGFloat
+    func magnitude() -> CGFloat
     {
-        get
-        {
-            return anchorPoint.x
-        }
-        
-        set(value)
-        {
-            anchorPoint = CGPointMake(value, anchorPoint.y)
-        }
+        return hypot(dx, dy)
     }
     
-    var anchorY : CGFloat
+    func clamp(target_magnitude:CGFloat) -> CGPoint
     {
-        get
-        {
-            return anchorPoint.y
-        }
+        let current_magnitude = magnitude()
+        let scale_factor = target_magnitude / current_magnitude
         
-        set(value)
-        {
-            anchorPoint = CGPointMake(anchorPoint.x, value)
-        }
+        return CGPointMake(dx*scale_factor, dy*scale_factor)
     }
 }
+
+public extension CGRect
+{
+    var center:CGPoint
+        {
+            return CGPointMake(CGRectGetMidX(self), CGRectGetMidY(self))
+    }
+}
+
+// CGPoint addition, which I do all the frickin time
+public func + (left: CGPoint, right: CGPoint) -> CGPoint
+{
+    return CGPoint(x: left.x + right.x, y: left.y + right.y)
+}
+
+public func - (left: CGPoint, right: CGPoint) -> CGPoint
+{
+    return CGPoint(x: left.x - right.x, y: left.y - right.y)
+}
+
+public func += (inout left: CGPoint, right: CGPoint)
+{
+    left = left + right
+}
+
+public func * (left:CGPoint, right:CGFloat) -> CGPoint
+{
+    return CGPoint(x:left.x*right, y:left.y*right)
+}
+public func * (left:CGFloat, right:CGPoint) -> CGPoint
+{
+    return right*left
+}
+public func *= (inout left: CGPoint, right: CGFloat)
+{
+    left = left*right
+}
+
+
+
+

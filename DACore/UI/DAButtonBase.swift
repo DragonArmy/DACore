@@ -146,7 +146,8 @@ class DAButtonBase : DAContainerBase
             //on passthrough buttons, play the SFX on button release so we don't get false clicks
             if(blocksTouches)
             {
-                DASoundManager.playSound(sfx);
+                print("PLAY BUTTON SOUND \(sfx)")
+                DASoundManager.playSound(sfx)
             }
         }
     }
@@ -284,7 +285,8 @@ class DAButtonBase : DAContainerBase
                 //on passthrough buttons, play the SFX on button release so we don't get false clicks
                 if(!blocksTouches)
                 {
-                    DASoundManager.playSound(sfx);
+                    print("PLAY BUTTON SOUND \(sfx)")
+                    DASoundManager.playSound(sfx)
                 }
             }
         }
