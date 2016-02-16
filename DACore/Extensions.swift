@@ -1,6 +1,6 @@
 //
 //  Extensions.swift
-//  
+//
 //  Extensions to base classes to make our code a little more portable to other languages such as AS3 or C#
 //
 //  Created by Will Hankinson on 1/28/15.
@@ -21,8 +21,8 @@ extension UIApplication
 
 
 /**
-Arc Random for Double and Float
-*/
+ Arc Random for Double and Float
+ */
 public func arc4random <T: IntegerLiteralConvertible> (type: T.Type) -> T {
     var r: T = 0
     arc4random_buf(&r, Int(sizeof(T)))
@@ -140,20 +140,20 @@ public extension Int
     {
         let delta = upper - lower + 1;
         let random_value = Int(arc4random_uniform(UInt32(delta)))
-//        print(lower)
-//        print(random_value)
+        //        print(lower)
+        //        print(random_value)
         return (lower + random_value)
     }
     
 }
 public extension Double {
     /**
-    Create a random num Double
-    - parameter lower: number Double
-    - parameter upper: number Double
-    :return: random number Double
-    By DaRkDOG
-    */
+     Create a random num Double
+     - parameter lower: number Double
+     - parameter upper: number Double
+     :return: random number Double
+     By DaRkDOG
+     */
     public static func random(lower lower: Double, upper: Double) -> Double {
         let r = Double(arc4random(UInt64)) / Double(UInt64.max)
         return (r * (upper - lower)) + lower
@@ -161,12 +161,12 @@ public extension Double {
 }
 public extension Float {
     /**
-    Create a random num Float
-    - parameter lower: number Float
-    - parameter upper: number Float
-    :return: random number Float
-    By DaRkDOG
-    */
+     Create a random num Float
+     - parameter lower: number Float
+     - parameter upper: number Float
+     :return: random number Float
+     By DaRkDOG
+     */
     public static func random(lower lower: Float, upper: Float) -> Float {
         let r = Float(arc4random(UInt32)) / Float(UInt32.max)
         return (r * (upper - lower)) + lower
@@ -360,10 +360,7 @@ public func *= (inout left: CGPoint, right: CGFloat)
 
 
 
-
-
-
-/********* SPRITEKIT *************/
+/************ SPRITEKIT **************/
 extension String
 {
     func toColor() -> SKColor
