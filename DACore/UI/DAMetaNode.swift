@@ -254,7 +254,7 @@ class DAMetaNode : DAContainer
         var offset_x:CGFloat = 0
         var offset_y:CGFloat = 0
         
-        if let dacon = container as? DAContainer
+        if let dacon = container as? DAContainerBase
         {
             //print("\(node_child.name!) X/Y = \(dacon.x),\(dacon.y)     PIVOT = \(dacon.pivotX),\(dacon.pivotY)")
             offset_x = dacon.pivotX
@@ -484,7 +484,7 @@ class DAMetaNode : DAContainer
                         var offset_x:CGFloat = 0
                         var offset_y:CGFloat = 0
 
-                        if let dacon = node_child as? DAContainer
+                        if let dacon = node_child as? DAContainerBase
                         {
                             //print("\(node_child.name!) X/Y = \(dacon.x),\(dacon.y)     PIVOT = \(dacon.pivotX),\(dacon.pivotY)")
                             offset_x = dacon.pivotX
