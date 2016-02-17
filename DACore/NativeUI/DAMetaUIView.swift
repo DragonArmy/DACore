@@ -8,7 +8,7 @@
 import UIKit
 
 
-class DAMetaUIView : DAUIView
+class DAMetaUIView : DAUIContainer
 {
     private static var LoadedMetadata = [String : Dictionary<String,AnyObject>]()
     
@@ -29,13 +29,14 @@ class DAMetaUIView : DAUIView
             _deviceTag = value
         }
     }
+    static var scaleFactor:CGFloat = 1.0
     
     
     private var fileRoot:String
     private var rootContainer:String?
     
-    var rootWidth = 0
-    var rootHeight = 0
+    var rootWidth:CGFloat = 0
+    var rootHeight:CGFloat = 0
     
     var placeholders    = [String:CGRect]()
     var containers      = [String:DAUIContainer]()
@@ -44,9 +45,10 @@ class DAMetaUIView : DAUIView
     var images          = [String:DAUIImageView]()
     var labels          = [String:DAUILabel]()
      
-    static func setup(device_tag:String)
+    static func setup(device_tag:String, scale_factor:CGFloat)
     {
         DAMetaUIView.deviceTag = device_tag
+        DAMetaUIView.scaleFactor = scale_factor
         
         
         let available_fonts = UIFont.familyNames()
@@ -109,11 +111,11 @@ class DAMetaUIView : DAUIView
         }
     }
     
-    init()
+    override init()
     {
         fileRoot = ""
         rootContainer = ""
-        super.init(frame:CGRect.zero)
+        super.init()
     }
     
     init(file_root:String, fromContainer container_name:String?, resolutionIndependent omit_device_tag:Bool)
@@ -157,6 +159,9 @@ class DAMetaUIView : DAUIView
         {
             name = container_name!
         }
+        
+        //set up all our frames on all our children
+        reset(true)
     }
     
     
@@ -238,13 +243,13 @@ class DAMetaUIView : DAUIView
         return placeholders[placeholder_name]
     }
     
-    let DEBUG = false
+    let DEBUG = true
     func processMetadata(json:Dictionary<String,AnyObject>)
     {
-        //print("PROCESS METADATA    asynch=\(asynch)")
+//        print("PROCESS METADATA")
         if let root_width = json["root_width"] as? NSNumber as? Int
         {
-            rootWidth = root_width
+            rootWidth = CGFloat(root_width)*DAMetaUIView.scaleFactor
             if(DEBUG)
             {
                 print("ROOT WIDTH: \(rootWidth)")
@@ -253,12 +258,15 @@ class DAMetaUIView : DAUIView
         
         if let root_height = json["root_height"] as? NSNumber as? Int
         {
-            rootHeight = root_height
+            rootHeight = CGFloat(root_height)*DAMetaUIView.scaleFactor
             if(DEBUG)
             {
                 print("ROOT WIDTH: \(rootHeight)")
             }
         }
+        
+        resetSize = CGSize(width: rootWidth, height: rootHeight)
+        print("RESET SIZE: \(resetSize)")
         
         if let children = json["children"] as? NSArray as? [AnyObject]
         {
@@ -266,6 +274,7 @@ class DAMetaUIView : DAUIView
             {
                 let view_children = processChildren(children)
                 
+                print("ROOT HAS \(view_children.count) CHILDREN")
                 for view_child in view_children
                 {
                     addSubview(view_child)
@@ -287,11 +296,15 @@ class DAMetaUIView : DAUIView
                         let view_child = processContainerView(view)
                         view_child.resetPosition = CGPoint.zero
                         
+                        rootHeight = view_child.resetSize.height
+                        rootWidth = view_child.resetSize.width
+                        resetSize = view_child.resetSize
+                        
                         var offset_x:CGFloat = 0
                         var offset_y:CGFloat = 0
                         
-                        offset_x = view_child.pivotX
-                        offset_y = view_child.pivotY
+                        offset_x = view_child.pivot.x
+                        offset_y = view_child.pivot.y
 
                         if(DEBUG)
                         {
@@ -360,7 +373,39 @@ class DAMetaUIView : DAUIView
             }
         }
         
+        print("RETURNING \(child_views.count) CHILD VIEWS")
         return child_views
+    }
+    
+    
+    func processPosition(coords:[CGFloat], size:CGSize) -> CGPoint
+    {
+        //need to convert from y-positive, center-origin to y-negative, top-left origin
+        
+        print("PROCESS POSITION: \(coords)   SIZE: \(size)     ROOT:\(rootWidth),\(rootHeight)")
+        
+        var x = coords[0]
+        var y = coords[1]
+
+        //apply the scale factor
+        x = x * DAMetaUIView.scaleFactor
+        y = y * DAMetaUIView.scaleFactor
+        print("          \(x),\(y)       scaled by \(DAMetaUIView.scaleFactor)")
+        
+        
+        //invert the y axis and convert to origin-at-top-left
+        x = rootWidth/2 + x
+        y = rootHeight/2 - y
+        print("          \(x),\(y)")
+        
+        
+        //subtract w/2,h/2 because we're doing topleft and not center
+        x -= size.width/2
+        y -= size.height/2
+        print("          \(x),\(y)")
+        
+        
+        return CGPoint(x:x, y:y)
     }
     
     func processContainerView(view:Dictionary<String, AnyObject>) -> DAUIView
@@ -428,25 +473,23 @@ class DAMetaUIView : DAUIView
             //tab.createStates()
         }
         
-        if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
-        {
-            container!.resetPosition = CGPoint(x:position[0], y:position[1])
-        }
-        
         if let size = view["size"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
-            container!.resetSize = CGPoint(x:size[0], y:size[1])
+            container!.resetSize = CGSize(width:size[0]*DAMetaUIView.scaleFactor, height:size[1]*DAMetaUIView.scaleFactor)
         }
+        
+        if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
+        {
+            container!.resetPosition = processPosition(position, size:container!.resetSize)
+        }
+        
         
         if let pivot = view["pivot"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
-            container?.pivotX = pivot[0]
-            container?.pivotY = pivot[1]
+            container!.pivot = CGPoint(x: pivot[0]*DAMetaUIView.scaleFactor, y: pivot[1]*DAMetaUIView.scaleFactor)
         }
         
         container!.cachedMetadata = view
-        
-        print("TODO: ADJUST CONTAINER VIEW")
         
         return container!
     }
@@ -502,7 +545,7 @@ class DAMetaUIView : DAUIView
 //            
 //            if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
 //            {
-//                sprite!.position = CGPoint(x:position[0], y:position[1])
+//                sprite!.position = processPosition(position)
 //            }
             
             return sprite!
@@ -556,14 +599,14 @@ class DAMetaUIView : DAUIView
                 label.name = name
             }
             
-            if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
-            {
-                label.resetPosition = CGPoint(x:position[0], y:position[1])
-            }
-            
             if let size = view["size"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
-                label.resetSize = CGPoint(x:size[0], y:size[1])
+                label.resetSize = CGSize(width:size[0]*DAMetaUIView.scaleFactor, height:size[1]*DAMetaUIView.scaleFactor)
+            }
+
+            if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
+            {
+                label.resetPosition = processPosition(position, size:label.resetSize)
             }
             
             if let font_color_hex = view["color"] as? NSString as? String
@@ -606,13 +649,12 @@ class DAMetaUIView : DAUIView
             
             image.name = image_name
             
+            //image size is implicit -- not in the json
+            image.resetSize = image.image.image!.size*DAMetaUIView.scaleFactor
+            
             if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
-                image.resetPosition = CGPoint(x:position[0], y:position[1])
-            }
-            if let size = view["size"] as? NSArray as? [NSNumber] as? [CGFloat]
-            {
-                image.resetSize = CGPoint(x:size[0], y:size[1])
+                image.resetPosition = processPosition(position, size:image.resetSize)
             }
             
             let image_type = image_name.split("_")[0]
@@ -639,6 +681,9 @@ class DAMetaUIView : DAUIView
 //                
 //                return container
             }
+            
+            
+            images[image_name] = image
             
             return image
         }

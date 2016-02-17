@@ -12,15 +12,16 @@ class DAUIImageView : DAUIView
 {
     var image = UIImageView()
     
-    init()
+    override init()
     {
-        super.init(frame: CGRect.zero)
+        super.init()
     }
     
     init(named:String)
     {
         image = UIImageView(image: UIImage(named: named))
         super.init(frame: CGRect(origin: CGPoint.zero, size: image.image!.size))
+        addSubview(image)
     }
 
     required init?(coder aDecoder: NSCoder) {

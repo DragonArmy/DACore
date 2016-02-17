@@ -16,40 +16,53 @@ class DAUIView : UIView
 
     //set from metadata, NOT the frame
     var resetPosition = CGPoint.zero
-    var resetSize = CGPoint.zero
+    var resetSize = CGSize.zero
+    var pivot = CGPoint.zero
     
-    //not strictly an anchor value but a fixed offset for all the contents
-    private var _pivotX:CGFloat = 0;
-    var pivotX:CGFloat
+    //we want the wrapped content to have the same frame as we have...
+    override var frame:CGRect
     {
         get
         {
-            return _pivotX
+            return super.frame
         }
         set(value)
         {
-            _pivotX = value
-            print("TODO: PIVOTS")
-        }
-    }
-    private var _pivotY:CGFloat = 0
-    var pivotY:CGFloat
-    {
-        get
-        {
-            return _pivotY
-        }
-        set(value)
-        {
-            _pivotY = value
-            print("TODO: PIVOTS")
+            super.frame = value
+            for view in subviews
+            {
+                if let da = view as? DAUIView
+                {
+                    continue
+                }
+                
+                print("SETTING SUBVIEW \(view) TO FRAME \(value)")
+                view.frame = CGRect(origin: CGPoint.zero, size: value.size)
+            }
         }
     }
     
+    init()
+    {
+        super.init(frame:CGRect.zero)
+    }
+    
+    override init(frame: CGRect)
+    {
+        super.init(frame:frame)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     
     func reset(recursive:Bool=true)
     {
-        print("RESET \(name) to \(reset)")
+        print("RESET \(name) to \(resetPosition), \(resetSize)")
+        
+        self.frame = CGRect(origin: resetPosition, size: resetSize)
+        print("MY CENTER IS \(center)")
         
 //        position = reset
 //        
