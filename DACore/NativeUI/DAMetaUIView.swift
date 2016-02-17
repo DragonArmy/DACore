@@ -277,6 +277,7 @@ class DAMetaUIView : DAUIContainer
                 print("ROOT HAS \(view_children.count) CHILDREN")
                 for view_child in view_children
                 {
+                    print("ADDING CHILD \(view_child.name) -- \(view_child)")
                     addSubview(view_child)
                 }
             }else{
@@ -577,13 +578,14 @@ class DAMetaUIView : DAUIContainer
         
         if let font = view["font"] as? NSString as? String
         {
+            print("CREATING LABEL")
             let label = DAUILabel()
             
             let font_name = DAFont.getFont(font)
             var font_size:CGFloat = 14
             if let fs = view["fontSize"] as? NSNumber as? CGFloat
             {
-                font_size = fs
+                font_size = fs*DAMetaUIView.scaleFactor
             }
             
             if let font = UIFont(name: font_name, size: font_size)
@@ -634,7 +636,7 @@ class DAMetaUIView : DAUIContainer
             }
             
             labels[label.name!] = label
-            
+            print("RETURNING \(label)")
             return label
         }
         

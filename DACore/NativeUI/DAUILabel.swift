@@ -13,6 +13,17 @@ class DAUILabel : DAUIView
     var label = UILabel()
     
     
+    override init()
+    {
+        super.init()
+        addSubview(label)
+    }
+
+    required init?(coder aDecoder: NSCoder)
+    {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     var font:UIFont
     {
         get

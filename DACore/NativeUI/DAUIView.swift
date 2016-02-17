@@ -59,7 +59,8 @@ class DAUIView : UIView
     
     func reset(recursive:Bool=true)
     {
-        print("RESET \(name) to \(resetPosition), \(resetSize)")
+        print("RESET \(name!) to \(resetPosition), \(resetSize)")
+        print(self)
         
         self.frame = CGRect(origin: resetPosition, size: resetSize)
         print("MY CENTER IS \(center)")
