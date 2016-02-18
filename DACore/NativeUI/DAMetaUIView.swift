@@ -34,9 +34,10 @@ class DAMetaUIView : DAUIContainer
     
     private var fileRoot:String
     private var rootContainer:String?
-    
-    var rootWidth:CGFloat = 0
-    var rootHeight:CGFloat = 0
+
+    //MOVED to superclass
+//    var rootWidth:CGFloat = 0
+//    var rootHeight:CGFloat = 0
     
     var placeholders    = [String:CGRect]()
     var containers      = [String:DAUIContainer]()
@@ -162,6 +163,9 @@ class DAMetaUIView : DAUIContainer
         
         //set up all our frames on all our children
         reset(true)
+        
+        //we probably don't want our root view centered at 0,0, so assume we want it at rootWidth/2, rootHeight/2
+        center = CGPoint(x:rootWidth/2, y:rootHeight/2)
     }
     
     
@@ -193,7 +197,7 @@ class DAMetaUIView : DAUIContainer
         }
         
         
-        return containerWithName("container_\(container_name)")
+        return containers["container_\(container_name)"]
     }
     
     func tabWithName(tab_name:String) -> DAUITabView
@@ -393,25 +397,12 @@ class DAMetaUIView : DAUIContainer
         y = y * DAMetaUIView.scaleFactor
         print("          \(x),\(y)       scaled by \(DAMetaUIView.scaleFactor)")
         
-        
-        //invert the y axis and convert to origin-at-top-left
-        x = rootWidth/2 + x
-        y = rootHeight/2 - y
-        print("          \(x),\(y)")
-        
-        
-        //subtract w/2,h/2 because we're doing topleft and not center
-        x -= size.width/2
-        y -= size.height/2
-        print("          \(x),\(y)")
-        
-        
         return CGPoint(x:x, y:y)
     }
     
     func processContainerView(view:Dictionary<String, AnyObject>) -> DAUIView
     {
-        var container:DAUIView?
+        var container:DAUIView!
         
         if let container_name = view["name"] as? NSString as? String
         {
@@ -454,9 +445,9 @@ class DAMetaUIView : DAUIContainer
         }
         
         //assign default container name if we didn't already assign a name
-        if(container != nil && container!.name == nil)
+        if(container != nil && container.name == nil)
         {
-            container!.name = view["name"] as? NSString as? String
+            container.name = view["name"] as? NSString as? String
         }
         
         if let children = view["children"] as? NSArray as? [AnyObject]
@@ -481,6 +472,7 @@ class DAMetaUIView : DAUIContainer
         
         if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
+            print("GET POSITION FOR CONTAINER \(container!.name!)")
             container!.resetPosition = processPosition(position, size:container!.resetSize)
         }
         
@@ -490,9 +482,14 @@ class DAMetaUIView : DAUIContainer
             container!.pivot = CGPoint(x: pivot[0]*DAMetaUIView.scaleFactor, y: pivot[1]*DAMetaUIView.scaleFactor)
         }
         
-        container!.cachedMetadata = view
+        container.cachedMetadata = view
         
-        return container!
+        if let real_container = container as? DAUIContainer
+        {
+            containers[container.name!] = real_container
+        }
+        
+        return container
     }
     
     func processScale9View(view:Dictionary<String, AnyObject>) -> DAUIImageView
@@ -656,10 +653,16 @@ class DAMetaUIView : DAUIContainer
             
             if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
+                print("GET POSITION FOR IMAGE \(image_name)")
                 image.resetPosition = processPosition(position, size:image.resetSize)
             }
             
             let image_type = image_name.split("_")[0]
+            
+            if(image_type == "flipX")
+            {
+                image.image.transform = CGAffineTransformMakeScale(-1, 1)
+            }
             
             //simple scale button!
             if(image_type == "scalebtn")
