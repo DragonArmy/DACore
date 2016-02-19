@@ -62,9 +62,6 @@ class DAUIView : UIView
     
     func reset(recursive:Bool=true)
     {
-        print("RESET \(name!) to \(resetPosition), \(resetSize)")
-        print(self)
-        
         let centerPosition = resetPosition + pivot
         
         var x:CGFloat = centerPosition.x

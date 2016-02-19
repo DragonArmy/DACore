@@ -33,6 +33,7 @@ class DAMetaUIView : DAUIContainer
     
     
     private var fileRoot:String
+    private var assetFolder:String
     private var rootContainer:String?
 
     //MOVED to superclass
@@ -76,7 +77,7 @@ class DAMetaUIView : DAUIContainer
             }
             
             
-            if let meta_url = bundle.URLForResource("\(file_root)\(device_tag)", withExtension: "txt")
+            if let meta_url = bundle.URLForResource("\(file_root)\(device_tag)/\(file_root)\(device_tag)", withExtension: "txt")
             {
                 print(meta_url)
                 
@@ -116,6 +117,7 @@ class DAMetaUIView : DAUIContainer
     {
         fileRoot = ""
         rootContainer = ""
+        assetFolder = ""
         super.init()
     }
     
@@ -124,6 +126,13 @@ class DAMetaUIView : DAUIContainer
         print("INIT \(file_root):\(container_name):\(omit_device_tag)")
         fileRoot = file_root
         rootContainer = container_name
+        
+        var device_tag = DAMetaUIView.deviceTag
+        if(omit_device_tag)
+        {
+            device_tag = ""
+        }
+        assetFolder = "\(file_root)\(device_tag)"
         
         super.init(frame:CGRect.zero)
         
@@ -247,7 +256,7 @@ class DAMetaUIView : DAUIContainer
         return placeholders[placeholder_name]
     }
     
-    let DEBUG = true
+    let DEBUG = false
     func processMetadata(json:Dictionary<String,AnyObject>)
     {
 //        print("PROCESS METADATA")
@@ -270,7 +279,6 @@ class DAMetaUIView : DAUIContainer
         }
         
         resetSize = CGSize(width: rootWidth, height: rootHeight)
-        print("RESET SIZE: \(resetSize)")
         
         if let children = json["children"] as? NSArray as? [AnyObject]
         {
@@ -278,10 +286,8 @@ class DAMetaUIView : DAUIContainer
             {
                 let view_children = processChildren(children)
                 
-                print("ROOT HAS \(view_children.count) CHILDREN")
                 for view_child in view_children
                 {
-                    print("ADDING CHILD \(view_child.name) -- \(view_child)")
                     addSubview(view_child)
                 }
             }else{
@@ -378,24 +384,17 @@ class DAMetaUIView : DAUIContainer
             }
         }
         
-        print("RETURNING \(child_views.count) CHILD VIEWS")
         return child_views
     }
     
-    
     func processPosition(coords:[CGFloat], size:CGSize) -> CGPoint
     {
-        //need to convert from y-positive, center-origin to y-negative, top-left origin
-        
-        print("PROCESS POSITION: \(coords)   SIZE: \(size)     ROOT:\(rootWidth),\(rootHeight)")
-        
         var x = coords[0]
         var y = coords[1]
 
         //apply the scale factor
         x = x * DAMetaUIView.scaleFactor
         y = y * DAMetaUIView.scaleFactor
-        print("          \(x),\(y)       scaled by \(DAMetaUIView.scaleFactor)")
         
         return CGPoint(x:x, y:y)
     }
@@ -472,7 +471,6 @@ class DAMetaUIView : DAUIContainer
         
         if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
-            print("GET POSITION FOR CONTAINER \(container!.name!)")
             container!.resetPosition = processPosition(position, size:container!.resetSize)
         }
         
@@ -571,8 +569,6 @@ class DAMetaUIView : DAUIContainer
     
     func processTextView(view:Dictionary<String, AnyObject>) -> DAUILabel
     {
-        //{"name":"header","type":"text","position":[-1,627.5],"size":[272,31],"color":"ff686f","font":"Arial","justification":"center","fontSize":40,"text":"TESTING PSD"}
-        
         if let font = view["font"] as? NSString as? String
         {
             print("CREATING LABEL")
@@ -587,6 +583,7 @@ class DAMetaUIView : DAUIContainer
             
             if let font = UIFont(name: font_name, size: font_size)
             {
+                print(font)
                 label.font = font
             }else{
                 print("ERROR -- COULD NOT CREATE FONT \(font_name)")
@@ -625,15 +622,19 @@ class DAMetaUIView : DAUIContainer
                     label.textAlignment = NSTextAlignment.Center
                 }else if(align == "left"){
                     label.textAlignment = NSTextAlignment.Left
+                    label.resetPosition = CGPoint(x: label.resetPosition.x + label.resetSize.width/2, y: label.resetPosition.y)
                 }else if(align == "right"){
                     label.textAlignment = NSTextAlignment.Right
+                    label.resetPosition = CGPoint(x: label.resetPosition.x - label.resetSize.width/2, y: label.resetPosition.y)
                 }else{
                     print("[DAMetaUIView] -- INVALID LABEL ORIENTATION ON LABEL \(label.name) -- \(align)")
                 }
             }
             
+            
+            print("LABEL \(label.name!) CREATED WITH FONT \(font_name) AT SIZE \(font_size)")
+            
             labels[label.name!] = label
-            print("RETURNING \(label)")
             return label
         }
         
@@ -644,7 +645,7 @@ class DAMetaUIView : DAUIContainer
     {
         if let image_name = view["name"] as? NSString as? String
         {
-            let image = DAUIImageView(named: image_name)
+            let image = DAUIImageView(named: "\(assetFolder)/\(image_name)")
             
             image.name = image_name
             
@@ -653,7 +654,6 @@ class DAMetaUIView : DAUIContainer
             
             if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
-                print("GET POSITION FOR IMAGE \(image_name)")
                 image.resetPosition = processPosition(position, size:image.resetSize)
             }
             
