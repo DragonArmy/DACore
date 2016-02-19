@@ -103,9 +103,15 @@ public class DASoundManager
             player.numberOfLoops = -1
             player.prepareToPlay()
             
+            do
+            {
+                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient)
+            }catch{
+                print("OOPS: AVAudioSession Hates You")
+            }
+            
             if(MUSIC_ENABLED)
             {
-//                print("MUSIC ENABLED -- PLAY")
                 player.play()
             }
             
@@ -148,6 +154,14 @@ public class DASoundManager
         
         if let player = musicPlayer
         {
+            do
+            {
+                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient)
+            }catch{
+                print("OOPS: AVAudioSession Hates You")
+            }
+            
+            
             if !player.playing
             {
                 player.play()
