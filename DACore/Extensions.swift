@@ -358,6 +358,19 @@ public func *= (inout left: CGPoint, right: CGFloat)
 }
 
 
+public func * (left:CGSize, right:CGFloat) -> CGSize
+{
+    return CGSize(width:left.width*right, height:left.height*right)
+}
+public func * (left:CGFloat, right:CGSize) -> CGSize
+{
+    return right*left
+}
+public func *= (inout left: CGSize, right: CGFloat)
+{
+    left = left*right
+}
+
 
 
 /************ SPRITEKIT **************/

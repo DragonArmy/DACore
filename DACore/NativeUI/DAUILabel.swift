@@ -13,6 +13,17 @@ class DAUILabel : DAUIView
     var label = UILabel()
     
     
+    override init()
+    {
+        super.init()
+        addSubview(label)
+    }
+
+    required init?(coder aDecoder: NSCoder)
+    {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     var font:UIFont
     {
         get
@@ -21,7 +32,7 @@ class DAUILabel : DAUIView
         }
         set(value)
         {
-            label.font = font
+            label.font = value
         }
     }
     
@@ -46,6 +57,7 @@ class DAUILabel : DAUIView
         set(value)
         {
             label.text = value
+            sizeToFit()
         }
     }
     
@@ -62,6 +74,36 @@ class DAUILabel : DAUIView
     }
     
     
+    override func reset(recursive:Bool=true)
+    {
+        super.reset(recursive)
+        sizeToFit()
+    }
     
+    
+    override func sizeToFit()
+    {
+        super.sizeToFit()
+        
+        let nstext = label.text! as NSString
+        let size = nstext.sizeWithAttributes([NSFontAttributeName:label.font])
+        let expansion = size.width - resetSize.width
+        
+        if(expansion > 0)
+        {
+            switch(textAlignment)
+            {
+                case .Left:
+                    frame = CGRect(x: frame.origin.x, y: frame.origin.y, width: frame.size.width + expansion, height: frame.size.height)
+                case .Right:
+                    frame = CGRect(x: frame.origin.x - expansion, y: frame.origin.y, width: frame.size.width + expansion, height: frame.size.height)
+                case .Center:
+                    frame = CGRect(x: frame.origin.x - expansion/2, y: frame.origin.y, width: frame.size.width + expansion, height: frame.size.height)
+                default:
+                    print("OOPS WE DONT SUPPORT \(textAlignment)")
+            }
+        }
+        
+    }
     
 }

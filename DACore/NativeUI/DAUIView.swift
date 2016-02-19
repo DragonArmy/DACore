@@ -16,40 +16,82 @@ class DAUIView : UIView
 
     //set from metadata, NOT the frame
     var resetPosition = CGPoint.zero
-    var resetSize = CGPoint.zero
+    var resetSize = CGSize.zero
+    var pivot = CGPoint(x: 0.5, y: 0.5)
     
-    //not strictly an anchor value but a fixed offset for all the contents
-    private var _pivotX:CGFloat = 0;
-    var pivotX:CGFloat
+    var rootWidth:CGFloat = 0
+    var rootHeight:CGFloat = 0
+    
+    //we want the wrapped content to have the same frame as we have...
+    override var frame:CGRect
     {
         get
         {
-            return _pivotX
+            return super.frame
         }
         set(value)
         {
-            _pivotX = value
-            print("TODO: PIVOTS")
-        }
-    }
-    private var _pivotY:CGFloat = 0
-    var pivotY:CGFloat
-    {
-        get
-        {
-            return _pivotY
-        }
-        set(value)
-        {
-            _pivotY = value
-            print("TODO: PIVOTS")
+            super.frame = value
+            for view in subviews
+            {
+                if let da = view as? DAUIView
+                {
+                    continue
+                }
+                
+                print("SETTING SUBVIEW \(view) TO FRAME \(value)")
+                view.frame = CGRect(origin: CGPoint.zero, size: value.size)
+            }
         }
     }
     
+    init()
+    {
+        super.init(frame:CGRect.zero)
+    }
+    
+    override init(frame: CGRect)
+    {
+        super.init(frame:frame)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     
     func reset(recursive:Bool=true)
     {
-        print("RESET \(name) to \(reset)")
+        let centerPosition = resetPosition + pivot
+        
+        var x:CGFloat = centerPosition.x
+        var y:CGFloat = centerPosition.y
+
+        if(superview == nil)
+        {
+            x = rootWidth/2 + x
+            y = rootHeight/2 - y
+        }else{
+            x = superview!.frame.size.width/2 + x
+            y = superview!.frame.size.height/2 - y
+        }
+        
+        //offset to the top left
+        x -= resetSize.width/2
+        y -= resetSize.height/2
+        
+        //pivot is actually the inverse offset from center
+        //it's important to set pivot before frame, as adjusting the pivot will move the position
+        //while frame is pivot-agnostic
+        if(pivot != CGPoint.zero && resetSize != CGSize.zero)
+        {
+            self.layer.anchorPoint = CGPoint(x: 0.5 + pivot.x/resetSize.width, y: 0.5 + pivot.y/resetSize.height)
+        }
+        
+        self.frame = CGRect(origin: CGPoint(x:x, y:y), size: resetSize)
+        
+        
+//        self.layer.anchorPoint = pivot
         
 //        position = reset
 //        
@@ -71,6 +113,8 @@ class DAUIView : UIView
         {
             if let resettable = view as? DAUIView
             {
+                resettable.rootWidth = rootWidth
+                resettable.rootHeight = rootHeight
                 resettable.reset(recursive)
             }
         }
