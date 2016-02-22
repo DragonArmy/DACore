@@ -105,6 +105,7 @@ class DAButtonBase : DAContainerBase
                 initialTouchPos = touch_pos
 
                 let hit_nodes = scene!.nodesAtPoint(touch_pos)
+                scene!.touchesBegan(touches, withEvent: event)
                 for node in hit_nodes
                 {
                     if(node == self)
@@ -176,6 +177,7 @@ class DAButtonBase : DAContainerBase
                 }
                 
                 let hit_nodes = scene!.nodesAtPoint(touch_pos)
+                scene!.touchesMoved(touches, withEvent:event)
                 for node in hit_nodes
                 {
                     if(node == self)
@@ -232,6 +234,7 @@ class DAButtonBase : DAContainerBase
                 let touch_view = touch.locationInView(scene!.view)
                 print("POSITION IN SCENE: \(touch_pos)        VIEW: \(touch_view)")
                 let hit_nodes = scene!.nodesAtPoint(touch_pos)
+                scene!.touchesEnded(touches, withEvent: event)
                 for node in hit_nodes
                 {
                     if(node == self)

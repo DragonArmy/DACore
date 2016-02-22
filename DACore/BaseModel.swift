@@ -6,6 +6,10 @@
 //  Copyright (c) 2015 Dragon Army. All rights reserved.
 //
 
+// wch 2/22/16
+// might be worth looking at this ActiveRecord implementation -- https://github.com/qutheory/fluent
+// they use a Protocol with a Category, which allows slightly nicer syntax for finds by returing Self
+
 import UIKit
 
 class BaseModel

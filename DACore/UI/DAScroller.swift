@@ -197,7 +197,6 @@ class DAScroller
         }else if(absolute_position > _boundsMax){
 
             diff = absolute_position - _boundsMax
-            print("DIFF: \(diff)")
             
             let result = (1.0 - (1.0 / ((diff * EDGE_SQUISH_RATIO / EDGE_SQUISH) + 1.0))) * EDGE_SQUISH
             
