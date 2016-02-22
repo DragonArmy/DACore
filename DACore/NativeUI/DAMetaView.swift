@@ -676,20 +676,18 @@ class DAMetaView : DAContainerView
                 
                 let container = DAScaleButtonView()
                 
+                let btn_name = image_name.replace("scalebtn_",withString:"")
+                buttons[btn_name] = container
+                container.name = btn_name
+                
+                container.resetPosition = image.resetPosition
+                container.resetSize = image.resetSize
+                
+                image.resetPosition = CGPoint.zero
+                container.addSubview(image)
+                container.updateDisplay()
+
                 return container
-//                let container = DAScaleButton()
-//                container.position = image.position
-//                image.position = CGPoint(x:0,y:0)
-//                container.addChild(image)
-//                container.updateDisplay()
-//                
-//                if let btn_name = (view["name"] as? NSString as? String)?.replace("scalebtn_",withString:"")
-//                {
-//                    buttons[btn_name] = container as DAButtonBase
-//                    container.name = btn_name
-//                }
-//                
-//                return container
             }
             
             
