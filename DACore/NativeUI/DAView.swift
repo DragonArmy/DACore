@@ -8,7 +8,7 @@
 
 import UIKit
 
-class DAUIView : UIView
+class DAView : UIView
 {
     var name:String?
     
@@ -34,12 +34,11 @@ class DAUIView : UIView
             super.frame = value
             for view in subviews
             {
-                if let da = view as? DAUIView
+                if let da = view as? DAView
                 {
                     continue
                 }
                 
-                print("SETTING SUBVIEW \(view) TO FRAME \(value)")
                 view.frame = CGRect(origin: CGPoint.zero, size: value.size)
             }
         }
@@ -111,7 +110,7 @@ class DAUIView : UIView
     {
         for view in subviews
         {
-            if let resettable = view as? DAUIView
+            if let resettable = view as? DAView
             {
                 resettable.rootWidth = rootWidth
                 resettable.rootHeight = rootHeight

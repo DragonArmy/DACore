@@ -1,5 +1,5 @@
 //
-//  DAUIContainer.swift
+//  DAUITabView.swift
 //  catchsports
 //
 //  Created by Will Hankinson on 2/16/16.
@@ -10,7 +10,7 @@ import UIKit
 
 //most contaienr types are DAUIContainerBase children, whereas a DAUIContainer is explicitly a container
 //and holds subviews but no content of its own
-class DAUIContainer : DAUIView
+class DATabView : DAView
 {
     
 }

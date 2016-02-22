@@ -1,5 +1,5 @@
 //
-//  DAUIButton.swift
+//  DAButtonView.swift
 //  catchsports
 //
 //  Created by Will Hankinson on 2/16/16.
@@ -7,34 +7,7 @@
 //
 
 import UIKit
-class DAUIButton : DAUIView
-{
-    var button:DAButtonBase!
-    
-    
-}
-
-class DAButtonControl : DAButtonControlBase
-{
-    override func updateDisplay()
-    {
-        if(highlighted)
-        {
-            transform = CGAffineTransformMakeScale(DAScaleButton.DOWN_SCALE,DAScaleButton.DOWN_SCALE)
-        }else{
-            transform = CGAffineTransformMakeScale(1.0, 1.0)
-        }
-    }
-}
-
-class DAScaleButtonControl :DAButtonControlBase
-{
-    static var DOWN_SCALE:CGFloat = 0.85
-    
-    
-}
-
-class DAButtonControlBase : UIControl
+class DAButtonViewBase : DAView
 {
     static var TOUCH_EXPANSION = 10
     static var DEFAULT_TOUCH_COOLDOWN = 0.0
@@ -44,9 +17,9 @@ class DAButtonControlBase : UIControl
     var buttonSound:String?
     
     //SIGNALS
-    let onButtonDown = Signal<DAButtonControlBase>()
-    let onButtonUp = Signal<DAButtonControlBase>()
-    let onButtonClick = Signal<DAButtonControlBase>()
+    let onButtonDown = Signal<DAButtonViewBase>()
+    let onButtonUp = Signal<DAButtonViewBase>()
+    let onButtonClick = Signal<DAButtonViewBase>()
     
     var isTouching:Bool = false
     var lastTouch:NSTimeInterval = 0
@@ -56,39 +29,45 @@ class DAButtonControlBase : UIControl
     var lastPress = NSDate()
     var cooldown:Double = 0.0
     
-    override init(frame:CGRect)
+    var enabled = true
+    
+    var _isButtonDown:Bool = false
+    var isButtonDown:Bool
     {
-        super.init(frame:frame)
+        get
+        {
+            return _isButtonDown
+        }
         
-        buttonSound = DAButtonControlBase.DEFAULT_BUTTON_SOUND
-        cooldown = DAButtonControlBase.DEFAULT_TOUCH_COOLDOWN
+        set(new_state)
+        {
+            if(new_state == _isButtonDown)
+            {
+                return
+            }
+            
+            _isButtonDown = new_state
+            
+            updateDisplay()
+        }
     }
-
+    
+    override init()
+    {
+        super.init()
+        
+        userInteractionEnabled = true
+        
+        buttonSound = DAButtonViewBase.DEFAULT_BUTTON_SOUND
+        cooldown = DAButtonViewBase.DEFAULT_TOUCH_COOLDOWN
+    }
+    
     required init?(coder aDecoder: NSCoder)
     {
         fatalError("init(coder:) has not been implemented")
     }
     
     
-    override var highlighted:Bool
-    {
-        get
-        {
-            return super.highlighted
-        }
-        set(new_state)
-        {
-            if(new_state == highlighted)
-            {
-                return
-            }
-            
-            super.highlighted = new_state
-            updateDisplay()
-        }
-    }
-    
-
     func updateDisplay()
     {
         //VIRTUAL -- OVERRIDE ME
@@ -116,6 +95,7 @@ class DAButtonControlBase : UIControl
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
+        print("TOUCHES BEGAN")
         isTouching = false;
         
         if(recursiveHidden())
@@ -124,12 +104,11 @@ class DAButtonControlBase : UIControl
             return
         }
         
-
         if(superview == nil)
         {
+            print("NO SUPERVIEW NO TOUCH")
             return
         }
-        
         
         let press_time = NSDate()
         if(press_time.timeIntervalSinceDate(lastPress) < cooldown)
@@ -141,11 +120,14 @@ class DAButtonControlBase : UIControl
         if(enabled)
         {
             onButtonDown.fire(self);
+        }else{
+            print("NOT ENABLED")
         }
         
+        print("IS TOUCHING IS HIGLIGHTED")
         isTouching = true
-        highlighted = true
-
+        isButtonDown = true
+        
     }
     
     override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?)
@@ -169,9 +151,9 @@ class DAButtonControlBase : UIControl
             //use touchRect instead of self b/c our size can change based on input
             if CGRectContainsPoint(expanded_rect, location)
             {
-                highlighted = true
+                isButtonDown = true
             }else{
-                highlighted = false
+                isButtonDown = false
             }
         }
     }
@@ -198,15 +180,15 @@ class DAButtonControlBase : UIControl
             //use touchRect instead of self b/c our size can change based on input
             if CGRectContainsPoint(expanded_rect, location)
             {
-                highlighted = true
+                isButtonDown = true
             }else{
-                highlighted = false
+                isButtonDown = false
             }
         }
         
-        if(highlighted)
+        if(isButtonDown)
         {
-            highlighted = false
+            isButtonDown = false
             
             if(enabled)
             {
@@ -222,6 +204,8 @@ class DAButtonControlBase : UIControl
             }
         }
     }
-    
 }
+
+
+
 

@@ -1,5 +1,5 @@
 //
-//  DAUIImage.swift
+//  DAImageView.swift
 //  catchsports
 //
 //  Created by Will Hankinson on 2/16/16.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class DAUIImageView : DAUIView
+class DAImageView : DAView
 {
     var image = UIImageView()
     

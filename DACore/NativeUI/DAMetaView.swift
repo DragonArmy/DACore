@@ -8,7 +8,7 @@
 import UIKit
 
 
-class DAMetaUIView : DAUIContainer
+class DAMetaView : DAContainerView
 {
     private static var LoadedMetadata = [String : Dictionary<String,AnyObject>]()
     
@@ -41,16 +41,16 @@ class DAMetaUIView : DAUIContainer
 //    var rootHeight:CGFloat = 0
     
     var placeholders    = [String:CGRect]()
-    var containers      = [String:DAUIContainer]()
-    var tabs            = [String:DAUITabView]()
-    var buttons         = [String:DAUIButton]()
-    var images          = [String:DAUIImageView]()
-    var labels          = [String:DAUILabel]()
+    var containers      = [String:DAContainerView]()
+    var tabs            = [String:DATabView]()
+    var buttons         = [String:DAButtonViewBase]()
+    var images          = [String:DAImageView]()
+    var labels          = [String:DALabelView]()
      
     static func setup(device_tag:String, scale_factor:CGFloat)
     {
-        DAMetaUIView.deviceTag = device_tag
-        DAMetaUIView.scaleFactor = scale_factor
+        DAMetaView.deviceTag = device_tag
+        DAMetaView.scaleFactor = scale_factor
         
         
         let available_fonts = UIFont.familyNames()
@@ -70,7 +70,7 @@ class DAMetaUIView : DAUIContainer
         
         for (file_root, omit_device_tag) in file_root_list
         {
-            var device_tag = DAMetaUIView.deviceTag
+            var device_tag = DAMetaView.deviceTag
             if(omit_device_tag)
             {
                 device_tag = ""
@@ -87,7 +87,7 @@ class DAMetaUIView : DAUIContainer
                 
                 let json = try! NSJSONSerialization.JSONObjectWithData(data, options: []) as? Dictionary<String, AnyObject>
                 
-                DAMetaUIView.LoadedMetadata[file_root] = json
+                DAMetaView.LoadedMetadata[file_root] = json
             }else{
                 print("ERROR ERROR ERROR -- \(file_root)\(device_tag) NOT FOUND")
             }
@@ -106,7 +106,7 @@ class DAMetaUIView : DAUIContainer
             let closure_omit = omit_device_tag
             
             dispatch_async(backgroundQueue) {
-                DAMetaUIView.loadMetadata([(closure_file, closure_omit)])
+                DAMetaView.loadMetadata([(closure_file, closure_omit)])
                 //print("FINISHED LOADING \(closure_file)")
             }
             
@@ -127,7 +127,7 @@ class DAMetaUIView : DAUIContainer
         fileRoot = file_root
         rootContainer = container_name
         
-        var device_tag = DAMetaUIView.deviceTag
+        var device_tag = DAMetaView.deviceTag
         if(omit_device_tag)
         {
             device_tag = ""
@@ -143,18 +143,18 @@ class DAMetaUIView : DAUIContainer
             return
         }
         
-        if(DAMetaUIView.LoadedMetadata.indexForKey(file_root) != nil)
+        if(DAMetaView.LoadedMetadata.indexForKey(file_root) != nil)
         {
-            processMetadata(DAMetaUIView.LoadedMetadata[file_root]!)
+            processMetadata(DAMetaView.LoadedMetadata[file_root]!)
         }else{
             print("LOADING \(file_root) -------------------")
             
             //synchronously load metadata if we initialize a MetaView
             //print("SYNCHRONOUS LOAD: \(file_root)")
             
-            DAMetaUIView.loadMetadata([(file_root, omit_device_tag)])
+            DAMetaView.loadMetadata([(file_root, omit_device_tag)])
             
-            if let json = DAMetaUIView.LoadedMetadata[file_root]
+            if let json = DAMetaView.LoadedMetadata[file_root]
             {
                 processMetadata(json)
             }else{
@@ -198,7 +198,7 @@ class DAMetaUIView : DAUIContainer
     }
     
     //SUPER DUPER HELPFUL TYPED GETTERS
-    func containerWithName(container_name:String) -> DAUIContainer?
+    func containerWithName(container_name:String) -> DAContainerView?
     {
         if(container_name.split("_").first! == "container")
         {
@@ -209,7 +209,7 @@ class DAMetaUIView : DAUIContainer
         return containers["container_\(container_name)"]
     }
     
-    func tabWithName(tab_name:String) -> DAUITabView
+    func tabWithName(tab_name:String) -> DATabView
     {
         if(tab_name.split("_").first! == "tab")
         {
@@ -220,12 +220,12 @@ class DAMetaUIView : DAUIContainer
     }
     
     //simplest of the getters, doesn't prefix anything
-    func imageWithName(image_name:String) -> DAUIImageView?
+    func imageWithName(image_name:String) -> DAImageView?
     {
         return images[image_name]
     }
     
-    func labelWithName(label_name:String) -> DAUILabel?
+    func labelWithName(label_name:String) -> DALabelView?
     {
         if(label_name.split("_").first! == "txt")
         {
@@ -236,7 +236,7 @@ class DAMetaUIView : DAUIContainer
     }
     
     //buttons keep a name hash around because they can come from a scalebtn image, a scalebtn container, or a btn
-    func buttonWithName(button_name:String) -> DAUIButton?
+    func buttonWithName(button_name:String) -> DAButtonViewBase?
     {
         if(button_name.split("_").first! == "btn")
         {
@@ -262,7 +262,7 @@ class DAMetaUIView : DAUIContainer
 //        print("PROCESS METADATA")
         if let root_width = json["root_width"] as? NSNumber as? Int
         {
-            rootWidth = CGFloat(root_width)*DAMetaUIView.scaleFactor
+            rootWidth = CGFloat(root_width)*DAMetaView.scaleFactor
             if(DEBUG)
             {
                 print("ROOT WIDTH: \(rootWidth)")
@@ -271,7 +271,7 @@ class DAMetaUIView : DAUIContainer
         
         if let root_height = json["root_height"] as? NSNumber as? Int
         {
-            rootHeight = CGFloat(root_height)*DAMetaUIView.scaleFactor
+            rootHeight = CGFloat(root_height)*DAMetaView.scaleFactor
             if(DEBUG)
             {
                 print("ROOT WIDTH: \(rootHeight)")
@@ -327,7 +327,7 @@ class DAMetaUIView : DAUIContainer
                             view.removeFromSuperview()
                             addSubview(view)
                             
-                            if let da_view = view as? DAUIView
+                            if let da_view = view as? DAView
                             {
                                 if(DEBUG)
                                 {
@@ -353,9 +353,9 @@ class DAMetaUIView : DAUIContainer
     //processChildren works a little differently in that it returns the children...
     //you don't have to actually do anything with them, but for compound objects such
     //as buttons and progress bars this is required
-    func processChildren(children:[AnyObject]) -> [DAUIView]
+    func processChildren(children:[AnyObject]) -> [DAView]
     {
-        var child_views:[DAUIView] = []
+        var child_views:[DAView] = []
         
         for raw_view in children
         {
@@ -393,15 +393,15 @@ class DAMetaUIView : DAUIContainer
         var y = coords[1]
 
         //apply the scale factor
-        x = x * DAMetaUIView.scaleFactor
-        y = y * DAMetaUIView.scaleFactor
+        x = x * DAMetaView.scaleFactor
+        y = y * DAMetaView.scaleFactor
         
         return CGPoint(x:x, y:y)
     }
     
-    func processContainerView(view:Dictionary<String, AnyObject>) -> DAUIView
+    func processContainerView(view:Dictionary<String, AnyObject>) -> DAView
     {
-        var container:DAUIView!
+        var container:DAView!
         
         if let container_name = view["name"] as? NSString as? String
         {
@@ -411,35 +411,35 @@ class DAMetaUIView : DAUIContainer
             switch(container_type)
             {
             case "container":
-                container = DAUIContainer()
+                container = DAContainerView()
             case "btn":
-                container = DAUIButton()
+                container = DAButtonView()
                 
                 let btn_name = container_name.replace("btn_",withString:"")
-                buttons[btn_name] = container as? DAUIButton
+                buttons[btn_name] = container as? DAButtonViewBase
                 container.name = btn_name
                 
             case "scalebtn":
                 print("TODO: SCALE BUTTONS")
-                container = DAUIContainer()
-//                container = DAScaleButton()
-//                let btn_name = container_name.replace("scalebtn_",withString:"")
-//                buttons[btn_name] = container as? DAButtonBase
-//                container!.name = btn_name
+                container = DAScaleButtonView()
+
+                let btn_name = container_name.replace("scalebtn_",withString:"")
+                buttons[btn_name] = container as? DAButtonViewBase
+                container.name = btn_name
             case "progress":
                 print("ERROR: PROGRESS BARS NOT SUPPORTED YET")
-                container = DAUIContainer()
+                container = DAContainerView()
             case "tab":
-                container = DAUITabView()
+                container = DATabView()
             case "scale9":
                 //SHHH, NOT ACTUALLY A CONTAINER
                 return processScale9View(view)
             case "paragraph":
                 print("ERROR: PARAGRAPH NOT SUPPORTED YET")
-                container = DAUIContainer()
+                container = DAContainerView()
             default:
                 print("ERROR: UNRECOGNIZED CONTAINER TYPE: \(container_type)")
-                container = DAUIContainer()
+                container = DAContainerView()
             }
         }
         
@@ -458,7 +458,12 @@ class DAMetaUIView : DAUIContainer
             }
         }
         
-        if let tab = container as? DAUITabView
+        if let button = container as? DAButtonViewBase
+        {
+            button.updateDisplay()
+        }
+        
+        if let tab = container as? DATabView
         {
             print("TODO: POST PROCESS TABS")
             //tab.createStates()
@@ -466,7 +471,7 @@ class DAMetaUIView : DAUIContainer
         
         if let size = view["size"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
-            container!.resetSize = CGSize(width:size[0]*DAMetaUIView.scaleFactor, height:size[1]*DAMetaUIView.scaleFactor)
+            container!.resetSize = CGSize(width:size[0]*DAMetaView.scaleFactor, height:size[1]*DAMetaView.scaleFactor)
         }
         
         if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
@@ -477,12 +482,12 @@ class DAMetaUIView : DAUIContainer
         
         if let pivot = view["pivot"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
-            container!.pivot = CGPoint(x: pivot[0]*DAMetaUIView.scaleFactor, y: pivot[1]*DAMetaUIView.scaleFactor)
+            container!.pivot = CGPoint(x: pivot[0]*DAMetaView.scaleFactor, y: pivot[1]*DAMetaView.scaleFactor)
         }
         
         container.cachedMetadata = view
         
-        if let real_container = container as? DAUIContainer
+        if let real_container = container as? DAContainerView
         {
             containers[container.name!] = real_container
         }
@@ -490,10 +495,10 @@ class DAMetaUIView : DAUIContainer
         return container
     }
     
-    func processScale9View(view:Dictionary<String, AnyObject>) -> DAUIImageView
+    func processScale9View(view:Dictionary<String, AnyObject>) -> DAImageView
     {
         var center:CGRect?
-        var sprite:DAUIImageView?
+        var sprite:DAImageView?
         var size:CGRect?
         
         let children = view["children"] as! NSArray as [AnyObject]
@@ -507,7 +512,7 @@ class DAMetaUIView : DAUIContainer
                     switch view_type
                     {
                     case "image":
-                        sprite = processImageView(view) as? DAUIImageView
+                        sprite = processImageView(view) as? DAImageView
                     case "placeholder":
                         processPlaceholder(view)
                         
@@ -535,7 +540,7 @@ class DAMetaUIView : DAUIContainer
 
             //uiview uses actual pixel insets and not UV insets
             print("TODO: replace image with resizableImageWithCapInsets")
-//            sprite!.centerRect = DAMetaUIView.getCenterRect(outerRect:sprite!.frame, innerRect:center!)
+//            sprite!.centerRect = DAMetaView.getCenterRect(outerRect:sprite!.frame, innerRect:center!)
 //            sprite!.width = size!.width
 //            sprite!.height = size!.height
 //            
@@ -548,7 +553,7 @@ class DAMetaUIView : DAUIContainer
         }
         
         
-        return DAUIImageView()
+        return DAImageView()
     }
     
     static func getCenterRect(outerRect outer:CGRect, innerRect inner:CGRect) -> CGRect
@@ -567,18 +572,18 @@ class DAMetaUIView : DAUIContainer
         return CGRect(x:x, y:y, width:w, height:h)
     }
     
-    func processTextView(view:Dictionary<String, AnyObject>) -> DAUILabel
+    func processTextView(view:Dictionary<String, AnyObject>) -> DALabelView
     {
         if let font = view["font"] as? NSString as? String
         {
             print("CREATING LABEL")
-            let label = DAUILabel()
+            let label = DALabelView()
             
             let font_name = DAFont.getFont(font)
             var font_size:CGFloat = 14
             if let fs = view["fontSize"] as? NSNumber as? CGFloat
             {
-                font_size = fs*DAMetaUIView.scaleFactor
+                font_size = fs*DAMetaView.scaleFactor
             }
             
             if let font = UIFont(name: font_name, size: font_size)
@@ -597,7 +602,7 @@ class DAMetaUIView : DAUIContainer
             
             if let size = view["size"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
-                label.resetSize = CGSize(width:size[0]*DAMetaUIView.scaleFactor, height:size[1]*DAMetaUIView.scaleFactor)
+                label.resetSize = CGSize(width:size[0]*DAMetaView.scaleFactor, height:size[1]*DAMetaView.scaleFactor)
             }
 
             if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
@@ -627,7 +632,7 @@ class DAMetaUIView : DAUIContainer
                     label.textAlignment = NSTextAlignment.Right
                     label.resetPosition = CGPoint(x: label.resetPosition.x - label.resetSize.width/2, y: label.resetPosition.y)
                 }else{
-                    print("[DAMetaUIView] -- INVALID LABEL ORIENTATION ON LABEL \(label.name) -- \(align)")
+                    print("[DAMetaView] -- INVALID LABEL ORIENTATION ON LABEL \(label.name) -- \(align)")
                 }
             }
             
@@ -638,19 +643,19 @@ class DAMetaUIView : DAUIContainer
             return label
         }
         
-        return DAUILabel()
+        return DALabelView()
     }
     
-    func processImageView(view:Dictionary<String, AnyObject>) -> DAUIView
+    func processImageView(view:Dictionary<String, AnyObject>) -> DAView
     {
         if let image_name = view["name"] as? NSString as? String
         {
-            let image = DAUIImageView(named: "\(assetFolder)/\(image_name)")
+            let image = DAImageView(named: "\(assetFolder)/\(image_name)")
             
             image.name = image_name
             
             //image size is implicit -- not in the json
-            image.resetSize = image.image.image!.size*DAMetaUIView.scaleFactor
+            image.resetSize = image.image.image!.size*DAMetaView.scaleFactor
             
             if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
@@ -669,7 +674,7 @@ class DAMetaUIView : DAUIContainer
             {
                 print("TODO: SIMPLE SCALE BUTTON")
                 
-                let container = DAUIButton()
+                let container = DAScaleButtonView()
                 
                 return container
 //                let container = DAScaleButton()
@@ -693,11 +698,11 @@ class DAMetaUIView : DAUIContainer
             return image
         }
         
-        return DAUIView()
+        return DAView()
     }
     
     //no return type here
-    func processPlaceholder(view:Dictionary<String, AnyObject>) -> DAUIView?
+    func processPlaceholder(view:Dictionary<String, AnyObject>) -> DAView?
     {
         if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
@@ -730,17 +735,17 @@ class DAMetaUIView : DAUIContainer
         printDisplayTree(self, currentDepth:0)
     }
     
-    func printDisplayTree(view:DAUIView, currentDepth depth:Int)
+    func printDisplayTree(view:DAView, currentDepth depth:Int)
     {
         let tab = Array<String>(count: depth, repeatedValue: "  ").joinWithSeparator("") + "->"
         let view_name = (view.name == nil ? view.description : view.name!)
         print("\(tab) \(view_name)     \(view.frame.center)")
         
-        if let container = view as? DAUIContainer
+        if let container = view as? DAContainerView
         {
             for child:AnyObject in container.subviews
             {
-                if let view_child = child as? DAUIView
+                if let view_child = child as? DAView
                 {
                     printDisplayTree(view_child, currentDepth: depth + 1)
                 }

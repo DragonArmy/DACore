@@ -8,7 +8,7 @@
 
 import UIKit
 
-class DAUILabel : DAUIView
+class DALabelView : DAView
 {
     var label = UILabel()
     
