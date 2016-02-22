@@ -209,14 +209,14 @@ class DAMetaView : DAContainerView
         return containers["container_\(container_name)"]
     }
     
-    func tabWithName(tab_name:String) -> DATabView
+    func tabWithName(tab_name:String) -> DATabView?
     {
         if(tab_name.split("_").first! == "tab")
         {
             print("[ERROR] tabWithName provides the tab_, you may omit it from your call!")
         }
         
-        return tabs["tab_\(tab_name)"]!
+        return tabs[tab_name]
     }
     
     //simplest of the getters, doesn't prefix anything
@@ -431,6 +431,11 @@ class DAMetaView : DAContainerView
                 container = DAContainerView()
             case "tab":
                 container = DATabView()
+                
+                let tab_name = container_name.replace("tab_", withString:"")
+                tabs[tab_name] = container as? DATabView
+                container.name = tab_name
+                
             case "scale9":
                 //SHHH, NOT ACTUALLY A CONTAINER
                 return processScale9View(view)
@@ -466,7 +471,7 @@ class DAMetaView : DAContainerView
         if let tab = container as? DATabView
         {
             print("TODO: POST PROCESS TABS")
-            //tab.createStates()
+            tab.createStates()
         }
         
         if let size = view["size"] as? NSArray as? [NSNumber] as? [CGFloat]
