@@ -28,7 +28,6 @@ class DAButtonBase : DAContainerBase
     let onButtonUp = Signal<DAButtonBase>()
     let onButtonClick = Signal<DAButtonBase>()
 
-    var isButtonDown:Bool = false
     var isTouching:Bool = false
     var lastTouch:NSTimeInterval = 0
     
@@ -51,6 +50,27 @@ class DAButtonBase : DAContainerBase
     required init(coder: NSCoder)
     {
         fatalError("NSCoding not supported")
+    }
+    
+    var _isButtonDown:Bool = false
+    var isButtonDown:Bool
+    {
+        get
+        {
+            return _isButtonDown
+        }
+        
+        set(new_state)
+        {
+            if(new_state == _isButtonDown)
+            {
+                return
+            }
+            
+            _isButtonDown = new_state
+            
+            updateDisplay()
+        }
     }
     
     func updateDisplay()

@@ -413,12 +413,12 @@ class DAMetaUIView : DAUIContainer
             case "container":
                 container = DAUIContainer()
             case "btn":
-                print("TODO: BUTTONS")
-                container = DAUIContainer()
-//                container = DAButton()
-//                let btn_name = container_name.replace("btn_",withString:"")
-//                buttons[btn_name] = container as? DAButtonBase
-//                container!.name = btn_name
+                container = DAUIButton()
+                
+                let btn_name = container_name.replace("btn_",withString:"")
+                buttons[btn_name] = container as? DAUIButton
+                container.name = btn_name
+                
             case "scalebtn":
                 print("TODO: SCALE BUTTONS")
                 container = DAUIContainer()
