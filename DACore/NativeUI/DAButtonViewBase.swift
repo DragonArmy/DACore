@@ -95,18 +95,15 @@ class DAButtonViewBase : DAView
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
-        print("TOUCHES BEGAN")
         isTouching = false;
         
         if(recursiveHidden())
         {
-            print("PARENT IS HIDDEN, NO TOUCH FOR YOU")
             return
         }
         
         if(superview == nil)
         {
-            print("NO SUPERVIEW NO TOUCH")
             return
         }
         
@@ -120,11 +117,8 @@ class DAButtonViewBase : DAView
         if(enabled)
         {
             onButtonDown.fire(self);
-        }else{
-            print("NOT ENABLED")
         }
         
-        print("IS TOUCHING IS HIGLIGHTED")
         isTouching = true
         isButtonDown = true
         

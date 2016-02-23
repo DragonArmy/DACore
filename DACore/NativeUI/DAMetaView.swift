@@ -40,7 +40,7 @@ class DAMetaView : DAContainerView
 //    var rootWidth:CGFloat = 0
 //    var rootHeight:CGFloat = 0
     
-    var placeholders    = [String:CGRect]()
+    var placeholders    = [String:DAView]()
     var containers      = [String:DAContainerView]()
     var tabs            = [String:DATabView]()
     var buttons         = [String:DAButtonViewBase]()
@@ -173,6 +173,9 @@ class DAMetaView : DAContainerView
         //set up all our frames on all our children
         reset(true)
         
+        //scale9 placeholders are in the wrong coordinate system until AFTER we reset the tree, so have to do this after
+        postProcessScale9Views(self)
+        
         //we probably don't want our root view centered at 0,0, so assume we want it at rootWidth/2, rootHeight/2
         center = CGPoint(x:rootWidth/2, y:rootHeight/2)
     }
@@ -253,7 +256,7 @@ class DAMetaView : DAContainerView
             print("[ERROR] placeholderWithName provides the placeholder_, you may omit it from your call!")
         }
         
-        return placeholders[placeholder_name]
+        return placeholders[placeholder_name]?.frame
     }
     
     let DEBUG = false
@@ -387,7 +390,7 @@ class DAMetaView : DAContainerView
         return child_views
     }
     
-    func processPosition(coords:[CGFloat], size:CGSize) -> CGPoint
+    func processPosition(coords:[CGFloat]) -> CGPoint
     {
         var x = coords[0]
         var y = coords[1]
@@ -410,41 +413,41 @@ class DAMetaView : DAContainerView
             
             switch(container_type)
             {
-            case "container":
-                container = DAContainerView()
-            case "btn":
-                container = DAButtonView()
-                
-                let btn_name = container_name.replace("btn_",withString:"")
-                buttons[btn_name] = container as? DAButtonViewBase
-                container.name = btn_name
-                
-            case "scalebtn":
-                print("TODO: SCALE BUTTONS")
-                container = DAScaleButtonView()
+                case "container":
+                    container = DAContainerView()
+                case "btn":
+                    container = DAButtonView()
+                    
+                    let btn_name = container_name.replace("btn_",withString:"")
+                    buttons[btn_name] = container as? DAButtonViewBase
+                    container.name = btn_name
+                    
+                case "scalebtn":
+                    print("TODO: SCALE BUTTONS")
+                    container = DAScaleButtonView()
 
-                let btn_name = container_name.replace("scalebtn_",withString:"")
-                buttons[btn_name] = container as? DAButtonViewBase
-                container.name = btn_name
-            case "progress":
-                print("ERROR: PROGRESS BARS NOT SUPPORTED YET")
-                container = DAContainerView()
-            case "tab":
-                container = DATabView()
-                
-                let tab_name = container_name.replace("tab_", withString:"")
-                tabs[tab_name] = container as? DATabView
-                container.name = tab_name
-                
-            case "scale9":
-                //SHHH, NOT ACTUALLY A CONTAINER
-                return processScale9View(view)
-            case "paragraph":
-                print("ERROR: PARAGRAPH NOT SUPPORTED YET")
-                container = DAContainerView()
-            default:
-                print("ERROR: UNRECOGNIZED CONTAINER TYPE: \(container_type)")
-                container = DAContainerView()
+                    let btn_name = container_name.replace("scalebtn_",withString:"")
+                    buttons[btn_name] = container as? DAButtonViewBase
+                    container.name = btn_name
+                case "progress":
+                    print("ERROR: PROGRESS BARS NOT SUPPORTED YET")
+                    container = DAContainerView()
+                case "tab":
+                    container = DATabView()
+                    
+                    let tab_name = container_name.replace("tab_", withString:"")
+                    tabs[tab_name] = container as? DATabView
+                    container.name = tab_name
+                    
+                case "scale9":
+                    //actually a container in view-land
+                    container = DAScale9View()
+                case "paragraph":
+                    print("ERROR: PARAGRAPH NOT SUPPORTED YET")
+                    container = DAContainerView()
+                default:
+                    print("ERROR: UNRECOGNIZED CONTAINER TYPE: \(container_type)")
+                    container = DAContainerView()
             }
         }
         
@@ -460,6 +463,17 @@ class DAMetaView : DAContainerView
             for view_child in view_children
             {
                 container!.addSubview(view_child)
+            }
+        }
+        
+        if let scale9 = container as? DAScale9View
+        {
+            for subview in scale9.subviews
+            {
+                if let dasub = subview as? DAView
+                {
+                    print("SUBVIEW CHILD: \(dasub.name)")
+                }
             }
         }
         
@@ -481,7 +495,7 @@ class DAMetaView : DAContainerView
         
         if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
-            container!.resetPosition = processPosition(position, size:container!.resetSize)
+            container!.resetPosition = processPosition(position)
         }
         
         
@@ -500,51 +514,66 @@ class DAMetaView : DAContainerView
         return container
     }
     
-    func processScale9View(view:Dictionary<String, AnyObject>) -> DAImageView
+    func postProcessScale9Views(view:DAView)
     {
-        var center:CGRect?
-        var sprite:DAImageView?
-        var size:CGRect?
-        
-        let children = view["children"] as! NSArray as [AnyObject]
-        
-        for raw_view in children
+        for child:AnyObject in view.subviews
         {
-            if let view = raw_view as? Dictionary<String,AnyObject>
+            if let scale9 = child as? DAScale9View
             {
-                if let view_type = view["type"] as? NSString as? String
+                postProcessScale9View(scale9)
+            }
+            
+            if let view_child = child as? DAView
+            {
+                postProcessScale9Views(view_child)
+            }
+            
+        }
+    }
+    
+    func postProcessScale9View(view:DAView)
+    {
+        var center:DAView!
+        var sprite:DAImageView!
+        var size:DAView!
+        
+        for view:AnyObject in view.subviews
+        {
+            if let daview = view as? DAView
+            {
+                switch(daview.name!)
                 {
-                    switch view_type
-                    {
-                    case "image":
-                        sprite = processImageView(view) as? DAImageView
-                    case "placeholder":
-                        processPlaceholder(view)
-                        
-                        if let name = view["name"] as? NSString as? String
-                        {
-                            if(name == "size")
-                            {
-                                size = placeholderWithName(name)!
-                            }else if(name == "center"){
-                                center = placeholderWithName(name)!
-                            }else{
-                                print("EXTRA SCALE9 PLACEHOLDER: \(name)")
-                            }
-                            
-                        }
+                    case "size":
+                        size = daview
+                    case "center":
+                        center = daview
                     default:
-                        fatalError("scale9 containers can only contain a single image and two placeholders")
-                    }
+                        //not size, not center, assume it's our image!
+                        if let image = daview as? DAImageView
+                        {
+                            sprite = image
+                            
+                        }else{
+                            fatalError("FOUND SOMETHING EXTRA IN A SCALE9 -- \(daview)")
+                        }
                 }
             }
         }
+        
+        let image_view = sprite.image
+        
 
-        if let image = sprite?.image
-        {
-
-            //uiview uses actual pixel insets and not UV insets
-            print("TODO: replace image with resizableImageWithCapInsets")
+        //uiview uses actual pixel insets and not UV insets
+        let center_inset = DAMetaView.getCenterInset(outerRect: sprite.frame, innerRect: center.frame)
+        //let center_inset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        
+        let cap_image = image_view.image!.resizableImageWithCapInsets(center_inset)
+        image_view.image = cap_image
+        
+        sprite.frame = size.frame
+//            sprite!.resetPosition = size!.origin
+//            sprite!.resetSize = size!.size
+        
 //            sprite!.centerRect = DAMetaView.getCenterRect(outerRect:sprite!.frame, innerRect:center!)
 //            sprite!.width = size!.width
 //            sprite!.height = size!.height
@@ -553,35 +582,23 @@ class DAMetaView : DAContainerView
 //            {
 //                sprite!.position = processPosition(position)
 //            }
-            
-            return sprite!
-        }
-        
-        
-        return DAImageView()
     }
     
-    static func getCenterRect(outerRect outer:CGRect, innerRect inner:CGRect) -> CGRect
+    static func getCenterInset(outerRect outer:CGRect, innerRect inner:CGRect) -> UIEdgeInsets
     {
-        let full_width = outer.width
-        let full_height = outer.height
-        
-        let left = inner.minX - outer.minX
-        let bottom = inner.minY - outer.minY
-        
-        let x = left / full_width
-        let y = bottom / full_height
-        let w = inner.width / full_width
-        let h = inner.height / full_height
-        
-        return CGRect(x:x, y:y, width:w, height:h)
+        //PIXEL INSETS USE REAL IMAGE PIXELS NOT POINTS
+        let left = (inner.minX - outer.minX) / 1
+        let bottom = (outer.maxY - inner.maxY)  / 1
+        let right = (outer.maxX - inner.maxX)  / 1
+        let top = (inner.minY - outer.minY)  / 1
+
+        return UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
     }
     
     func processTextView(view:Dictionary<String, AnyObject>) -> DALabelView
     {
         if let font = view["font"] as? NSString as? String
         {
-            print("CREATING LABEL")
             let label = DALabelView()
             
             let font_name = DAFont.getFont(font)
@@ -593,7 +610,6 @@ class DAMetaView : DAContainerView
             
             if let font = UIFont(name: font_name, size: font_size)
             {
-                print(font)
                 label.font = font
             }else{
                 print("ERROR -- COULD NOT CREATE FONT \(font_name)")
@@ -612,7 +628,7 @@ class DAMetaView : DAContainerView
 
             if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
-                label.resetPosition = processPosition(position, size:label.resetSize)
+                label.resetPosition = processPosition(position)
             }
             
             if let font_color_hex = view["color"] as? NSString as? String
@@ -641,9 +657,6 @@ class DAMetaView : DAContainerView
                 }
             }
             
-            
-            print("LABEL \(label.name!) CREATED WITH FONT \(font_name) AT SIZE \(font_size)")
-            
             labels[label.name!] = label
             return label
         }
@@ -660,11 +673,11 @@ class DAMetaView : DAContainerView
             image.name = image_name
             
             //image size is implicit -- not in the json
-            image.resetSize = image.image.image!.size*DAMetaView.scaleFactor
+            image.resetSize = image.image.image!.size*DAMetaView.scaleFactor*image.image.image!.scale
             
             if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
-                image.resetPosition = processPosition(position, size:image.resetSize)
+                image.resetPosition = processPosition(position)
             }
             
             let image_type = image_name.split("_")[0]
@@ -677,8 +690,6 @@ class DAMetaView : DAContainerView
             //simple scale button!
             if(image_type == "scalebtn")
             {
-                print("TODO: SIMPLE SCALE BUTTON")
-                
                 let container = DAScaleButtonView()
                 
                 let btn_name = image_name.replace("scalebtn_",withString:"")
@@ -713,7 +724,13 @@ class DAMetaView : DAContainerView
             {
                 if let name = view["name"] as? NSString as? String
                 {
-                    placeholders[name] = CGRect(x: position[0] - size[0]/2.0, y: position[1] - size[1]/2.0, width: size[0], height: size[1])
+                    
+                    let view = DAView()
+                    view.resetPosition = processPosition(position)
+                    view.resetSize = CGSize(width: size[0]*DAMetaView.scaleFactor, height: size[1]*DAMetaView.scaleFactor)
+                    view.name = name
+                    
+                    placeholders[name] = view
                     
                     if(name.rangeOfString("modal", options: [], range: nil, locale: nil) != nil)
                     {
@@ -725,6 +742,7 @@ class DAMetaView : DAContainerView
 //                        return modal
                     }
                     
+                    return view
                 }
             }
         }
@@ -744,16 +762,14 @@ class DAMetaView : DAContainerView
         let view_name = (view.name == nil ? view.description : view.name!)
         print("\(tab) \(view_name)     \(view.frame.center)")
         
-        if let container = view as? DAContainerView
+
+        for child:AnyObject in view.subviews
         {
-            for child:AnyObject in container.subviews
+            if let view_child = child as? DAView
             {
-                if let view_child = child as? DAView
-                {
-                    printDisplayTree(view_child, currentDepth: depth + 1)
-                }
-                
+                printDisplayTree(view_child, currentDepth: depth + 1)
             }
+            
         }
     }
     

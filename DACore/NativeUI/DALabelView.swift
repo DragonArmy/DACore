@@ -69,7 +69,12 @@ class DALabelView : DAView
         }
         set(value)
         {
-            label.textAlignment = value
+            if(value.rawValue == 4)
+            {
+                label.textAlignment = NSTextAlignment.Left
+            }else{
+                label.textAlignment = value
+            }
         }
     }
     
@@ -84,6 +89,11 @@ class DALabelView : DAView
     override func sizeToFit()
     {
         super.sizeToFit()
+        
+        if(label.text == nil || label.text == "\"\"" || label.text!.isEmpty)
+        {
+            return
+        }
         
         let nstext = label.text! as NSString
         let size = nstext.sizeWithAttributes([NSFontAttributeName:label.font])
@@ -100,7 +110,7 @@ class DALabelView : DAView
                 case .Center:
                     frame = CGRect(x: frame.origin.x - expansion/2, y: frame.origin.y, width: frame.size.width + expansion, height: frame.size.height)
                 default:
-                    print("OOPS WE DONT SUPPORT \(textAlignment)")
+                    print("OOPS WE DONT SUPPORT \(textAlignment.rawValue)")
             }
         }
         
