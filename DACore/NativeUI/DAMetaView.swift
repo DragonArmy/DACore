@@ -30,6 +30,7 @@ class DAMetaView : DAContainerView
         }
     }
     static var scaleFactor:CGFloat = 1.0
+    static var assetPath:String = "screens/"
     
     
     private var fileRoot:String
@@ -77,7 +78,7 @@ class DAMetaView : DAContainerView
             }
             
             
-            if let meta_url = bundle.URLForResource("\(file_root)\(device_tag)/\(file_root)\(device_tag)", withExtension: "txt")
+            if let meta_url = bundle.URLForResource("\(assetPath)\(file_root)\(device_tag)/\(file_root)\(device_tag)", withExtension: "txt")
             {
                 print(meta_url)
                 
@@ -89,7 +90,7 @@ class DAMetaView : DAContainerView
                 
                 DAMetaView.LoadedMetadata[file_root] = json
             }else{
-                print("ERROR ERROR ERROR -- \(file_root)\(device_tag) NOT FOUND")
+                print("ERROR ERROR ERROR -- \(assetPath)\(file_root)\(device_tag) NOT FOUND")
             }
         }
     }
@@ -132,7 +133,7 @@ class DAMetaView : DAContainerView
         {
             device_tag = ""
         }
-        assetFolder = "\(file_root)\(device_tag)"
+        assetFolder = "\(DAMetaView.assetPath)\(file_root)\(device_tag)"
         
         super.init(frame:CGRect.zero)
         
@@ -664,6 +665,12 @@ class DAMetaView : DAContainerView
         return DALabelView()
     }
     
+    static func imageNamed(name:String) -> UIImage
+    {
+        let path = "\(DAMetaView.assetPath)\(name)\(deviceTag)"
+        return UIImage(named: path)!
+    }
+    
     func processImageView(view:Dictionary<String, AnyObject>) -> DAView
     {
         if let image_name = view["name"] as? NSString as? String
@@ -706,7 +713,7 @@ class DAMetaView : DAContainerView
                 return container
             }
             
-            
+            print("SET images[\(image_name)] = IMAGE")
             images[image_name] = image
             
             return image
