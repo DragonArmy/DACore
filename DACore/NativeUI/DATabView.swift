@@ -34,7 +34,7 @@ class DATabView : DAView
         set(value)
         {
             //could bail out here if we're setting it to our current value, but there's a chance
-            //we're resetting the current state to refresh linked display nodes... so do it every time
+            //we're resetting the current state to refresh linked dDAisplay nodes... so do it every time
             //just to be safe
             _currentState = value
             
@@ -80,6 +80,22 @@ class DATabView : DAView
     {
         fatalError("NSCoding not supported")
     }
+    
+    //we need all our tab contents to reset, not just the currently selected one
+    override func reset(recursive:Bool=true)
+    {
+        for view in content
+        {
+            if(view.superview == nil)
+            {
+                addSubview(view)
+            }
+        }
+        
+        super.reset(recursive)
+        self.currentState = _currentState
+    }
+    
     
     func linkView(view:DAView, toState state:String)
     {

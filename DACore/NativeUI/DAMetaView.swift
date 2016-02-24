@@ -54,14 +54,14 @@ class DAMetaView : DAContainerView
         DAMetaView.scaleFactor = scale_factor
         
         
-        let available_fonts = UIFont.familyNames()
-        for(var i:Int = 0; i < available_fonts.count; i++)
-        {
-            let font_family = available_fonts[i]
-            let font_names = UIFont.fontNamesForFamilyName(font_family)
-            
-            print("\(font_family): \(font_names)")
-        }
+//        let available_fonts = UIFont.familyNames()
+//        for(var i:Int = 0; i < available_fonts.count; i++)
+//        {
+//            let font_family = available_fonts[i]
+//            let font_names = UIFont.fontNamesForFamilyName(font_family)
+//            
+//            print("\(font_family): \(font_names)")
+//        }
     }
     
     // tuple of (String,bool) is for file_root and whether it's resolutionIndependent or not
