@@ -51,7 +51,6 @@ class DAProgressBar : DAContainerBase
             }else{
                 //it seems like masked sprites maybe don't respect their anchors?
                 progressSprite!.x = _progressX - CGFloat((1-value))*progressSprite!.width
-                print("SET X TO \(progressSprite!.x)   (\(progressSprite!.width))      \(value)")
             }
         }
     }
