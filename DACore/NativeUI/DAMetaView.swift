@@ -485,7 +485,6 @@ class DAMetaView : DAContainerView
         
         if let tab = container as? DATabView
         {
-            print("TODO: POST PROCESS TABS")
             tab.createStates()
         }
         
@@ -640,6 +639,15 @@ class DAMetaView : DAContainerView
             if let text = view["text"] as? NSString as? String
             {
                 label.text = text
+            }
+            
+            if let alpha = view["alpha"] as? NSNumber as? CGFloat
+            {
+                if(alpha < 1.0)
+                {
+                    label.opaque = false
+                    label.alpha = alpha
+                }
             }
             
             if let align = view["justification"] as? NSString as? String

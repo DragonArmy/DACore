@@ -906,6 +906,11 @@ class DAMetaNode : DAContainer
                 label.text = text
             }
             
+            if let alpha = node["alpha"] as? NSNumber as? CGFloat
+            {
+                label.alpha = alpha
+            }
+            
             if let align = node["justification"] as? NSString as? String
             {
                 if(align == "center")
