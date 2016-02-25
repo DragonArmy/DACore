@@ -37,6 +37,9 @@ class DAButtonBase : DAContainerBase
     var lastPress = NSDate()
     var cooldown:Double = 0.0
     
+    static var globalLastPress = NSDate()
+    static var globalCooldown:Double = 0.0
+    
     override init()
     {
         super.init()
@@ -151,6 +154,12 @@ class DAButtonBase : DAContainerBase
             return
         }
         
+        if(press_time.timeIntervalSinceDate(DAButtonBase.globalLastPress) < DAButtonBase.globalCooldown)
+        {
+            print("GLOBAL TOO SOON")
+            return
+        }
+        
         
         if(enabled)
         {
@@ -252,7 +261,7 @@ class DAButtonBase : DAContainerBase
                 lastTouch = touch.timestamp
                 let touch_pos = touch.locationInNode(scene!)
                 let touch_view = touch.locationInView(scene!.view)
-                print("POSITION IN SCENE: \(touch_pos)        VIEW: \(touch_view)")
+                
                 let hit_nodes = scene!.nodesAtPoint(touch_pos)
                 scene!.touchesEnded(touches, withEvent: event)
                 for node in hit_nodes
