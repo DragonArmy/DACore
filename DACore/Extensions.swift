@@ -485,7 +485,7 @@ extension SKNode
     }
     
     var scale : CGFloat
-        {
+    {
         get
         {
             return xScale
@@ -497,11 +497,8 @@ extension SKNode
             var working_scale = self.scale
             var current_parent = self.parent
             
-            print("STARTING WITH SCALE \(self.scale)    -   \(self.name)")
-            
             while(current_parent != nil)
             {
-                print("MULTIPLY BY \(current_parent!.scale)")
                 working_scale = working_scale * current_parent!.scale
                 current_parent = current_parent!.parent
             }

@@ -37,8 +37,8 @@ class DAButtonBase : DAContainerBase
     var lastPress = NSDate()
     var cooldown:Double = 0.0
     
-    static var globalLastPress = NSDate()
-    static var globalCooldown:Double = 0.0
+    //if touchMask != nil, do a raycast of our touch in the scene and only allow touches IFF the touchMask was also touched!
+    var touchMask:SKNode?
     
     override init()
     {
@@ -114,8 +114,7 @@ class DAButtonBase : DAContainerBase
         if(scene == nil)
         {
             return
-        }
-        
+        }        
         
         /********** TOUCH FORWARDING **********/
         if(!blocksTouches)
@@ -145,18 +144,36 @@ class DAButtonBase : DAContainerBase
         }
         /********** END TOUCH FORWARDING **********/
         
-        
+        /********** TOUCH MASKING **********/
+        if let mask = touchMask
+        {
+            let touch = touches.first!
+            let touch_pos = touch.locationInNode(scene!)
+            let hit_nodes = scene!.nodesAtPoint(touch_pos)
+            
+            var in_mask = false
+            
+            for node in hit_nodes
+            {
+                if(node == mask)
+                {
+                    in_mask = true
+                    break
+                }
+            }
+            if(!in_mask)
+            {
+                print("TOUCHED BUT NOT IN OUR TOUCH MASK")
+                return
+            }
+            
+        }
+        /********** END TOUCH MASKING **********/
         
         let press_time = NSDate()
         if(press_time.timeIntervalSinceDate(lastPress) < cooldown)
         {
             print("TOO SOON")
-            return
-        }
-        
-        if(press_time.timeIntervalSinceDate(DAButtonBase.globalLastPress) < DAButtonBase.globalCooldown)
-        {
-            print("GLOBAL TOO SOON")
             return
         }
         
@@ -223,6 +240,32 @@ class DAButtonBase : DAContainerBase
         }
         /********** END TOUCH FORWARDING **********/
         
+        
+        /********** TOUCH MASKING **********/
+        if let mask = touchMask
+        {
+            let touch = touches.first!
+            let touch_pos = touch.locationInNode(scene!)
+            let hit_nodes = scene!.nodesAtPoint(touch_pos)
+            
+            var in_mask = false
+            
+            for node in hit_nodes
+            {
+                if(node == mask)
+                {
+                    in_mask = true
+                    break
+                }
+            }
+            if(!in_mask)
+            {
+                print("TOUCHED BUT NOT IN OUR TOUCH MASK")
+                return
+            }
+            
+        }
+        /********** END TOUCH MASKING **********/
         if(!isTouching)
         {
             return
@@ -279,6 +322,34 @@ class DAButtonBase : DAContainerBase
             }
         }
         /********** END TOUCH FORWARDING **********/
+        
+        
+        /********** TOUCH MASKING **********/
+        if let mask = touchMask
+        {
+            let touch = touches.first!
+            let touch_pos = touch.locationInNode(scene!)
+            let hit_nodes = scene!.nodesAtPoint(touch_pos)
+            
+            var in_mask = false
+            
+            for node in hit_nodes
+            {
+                if(node == mask)
+                {
+                    in_mask = true
+                    break
+                }
+            }
+            if(!in_mask)
+            {
+                print("TOUCHED BUT NOT IN OUR TOUCH MASK")
+                return
+            }
+            
+        }
+        /********** END TOUCH MASKING **********/
+        
         
         if(!isTouching)
         {
