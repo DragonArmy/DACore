@@ -713,7 +713,6 @@ class DAMetaView : DAContainerView
                 return container
             }
             
-            print("SET images[\(image_name)] = IMAGE")
             images[image_name] = image
             
             return image

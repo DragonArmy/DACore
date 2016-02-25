@@ -20,7 +20,12 @@ class DAImageView : DAView
     init(named:String)
     {
         image = UIImageView(image: UIImage(named: named))
-        super.init(frame: CGRect(origin: CGPoint.zero, size: image.image!.size))
+        if let size = image.image?.size
+        {
+            super.init(frame: CGRect(origin: CGPoint.zero, size: size))
+        }else{
+            fatalError("[ERROR] UNABLE TO LOAD IMAGE \(named)")
+        }
         addSubview(image)
     }
 
