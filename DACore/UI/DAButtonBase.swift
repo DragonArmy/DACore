@@ -303,7 +303,6 @@ class DAButtonBase : DAContainerBase
             {
                 lastTouch = touch.timestamp
                 let touch_pos = touch.locationInNode(scene!)
-                let touch_view = touch.locationInView(scene!.view)
                 
                 let hit_nodes = scene!.nodesAtPoint(touch_pos)
                 scene!.touchesEnded(touches, withEvent: event)
