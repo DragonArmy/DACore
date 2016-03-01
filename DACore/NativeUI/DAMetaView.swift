@@ -673,9 +673,9 @@ class DAMetaView : DAContainerView
         return DALabelView()
     }
     
-    static func imageNamed(name:String) -> UIImage
+    static func imageNamed(fileRoot:String, name:String) -> UIImage
     {
-        let path = "\(DAMetaView.assetPath)\(name)\(deviceTag)"
+        let path = "\(DAMetaView.assetPath)\(fileRoot)\(deviceTag)/\(name)"
         return UIImage(named: path)!
     }
     

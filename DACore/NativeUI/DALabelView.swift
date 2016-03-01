@@ -97,22 +97,22 @@ class DALabelView : DAView
         
         let nstext = label.text! as NSString
         let size = nstext.sizeWithAttributes([NSFontAttributeName:label.font])
-        let expansion = size.width - resetSize.width
+
+        let horizontal = size.width - resetSize.width
+        let vertical = size.height - resetSize.height
         
-        if(expansion > 0)
+        switch(textAlignment)
         {
-            switch(textAlignment)
-            {
-                case .Left:
-                    frame = CGRect(x: frame.origin.x, y: frame.origin.y, width: frame.size.width + expansion, height: frame.size.height)
-                case .Right:
-                    frame = CGRect(x: frame.origin.x - expansion, y: frame.origin.y, width: frame.size.width + expansion, height: frame.size.height)
-                case .Center:
-                    frame = CGRect(x: frame.origin.x - expansion/2, y: frame.origin.y, width: frame.size.width + expansion, height: frame.size.height)
-                default:
-                    print("OOPS WE DONT SUPPORT \(textAlignment.rawValue)")
-            }
+            case .Left:
+                frame = CGRect(x: frame.origin.x, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
+            case .Right:
+                frame = CGRect(x: frame.origin.x - horizontal, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
+            case .Center:
+                frame = CGRect(x: frame.origin.x - horizontal/2, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
+            default:
+                print("OOPS WE DONT SUPPORT \(textAlignment.rawValue)")
         }
+
         
     }
     
