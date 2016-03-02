@@ -34,7 +34,7 @@ class DAView : UIView
             super.frame = value
             for view in subviews
             {
-                if let da = view as? DAView
+                if let _ = view as? DAView
                 {
                     continue
                 }
@@ -86,8 +86,7 @@ class DAView : UIView
             self.layer.anchorPoint = CGPoint(x: 0.5 + pivot.x/resetSize.width, y: 0.5 + pivot.y/resetSize.height)
         }
         
-        self.frame = CGRect(origin: CGPoint(x:x, y:y), size: resetSize)
-        
+        self.frame = CGRect(origin: CGPoint(x:x, y:y), size: resetSize)        
         
 //        self.layer.anchorPoint = pivot
         

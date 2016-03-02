@@ -17,6 +17,8 @@ class DALabelView : DAView
     {
         super.init()
         addSubview(label)
+        
+        label.lineBreakMode = NSLineBreakMode.ByClipping
     }
 
     required init?(coder aDecoder: NSCoder)
@@ -57,7 +59,7 @@ class DALabelView : DAView
         set(value)
         {
             label.text = value
-            sizeToFit()
+            reset()
         }
     }
     
@@ -85,11 +87,8 @@ class DALabelView : DAView
         sizeToFit()
     }
     
-    
     override func sizeToFit()
     {
-        super.sizeToFit()
-        
         if(label.text == nil || label.text == "\"\"" || label.text!.isEmpty)
         {
             return
@@ -98,22 +97,23 @@ class DALabelView : DAView
         let nstext = label.text! as NSString
         let size = nstext.sizeWithAttributes([NSFontAttributeName:label.font])
 
-        let horizontal = size.width - resetSize.width
-        let vertical = size.height - resetSize.height
+        let horizontal = (size.width - frame.size.width)
+        let vertical = size.height - frame.size.height
         
+        var new_frame:CGRect = frame
         switch(textAlignment)
         {
             case .Left:
-                frame = CGRect(x: frame.origin.x, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
+                new_frame = CGRect(x: frame.origin.x, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
             case .Right:
-                frame = CGRect(x: frame.origin.x - horizontal, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
+                new_frame = CGRect(x: frame.origin.x - horizontal, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
             case .Center:
-                frame = CGRect(x: frame.origin.x - horizontal/2, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
+                new_frame = CGRect(x: frame.origin.x - horizontal/2, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
             default:
                 print("OOPS WE DONT SUPPORT \(textAlignment.rawValue)")
         }
-
         
+        self.frame = new_frame
     }
     
 }
