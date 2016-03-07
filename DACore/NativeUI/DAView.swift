@@ -17,7 +17,7 @@ class DAView : UIView
     //set from metadata, NOT the frame
     var resetPosition = CGPoint.zero
     var resetSize = CGSize.zero
-    var pivot = CGPoint(x: 0.5, y: 0.5)
+    var pivot = CGPoint(x: 0.0, y: 0.0)
     
     var rootWidth:CGFloat = 0
     var rootHeight:CGFloat = 0
@@ -47,6 +47,9 @@ class DAView : UIView
     init()
     {
         super.init(frame:CGRect.zero)
+        
+        //actually super handy to turn these all bright pink to debug hitboxes & placeholders
+        //self.backgroundColor = "#f800af".toUIColor()
     }
     
     override init(frame: CGRect)
