@@ -13,6 +13,7 @@ class DAView : UIView
     var name:String?
     
     var cachedMetadata = Dictionary<String, AnyObject>()
+    var assetFolder:String = ""
 
     //set from metadata, NOT the frame
     var resetPosition = CGPoint.zero
@@ -113,6 +114,9 @@ class DAView : UIView
         {
             if let resettable = view as? DAView
             {
+                //percolate this down to children so if we clone a view we know where to load stuff from
+                resettable.assetFolder = assetFolder
+                
                 resettable.rootWidth = rootWidth
                 resettable.rootHeight = rootHeight
                 resettable.reset(recursive)
