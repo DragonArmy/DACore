@@ -34,7 +34,6 @@ class DAMetaView : DAContainerView
     
     
     private var fileRoot:String
-    private var assetFolder:String
     private var rootContainer:String?
 
     //MOVED to superclass
@@ -118,9 +117,39 @@ class DAMetaView : DAContainerView
     {
         fileRoot = ""
         rootContainer = ""
-        assetFolder = ""
         super.init()
     }
+    
+    init(from_view:DAView)
+    {
+        print("CREATING DAMetaView from existing view!")
+        fileRoot = ""
+        rootContainer = from_view.name!
+        
+        super.init()
+        
+        assetFolder =  from_view.assetFolder        
+        
+        rootWidth = from_view.frame.size.width
+        rootHeight = from_view.frame.size.height
+        
+        let container = processContainerView(from_view.cachedMetadata)
+        
+        resetSize = container.resetSize
+        resetPosition = CGPoint.zero //CGPoint(x: rootWidth/2, y: rootHeight/2)
+        pivot = container.pivot
+        
+        for view in container.subviews
+        {
+            view.removeFromSuperview()
+            addSubview(view)
+        }
+        
+        reset(true)
+        postProcessScale9Views(self)
+        center = CGPoint(x:rootWidth/2, y:rootHeight/2)
+    }
+    
     
     init(file_root:String, fromContainer container_name:String?, resolutionIndependent omit_device_tag:Bool)
     {
@@ -133,9 +162,10 @@ class DAMetaView : DAContainerView
         {
             device_tag = ""
         }
-        assetFolder = "\(DAMetaView.assetPath)\(file_root)\(device_tag)"
         
         super.init(frame:CGRect.zero)
+        
+        assetFolder = "\(DAMetaView.assetPath)\(file_root)\(device_tag)"
         
         name = file_root
         
