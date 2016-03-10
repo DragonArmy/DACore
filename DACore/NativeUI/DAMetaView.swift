@@ -40,7 +40,7 @@ class DAMetaView : DAContainerView
 //    var rootWidth:CGFloat = 0
 //    var rootHeight:CGFloat = 0
     
-    var placeholders    = [String:DAView]()
+    var placeholders    = [String:CGRect]()
     var containers      = [String:DAContainerView]()
     var tabs            = [String:DATabView]()
     var buttons         = [String:DAButtonViewBase]()
@@ -146,7 +146,6 @@ class DAMetaView : DAContainerView
         }
         
         reset(true)
-        postProcessScale9Views(self)
         center = CGPoint(x:rootWidth/2, y:rootHeight/2)
     }
     
@@ -203,9 +202,6 @@ class DAMetaView : DAContainerView
         
         //set up all our frames on all our children
         reset(true)
-        
-        //scale9 placeholders are in the wrong coordinate system until AFTER we reset the tree, so have to do this after
-        postProcessScale9Views(self)
         
         //we probably don't want our root view centered at 0,0, so assume we want it at rootWidth/2, rootHeight/2
         center = CGPoint(x:rootWidth/2, y:rootHeight/2)
@@ -287,13 +283,24 @@ class DAMetaView : DAContainerView
             print("[ERROR] placeholderWithName provides the placeholder_, you may omit it from your call!")
         }
         
-        return placeholders[placeholder_name]?.frame
+        return placeholders[placeholder_name]
     }
     
     let DEBUG = false
     func processMetadata(json:Dictionary<String,AnyObject>)
     {
 //        print("PROCESS METADATA")
+        
+        if let platform = json["coordinate_system"] as? NSString as? String
+        {
+            if(platform != "native_ui")
+            {
+                fatalError("OOOPS YOU DIDN'T EXPORT FOR NATIVE UI")
+            }
+        }else{
+            fatalError("OOOPS YOU'RE PROBABLY USING AN OLD EXPORTER. MISSING coordinate_system KEY")
+        }
+        
         if let root_width = json["root_width"] as? NSNumber as? Int
         {
             rootWidth = CGFloat(root_width)*DAMetaView.scaleFactor
@@ -471,8 +478,8 @@ class DAMetaView : DAContainerView
                     container.name = tab_name
                     
                 case "scale9":
-                    //actually a container in view-land
-                    container = DAScale9View()
+                    //shhhh, not actually a container
+                    return processScale9View(view)
                 case "paragraph":
                     print("ERROR: PARAGRAPH NOT SUPPORTED YET")
                     container = DAContainerView()
@@ -544,75 +551,60 @@ class DAMetaView : DAContainerView
         return container
     }
     
-    func postProcessScale9Views(view:DAView)
+    func processScale9View(node:Dictionary<String, AnyObject>, useTextureCache use_texture_cache:Bool=false) -> DAImageView
     {
-        for child:AnyObject in view.subviews
-        {
-            if let scale9 = child as? DAScale9View
-            {
-                postProcessScale9View(scale9)
-            }
-            
-            if let view_child = child as? DAView
-            {
-                postProcessScale9Views(view_child)
-            }
-            
-        }
-    }
-    
-    func postProcessScale9View(view:DAView)
-    {
-        var center:DAView!
-        var sprite:DAImageView!
-        var size:DAView!
+        var center:CGRect!
+        var image:DAImageView!
+        var size:CGRect!
         
-        for view:AnyObject in view.subviews
+        let children = node["children"] as! NSArray as [AnyObject]
+        
+        for raw_node in children
         {
-            if let daview = view as? DAView
+            if let node = raw_node as? Dictionary<String,AnyObject>
             {
-                switch(daview.name!)
+                if let node_type = node["type"] as? NSString as? String
                 {
-                    case "size":
-                        size = daview
-                    case "center":
-                        center = daview
-                    default:
-                        //not size, not center, assume it's our image!
-                        if let image = daview as? DAImageView
-                        {
-                            sprite = image
+                    switch node_type
+                    {
+                        case "image":
+                            image = processImageView(node) as! DAImageView
+                        case "placeholder":
+                            processPlaceholder(node)
                             
-                        }else{
-                            fatalError("FOUND SOMETHING EXTRA IN A SCALE9 -- \(daview)")
-                        }
+                            if let name = node["name"] as? NSString as? String
+                            {
+                                if(name == "size")
+                                {
+                                    size = placeholderWithName(name)!
+                                }else if(name == "center"){
+                                    center = placeholderWithName(name)!
+                                }else{
+                                    print("EXTRA SCALE9 PLACEHOLDER: \(name)")
+                                }
+                                
+                            }
+                        default:
+                            fatalError("SCALE9 containers can only contain a single image and two placeholders")
+                    }
                 }
             }
         }
         
-        let image_view = sprite.image
-        
-
-        //uiview uses actual pixel insets and not UV insets
-        let center_inset = DAMetaView.getCenterInset(outerRect: sprite.frame, innerRect: center.frame)
-        //let center_inset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        //get the uiimageview
+        let image_view = image.image
+        let center_inset = DAMetaView.getCenterInset(outerRect: image.frame, innerRect: center)
         
         let cap_image = image_view.image!.resizableImageWithCapInsets(center_inset)
         image_view.image = cap_image
         
-        sprite.frame = size.frame
-//            sprite!.resetPosition = size!.origin
-//            sprite!.resetSize = size!.size
+        image.frame = size
+        image.resetPosition = size.origin
+        image.resetSize = size.size
         
-//            sprite!.centerRect = DAMetaView.getCenterRect(outerRect:sprite!.frame, innerRect:center!)
-//            sprite!.width = size!.width
-//            sprite!.height = size!.height
-//            
-//            if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
-//            {
-//                sprite!.position = processPosition(position)
-//            }
+        return DAImageView()
     }
+    
     
     static func getCenterInset(outerRect outer:CGRect, innerRect inner:CGRect) -> UIEdgeInsets
     {
@@ -768,25 +760,18 @@ class DAMetaView : DAContainerView
             {
                 if let name = view["name"] as? NSString as? String
                 {
-                    
-                    let view = DAView()
-                    view.resetPosition = processPosition(position)
-                    view.resetSize = CGSize(width: size[0]*DAMetaView.scaleFactor, height: size[1]*DAMetaView.scaleFactor)
-                    view.name = name
-                    
-                    placeholders[name] = view
+                    placeholders[name] = CGRect(x: position[0]*DAMetaView.scaleFactor, y: position[1]*DAMetaView.scaleFactor, width: size[0]*DAMetaView.scaleFactor, height: size[1]*DAMetaView.scaleFactor)
                     
                     if(name.rangeOfString("modal", options: [], range: nil, locale: nil) != nil)
                     {
-                        print("TODO: ADD MODALS")
-//                        let modal = SKSpriteView(color: "#230211".toColor(), size: placeholders[name]!.size)
-//                        modal.alpha = 0.7
-//                        modal.name = "modal"
-//                        modal.position = placeholders[name]!.center
-//                        return modal
+                        let modal = DAView(frame: placeholders[name]!)
+                        modal.opaque = false
+                        modal.alpha = 0.7
+                        modal.name = "modal"
+                        modal.backgroundColor = "#230211".toUIColor()
+                        
+                        return modal
                     }
-                    
-                    return view
                 }
             }
         }
