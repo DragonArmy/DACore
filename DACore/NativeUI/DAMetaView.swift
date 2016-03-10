@@ -602,7 +602,7 @@ class DAMetaView : DAContainerView
         image.resetPosition = size.origin
         image.resetSize = size.size
         
-        return DAImageView()
+        return image
     }
     
     
