@@ -45,6 +45,19 @@ class DAView : UIView
         }
     }
     
+    override var description: String
+    {
+        get
+        {
+            let legacy = super.description
+            
+            let new_stuff = "\(self.name!)      resetPosition:\(resetPosition)             resetSize:\(resetSize)       pivot:\(pivot)"
+            
+            return "\(legacy) \n \(new_stuff)"
+        }
+    }
+    
+    
     init()
     {
         super.init(frame:CGRect.zero)
@@ -63,6 +76,20 @@ class DAView : UIView
     }
     
     func reset(recursive:Bool=true)
+    {
+        let pivotPosition = resetPosition + pivot
+        let x:CGFloat = pivotPosition.x
+        let y:CGFloat = pivotPosition.y
+        
+        self.frame = CGRect(origin: CGPoint(x:x, y:y), size: resetSize)
+        
+        if(recursive)
+        {
+            resetChildren(true)
+        }
+    }
+    
+    func skCoordinateReset(recursive:Bool=true)
     {
         let centerPosition = resetPosition + pivot
         
@@ -90,21 +117,12 @@ class DAView : UIView
             self.layer.anchorPoint = CGPoint(x: 0.5 + pivot.x/resetSize.width, y: 0.5 + pivot.y/resetSize.height)
         }
         
-        self.frame = CGRect(origin: CGPoint(x:x, y:y), size: resetSize)        
-        
-//        self.layer.anchorPoint = pivot
-        
-//        position = reset
-//        
-//        setScale(1)
-//        zRotation = 0
-//        hidden = false
-//        alpha = 1
+        self.frame = CGRect(origin: CGPoint(x:x, y:y), size: resetSize)
         
         
         if(recursive)
         {
-            resetChildren(recursive)
+            resetChildren(true)
         }
     }
     
