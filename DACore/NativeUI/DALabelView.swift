@@ -67,6 +67,11 @@ class DALabelView : DAView
     {
         get
         {
+            if(label.textAlignment.rawValue == 4)
+            {
+                return NSTextAlignment.Left
+            }
+            
             return label.textAlignment
         }
         set(value)
@@ -110,7 +115,7 @@ class DALabelView : DAView
             case .Center:
                 new_frame = CGRect(x: frame.origin.x - horizontal/2, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
             default:
-                print("OOPS WE DONT SUPPORT \(textAlignment.rawValue)")
+                print("OOPS WE DONT SUPPORT \(textAlignment)")
         }
         
         self.frame = new_frame
