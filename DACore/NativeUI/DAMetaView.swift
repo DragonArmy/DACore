@@ -591,6 +591,9 @@ class DAMetaView : DAContainerView
             }
         }
         
+        //set our initial frame so our center inset isn't all screwy
+        image.reset()
+        
         //get the uiimageview
         let image_view = image.image
         let center_inset = DAMetaView.getCenterInset(outerRect: image.frame, innerRect: center)
