@@ -767,7 +767,7 @@ class DAMetaNode : DAContainer
                             
                         }
                     default:
-                        fatalError("PARAGRAPH containers can only contain a single image and two placeholders")
+                        fatalError("SCALE9 containers can only contain a single image and two placeholders")
                     }
                 }
             }
