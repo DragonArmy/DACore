@@ -12,6 +12,10 @@ class DAMetaView : DAContainerView
 {
     private static var LoadedMetadata = [String : Dictionary<String,AnyObject>]()
     
+    static var paddingTop:CGFloat = 0.0
+    static var paddingLeft:CGFloat = 0.0
+    
+    
     private static var _deviceTag:String = "NOT SET"
     private static let NOT_SET = "NOT SET"
     static var deviceTag:String
