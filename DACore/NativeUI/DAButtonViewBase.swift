@@ -95,6 +95,8 @@ class DAButtonViewBase : DAView
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
+        print("TOUCHES BEGAN")
+        
         isTouching = false;
         
         if(recursiveHidden())
@@ -126,6 +128,7 @@ class DAButtonViewBase : DAView
     
     override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
+        print("TOUCHES MOVED")
         if(!isTouching)
         {
             return
@@ -145,15 +148,32 @@ class DAButtonViewBase : DAView
             //use touchRect instead of self b/c our size can change based on input
             if CGRectContainsPoint(expanded_rect, location)
             {
+                print("STILL DOWN")
                 isButtonDown = true
             }else{
+                print("UP UP UP")
                 isButtonDown = false
             }
         }
     }
     
+    override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?)
+    {
+        if(!isTouching)
+        {
+            return
+        }
+        if(superview == nil)
+        {
+            return
+        }
+        
+        isButtonDown = false
+    }
+    
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
+        print("TOUCHES ENDED")
         if(!isTouching)
         {
             return
