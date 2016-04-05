@@ -11,7 +11,7 @@ import UIKit
 class DALabelView : DAView
 {
     var label = UILabel()
-    
+    var maxWidth:CGFloat?
     
     override init()
     {
@@ -102,7 +102,11 @@ class DALabelView : DAView
         let nstext = label.text! as NSString
         let size = nstext.sizeWithAttributes([NSFontAttributeName:label.font])
 
-        let horizontal = (size.width - frame.size.width)
+        var horizontal = (size.width - frame.size.width)
+        if let max_width = maxWidth
+        {
+            horizontal = min(size.width, max_width) - frame.size.width
+        }
         let vertical = size.height - frame.size.height
         
         var new_frame:CGRect = frame
