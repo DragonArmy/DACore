@@ -22,12 +22,13 @@ class DAButtonViewBase : DAView
     let onButtonClick = Signal<DAButtonViewBase>()
     
     var isTouching:Bool = false
-    var lastTouch:NSTimeInterval = 0
+    var lastTouch = NSDate()
     
     var touchRect:CGRect?
     
     var lastPress = NSDate()
     var cooldown:Double = 0.0
+    var minimumPressTime:Double = 0.25
     
     var enabled = true
     
@@ -48,7 +49,23 @@ class DAButtonViewBase : DAView
             
             _isButtonDown = new_state
             
-            updateDisplay()
+            
+            if(new_state == true)
+            {
+                //press down right away, delay on the up state
+                updateDisplay()
+                return
+            }
+            
+            
+            let time = NSDate()
+            if(lastTouch.timeIntervalSinceDate(time) < minimumPressTime)
+            {
+                let delta = minimumPressTime - lastTouch.timeIntervalSinceDate(time)
+                dispatch_after_delay(delta, block: updateDisplay)
+            }else{
+                updateDisplay()
+            }
         }
     }
     
@@ -107,8 +124,8 @@ class DAButtonViewBase : DAView
             return
         }
         
-        let press_time = NSDate()
-        if(press_time.timeIntervalSinceDate(lastPress) < cooldown)
+        lastTouch = NSDate()
+        if(lastTouch.timeIntervalSinceDate(lastPress) < cooldown)
         {
             print("TOO SOON")
             return
@@ -117,6 +134,9 @@ class DAButtonViewBase : DAView
         if(enabled)
         {
             onButtonDown.fire(self);
+        }else{
+            //don't modify isButtonDown or touch state if we're disabled
+            return
         }
         
         isTouching = true
