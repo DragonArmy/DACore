@@ -33,6 +33,14 @@ class DAView : UIView
         set(value)
         {
             super.frame = value
+            
+            //if we're explicitly a container view (or a child), do NOT resize our children
+            if let _ = self as? DAContainerView
+            {
+                return
+            }
+            
+            //otherwise we're likely a wrapper around a UIView and need it to match our view
             for view in subviews
             {
                 if let _ = view as? DAView
