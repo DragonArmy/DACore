@@ -21,8 +21,8 @@ class DATabView : DAView
     
     var cycle:[String] = []
     
-    var allLinkedViews = Set<DAView>()
-    var linkedViews = [String:Set<DAView>]()
+    var allLinkedViews = Set<UIView>()
+    var linkedViews = [String:Set<UIView>]()
     
     private var _currentState:String = ""
     var currentState:String
@@ -97,7 +97,7 @@ class DATabView : DAView
     }
     
     
-    func linkView(view:DAView, toState state:String)
+    func linkView(view:UIView, toState state:String)
     {
         allLinkedViews.insert(view)
         
@@ -112,7 +112,7 @@ class DATabView : DAView
         self.currentState = _currentState
     }
     
-    func unlinkView(view:DAView, fromState state:String)
+    func unlinkView(view:UIView, fromState state:String)
     {
         //remove the linked node from the requested state
         if var current_views = linkedViews[state]
