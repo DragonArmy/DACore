@@ -970,28 +970,32 @@ class DAMetaNode : DAContainer
                 image.position = CGPoint(x:position[0], y:position[1])
             }
             
-            let image_type = image_name.split("_")[0]
-            if(image_type == "flipX")
+            let image_pieces = image_name.componentsSeparatedByString("_")
+            if let image_type = image_pieces.first
             {
-                image.xScale = -1
-            }
-
-            //simple scale button!
-            if(image_type == "scalebtn")
-            {
-                let container = DAScaleButton()
-                container.position = image.position
-                image.position = CGPoint(x:0,y:0)
-                container.addChild(image)
-                container.updateDisplay()
-                
-                if let btn_name = (node["name"] as? NSString as? String)?.replace("scalebtn_",withString:"")
+                if(image_type == "flipX")
                 {
-                    buttons[btn_name] = container as DAButtonBase
-                    container.name = btn_name
+                    image.xScale = -1
                 }
-                
-                return container
+            
+
+                //simple scale button!
+                if(image_type == "scalebtn")
+                {
+                    let container = DAScaleButton()
+                    container.position = image.position
+                    image.position = CGPoint(x:0,y:0)
+                    container.addChild(image)
+                    container.updateDisplay()
+                    
+                    if let btn_name = (node["name"] as? NSString as? String)?.replace("scalebtn_",withString:"")
+                    {
+                        buttons[btn_name] = container as DAButtonBase
+                        container.name = btn_name
+                    }
+                    
+                    return container
+                }
             }
             
             return image
