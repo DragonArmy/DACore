@@ -21,6 +21,31 @@ class DATabView : DAView
     
     var cycle:[String] = []
     
+    private var _enabled:Bool = true
+    var enabled:Bool
+    {
+        get
+        {
+            return _enabled
+        }
+        set
+        {
+            _enabled = newValue
+            
+            for ui_view in subviews
+            {
+                if let view = ui_view as? DAView
+                {
+                    if let button = view as? DAButtonViewBase
+                    {
+                        button.enabled = _enabled
+                    }
+                }
+            }
+        }
+    }
+    
+    
     var allLinkedViews = Set<UIView>()
     var linkedViews = [String:Set<UIView>]()
     

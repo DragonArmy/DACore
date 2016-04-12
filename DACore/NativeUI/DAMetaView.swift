@@ -122,7 +122,6 @@ class DAMetaView : DAContainerView
     
     init(from_view:DAView)
     {
-        print("CREATING DAMetaView from existing view!")
         fileRoot = ""
         rootContainer = from_view.name!
         
