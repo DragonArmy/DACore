@@ -163,6 +163,7 @@ class DAMetaNode : DAContainer
     var buttons         = [String:DAButtonBase]()
     var labels          = [String:SKLabelNode]()
     var paragraphs      = [String:DAParagraphNode]()
+    var containers      = [String:DAContainer]()
     
     var ASYNCH_ENABLED = true
     
@@ -347,6 +348,12 @@ class DAMetaNode : DAContainer
             print("[ERROR] containerWithName provides the container_, you may omit it from your call!")
         }
         
+        if let container = containers[container_name]
+        {
+            return container
+        }
+        
+        //fall back to tree traversal
         return childNodeWithName(".//container_" + container_name) as? DAContainer
     }
     
@@ -726,8 +733,12 @@ class DAMetaNode : DAContainer
             }
         }
         
-        container!.resetPosition = container!.position
+        if let pure = container as? DAContainer
+        {
+            containers[pure.name!] = pure
+        }
         
+        container!.resetPosition = container!.position
         container!.cachedMetadata = node
         
         return container!
