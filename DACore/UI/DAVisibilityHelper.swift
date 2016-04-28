@@ -25,6 +25,10 @@ class DAVisibilityHelper
     init(nodeWithParent:SKNode)
     {
         self.child = nodeWithParent
+        if(nodeWithParent.parent == nil)
+        {
+            fatalError("nodeWithParent must have a parent! you sent \(nodeWithParent)")
+        }
         self.parent = nodeWithParent.parent!
     }
     
