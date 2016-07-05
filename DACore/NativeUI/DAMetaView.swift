@@ -440,10 +440,10 @@ class DAMetaView : DAContainerView
     {
         var container:DAView!
         
-        if let container_name = view["name"] as? NSString as? String
+        if let container_name:String = view["name"] as? NSString as? String
         {
             
-            let container_type = container_name.split("_")[0]
+            let container_type:String = container_name.split("_")[0]
             
             switch(container_type)
             {

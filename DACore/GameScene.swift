@@ -86,11 +86,11 @@ class GameScene: SKScene
     {
         for sub_anim in group.animations!
         {
-            if let sub_group = sub_anim as? CAAnimationGroup
+            if let sub_group:CAAnimationGroup = sub_anim as? CAAnimationGroup
             {
                 printAnimationGroup(sub_group, withDepth: (depth+1))
             }else{
-                if let keyframe = sub_anim as? CAKeyframeAnimation
+                if let keyframe:CAKeyframeAnimation = sub_anim as? CAKeyframeAnimation
                 {
                     //print("DEPTH \(depth): \(keyframe)      \(keyframe.keyPath)")
                     print("          keyTimes:\(keyframe.keyTimes)    (\(keyframe.keyTimes!.count))")

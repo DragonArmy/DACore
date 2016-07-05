@@ -48,7 +48,7 @@ class BaseModel
         // load the data from the bundle
         do
         {
-            var data = try String(contentsOfURL: NSBundle.mainBundle().URLForResource(filename, withExtension: ".csv")!, encoding: NSUTF8StringEncoding)
+            var data:String = try String(contentsOfURL: NSBundle.mainBundle().URLForResource(filename, withExtension: ".csv")!, encoding: NSUTF8StringEncoding)
             // removing the trailing whitespace if there is any
             data = data.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
             

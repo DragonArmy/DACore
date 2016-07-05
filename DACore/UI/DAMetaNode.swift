@@ -826,17 +826,17 @@ class DAMetaNode : DAContainer
     
     func processParagraphNode(name:String, withChildren children:[AnyObject]) -> DAParagraphNode
     {
-        let node = DAParagraphNode()
+        let node:DAParagraphNode = DAParagraphNode()
         node.name = name
         
         var placeholder:CGRect?
         var label:SKLabelNode?
         
-        for raw_node in children
+        for raw_node:AnyObject in children
         {
-            if let node = raw_node as? Dictionary<String,AnyObject>
+            if let node:Dictionary<String,AnyObject> = raw_node as? Dictionary<String,AnyObject>
             {
-                if let node_type = node["type"] as? NSString as? String
+                if let node_type:String = node["type"] as? NSString as? String
                 {
                     switch node_type
                     {
@@ -1024,11 +1024,11 @@ class DAMetaNode : DAContainer
     //no return type here
     func processPlaceholderNode(node:Dictionary<String, AnyObject>) -> SKNode?
     {
-        if let position = node["position"] as? NSArray as? [NSNumber] as? [CGFloat]
+        if let position:[CGFloat] = node["position"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
-            if let size = node["size"] as? NSArray as? [NSNumber] as? [CGFloat]
+            if let size:[CGFloat] = node["size"] as? NSArray as? [NSNumber] as? [CGFloat]
             {
-                if let name = node["name"] as? NSString as? String
+                if let name:String = node["name"] as? NSString as? String
                 {
                     placeholders[name] = CGRect(x: position[0] - size[0]/2.0, y: position[1] - size[1]/2.0, width: size[0], height: size[1])
                     
