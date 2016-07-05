@@ -151,7 +151,6 @@ class DAMetaView : DAContainerView
     
     init(file_root:String, fromContainer container_name:String?, resolutionIndependent omit_device_tag:Bool)
     {
-        print("INIT \(file_root):\(container_name):\(omit_device_tag)")
         fileRoot = file_root
         rootContainer = container_name
         
@@ -176,8 +175,6 @@ class DAMetaView : DAContainerView
         {
             processMetadata(DAMetaView.LoadedMetadata[file_root]!)
         }else{
-            print("LOADING \(file_root) -------------------")
-            
             //synchronously load metadata if we initialize a MetaView
             //print("SYNCHRONOUS LOAD: \(file_root)")
             

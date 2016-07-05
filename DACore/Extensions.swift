@@ -193,7 +193,7 @@ public func * (left: String, right: Int) -> String
     }
     
     var str = ""
-    for(var i = 0; i < right; i++)
+    for _ in (0..<right)
     {
         str = str + left
     }

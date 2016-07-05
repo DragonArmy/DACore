@@ -53,7 +53,7 @@ class BaseModel
             data = data.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
             
             // split the data based on a newline character
-            let text = data.split("\n")
+            let text:[String] = data.split("\n")
             
             //we require 2 rows:
             // 1) column name
@@ -65,8 +65,8 @@ class BaseModel
             }
             
             // get the variable names and types -- simple split! no commas allowed in name/type fields
-            let variableNames = text[0].componentsSeparatedByString(",")
-            let variableTypes = text[1].componentsSeparatedByString(",")
+            let variableNames:[String] = text[0].componentsSeparatedByString(",")
+            let variableTypes:[String] = text[1].componentsSeparatedByString(",")
             
             // if there isn't an id, remove it
             if (variableNames.count == 0)
@@ -76,9 +76,9 @@ class BaseModel
             }
             
             // parse through all the data
-            for var i = 2; i < text.count; i++
+            for i in (2..<text.count)
             {
-                let objectData = text[i]
+                let objectData:String = text[i]
                 
                 // if the string is empty, skip it
                 if(objectData.isEmpty)
@@ -93,33 +93,33 @@ class BaseModel
                 var raw_data = objectData.componentsSeparatedByString(",")
                 var dataVariables = [String]()
                 
-                for(var i = 0; i < raw_data.count; i++)
+                for var j in (0..<raw_data.count)
                 {
                     
                     
                     //check to see if we have quotes
-                    if(raw_data[i] == "\"\""){
+                    if(raw_data[j] == "\"\""){
                         //empty string kinda screws up the logic below
-                        dataVariables.append(raw_data[i])
-                    }else if(i < raw_data.count - 1 && raw_data[i].hasPrefix("\"")){
-                        var working_string = raw_data[i].replace("\"", withString: "")
+                        dataVariables.append(raw_data[j])
+                    }else if(j < raw_data.count - 1 && raw_data[j].hasPrefix("\"")){
+                        var working_string = raw_data[j].replace("\"", withString: "")
                         
-                        for(var j = i+1; j < raw_data.count; j++)
+                        for k in ((j+1)..<raw_data.count)
                         {
-                            if(raw_data[j].hasSuffix("\""))
+                            if(raw_data[k].hasSuffix("\""))
                             {
-                                working_string = working_string + "," + raw_data[j].replace("\"", withString: "")
-                                i = j;
+                                working_string = working_string + "," + raw_data[k].replace("\"", withString: "")
+                                j = k;
                                 break;
                             }else{
-                                working_string = working_string + "," + raw_data[j]
+                                working_string = working_string + "," + raw_data[k]
                             }
                         }
                         
                         //                        print("REJOINED DATA: \(working_string)")
                         dataVariables.append(working_string)
                     }else{
-                        dataVariables.append(raw_data[i])
+                        dataVariables.append(raw_data[j])
                     }
                 }
                 
@@ -129,39 +129,39 @@ class BaseModel
                 }
                 
                 // go through all the variables from the reflection and set them to the data from the csv
-                for var variable = 0; variable < variableNames.count; variable++
+                for v in (0..<variableNames.count)
                 {
-                    if (variable >= dataVariables.count)
+                    if (v >= dataVariables.count)
                     {
-                        print("ERROR: no data found for \(variableNames[variable]) on line \(i) of \(filename)")
+                        print("ERROR: no data found for \(variableNames[v]) on line \(i) of \(filename)")
                         continue
                     }
                     
                     // parse out all the data based on types
-                    switch(variableTypes[variable].lowercaseString)
+                    switch(variableTypes[v].lowercaseString)
                     {
-                    case "color":
-                        if !dataVariables[variable].characters.contains("#")
-                        {
-                            object.objectVariables[variableNames[variable]] = ("#" + dataVariables[variable]).lowercaseString.toColor()
-                        }
-                        else
-                        {
-                            object.objectVariables[variableNames[variable]] = dataVariables[variable].lowercaseString.toColor()
-                        }
-                        break
-                    case "int":
-                        object.objectVariables[variableNames[variable]] = Int(dataVariables[variable])
-                        break
-                    case "float":
-                        object.objectVariables[variableNames[variable]] = dataVariables[variable].toFloat()
-                        break
-                    case "bool":
-                        object.objectVariables[variableNames[variable]] = dataVariables[variable].lowercaseString == "true"
-                        break
-                    default:
-                        object.objectVariables[variableNames[variable]] = dataVariables[variable]
-                        break
+                        case "color":
+                            if !dataVariables[v].characters.contains("#")
+                            {
+                                object.objectVariables[variableNames[v]] = ("#" + dataVariables[v]).lowercaseString.toColor()
+                            }
+                            else
+                            {
+                                object.objectVariables[variableNames[v]] = dataVariables[v].lowercaseString.toColor()
+                            }
+                            break
+                        case "int":
+                            object.objectVariables[variableNames[v]] = Int(dataVariables[v])
+                            break
+                        case "float":
+                            object.objectVariables[variableNames[v]] = dataVariables[v].toFloat()
+                            break
+                        case "bool":
+                            object.objectVariables[variableNames[v]] = dataVariables[v].lowercaseString == "true"
+                            break
+                        default:
+                            object.objectVariables[variableNames[v]] = dataVariables[v]
+                            break
                     }
                 }
                 

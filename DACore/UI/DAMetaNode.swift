@@ -31,8 +31,9 @@ class DATextureCache
     private static var textureAliases = [String:String]()
     private static var cache = [String:SKTexture]()
     
-    static func get(var texture_name:String) -> SKTexture
+    static func get(texture_name_in:String) -> SKTexture
     {
+        var texture_name = texture_name_in
         if(texture_name.indexOf(".png") == -1)
         {
             texture_name = "\(texture_name).png"
@@ -172,7 +173,7 @@ class DAMetaNode : DAContainer
         
         
         let available_fonts = UIFont.familyNames()
-        for(var i:Int = 0; i < available_fonts.count; i++)
+        for i in (0..<available_fonts.count)
         {
             let font_family = available_fonts[i]
             let font_names = UIFont.fontNamesForFamilyName(font_family)
@@ -295,8 +296,6 @@ class DAMetaNode : DAContainer
         {
             processMetadata(DAMetaNode.LoadedMetadata[file_root]!, withAsynchSprites: asynch_sprites, useTextureCache: use_texture_cache)
         }else{
-            print("LOADING \(file_root) -------------------")
-            
             //synchronously load metadata if we initialize a MetaNode
             //print("SYNCHRONOUS LOAD: \(file_root)")
 
@@ -563,7 +562,7 @@ class DAMetaNode : DAContainer
     func finalizeImages()
     {
         var final_count = 0
-        for(var i = 0; i < DAMetaNode.ASYNCH_SPRITES.count; i++)
+        for var i in (0..<DAMetaNode.ASYNCH_SPRITES.count)
         {
             let asynch_sprite = DAMetaNode.ASYNCH_SPRITES[i]
             if let meta_node = asynch_sprite.metaNode
