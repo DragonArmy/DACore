@@ -79,7 +79,7 @@ struct FlumpLayer : Equatable
         
         var lastFrame:FlumpKeyframe = rest_layer.frames[0]
         
-        for(var i:Int = 0; i < frames.count; i++)
+        for i in 0..<frames.count
         {
             if(frames[i] != lastFrame)
             {
@@ -206,7 +206,7 @@ func ==(lhs:FlumpLayer, rhs:FlumpLayer) -> Bool
         return false
     }
     
-    for(var i = 0; i < lhs.frames.count; i++)
+    for i in (0..<lhs.frames.count)
     {
         if(lhs.frames[i] != rhs.frames[i])
         {
