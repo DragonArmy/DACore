@@ -78,7 +78,7 @@ public class DASoundManager
         }
     }
     
-    private static func createMusicPlayer(filename:String) -> AVAudioPlayer?
+    public static func createMusicPlayer(filename:String) -> AVAudioPlayer?
     {
         var music_player:AVAudioPlayer?
         
@@ -178,6 +178,28 @@ public class DASoundManager
             })
         }else{
             playSound(filename)
+        }
+    }
+    
+    public static func cacheSound(filename:String)
+    {
+        let url = NSBundle.mainBundle().URLForResource(filename, withExtension: nil)
+        if (url == nil)
+        {
+            print("NO SFX FOUND: \(filename)")
+            return
+        }
+        
+        if(soundPlayers[filename] == nil)
+        {
+            var error: NSError? = nil
+            do {
+                soundPlayers[filename] = try AVAudioPlayer(contentsOfURL: url!)
+            } catch let error1 as NSError {
+                error = error1
+                soundPlayers[filename] = nil
+                print("Could not create sfx player: \(error!)")
+            }
         }
     }
     
