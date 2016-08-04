@@ -5,6 +5,8 @@ DA Export
 ----------------------
 This framework makes use of an Adobe Generator (Photoshop plugin) and essentially replaces XCode's Interface Builder with Photoshop. By using a fairly simple naming convention for layers in PS, the plugin is able to export all metadata needed for creating a view that looks identical to that document in either SpriteKit or native UIViews.
 
+[https://github.com/DragonArmy/generator-daexport](https://github.com/DragonArmy/generator-daexport)
+
 Supported Features
 ----------------------
 * **/UI** -- SpriteKit-based UI framework
