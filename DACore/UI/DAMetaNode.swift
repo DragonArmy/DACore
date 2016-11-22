@@ -575,21 +575,21 @@ class DAMetaNode : DAContainer
     func finalizeImages()
     {
         var final_count = 0
-        for var i in (0..<DAMetaNode.ASYNCH_SPRITES.count)
+        var keepers = [AsynchSprite]()
+        for asynch_sprite in DAMetaNode.ASYNCH_SPRITES
         {
-            let asynch_sprite = DAMetaNode.ASYNCH_SPRITES[i]
             if let meta_node = asynch_sprite.metaNode
             {
                 if meta_node == self
                 {
                     final_count += 1
-                    DAMetaNode.ASYNCH_SPRITES.removeAtIndex(i)
-                    i -= 1
-                    
                     asynchProcessImage(asynch_sprite)
+                }else{
+                    keepers.append(asynch_sprite)
                 }
             }
         }
+        DAMetaNode.ASYNCH_SPRITES = keepers
         
         if(final_count > 0)
         {
