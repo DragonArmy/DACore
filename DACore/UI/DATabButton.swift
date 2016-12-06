@@ -47,18 +47,18 @@ class DATabButton : DAContainerBase
             
             for node in allLinkedNodes
             {
-                node.hidden = true
+                node.isHidden = true
             }
             
             if let linked_nodes = linkedNodes[value]
             {
                 for node in linked_nodes
                 {
-                    node.hidden = false
+                    node.isHidden = false
                 }
             }
             
-            //ok, so it appears that invisible nodes block touches! just setting the non-active pieces to hidden=true and userInteractionEnabled=false makes it a dead button
+            //ok, so it appears that invisible nodes block touches! just setting the non-active pieces to hidden=true and isUserInteractionEnabled=false makes it a dead button
             //so instead we keep a copy of our children and add only those that are active
             removeAllChildren()
             for node in content
@@ -87,7 +87,7 @@ class DATabButton : DAContainerBase
         fatalError("NSCoding not supported")
     }
     
-    func linkNode(node:SKNode, toState state:String)
+    func link(node:SKNode, toState state:String)
     {
         allLinkedNodes.insert(node)
         
@@ -102,7 +102,7 @@ class DATabButton : DAContainerBase
         self.currentState = _currentState
     }
     
-    func unlinkNode(node:SKNode, fromState state:String)
+    func unlink(node:SKNode, fromState state:String)
     {
         //remove the linked node from the requested state
         if var current_nodes = linkedNodes[state]
@@ -136,7 +136,7 @@ class DATabButton : DAContainerBase
         }
             
         //if we're not in the cycle (i.e. locked), stay where we are
-        if let index = cycle.indexOf(currentState)
+        if let index = cycle.index(of: currentState)
         {
             let next_index = (index + 1) % cycle.count
             return cycle[next_index]
@@ -168,7 +168,7 @@ class DATabButton : DAContainerBase
         {
             if let button = node as? DAButtonBase
             {
-                button.onButtonClick.listen(self, callback:handleButtonClick)
+                button.onButtonClick.subscribe(on:self, callback:handleButtonClick)
             }
             
             if let state = node.name?.split("_").last

@@ -19,7 +19,7 @@ class BaseModel
     static var allData = Dictionary<String, [AnyObject]>()
     
     // private variables for each object
-    var objectVariables = Dictionary<String, AnyObject>()
+    var objectVariables = Dictionary<String, Any>()
     
     // not sure what I needed this for in here, but it's important
     required init()
@@ -40,7 +40,7 @@ class BaseModel
     }
     
     // load all the data from the file
-    static func loadFromData(filename:String)
+    static func loadFromData(_ filename:String)
     {
         allData[allKey] = [AnyObject]()
         allCache[allKey] = Dictionary<String, AnyObject>()
@@ -48,9 +48,10 @@ class BaseModel
         // load the data from the bundle
         do
         {
-            var data:String = try String(contentsOfURL: NSBundle.mainBundle().URLForResource(filename, withExtension: ".csv")!, encoding: NSUTF8StringEncoding)
+            let url = Bundle.main.url(forResource: filename, withExtension: ".csv")
+            var data:String = try String(contentsOf: url!, encoding: String.Encoding.utf8)
             // removing the trailing whitespace if there is any
-            data = data.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+            data = data.trimmingCharacters(in: NSCharacterSet.whitespaces)
             
             // split the data based on a newline character
             let text:[String] = data.split("\n")
@@ -65,8 +66,8 @@ class BaseModel
             }
             
             // get the variable names and types -- simple split! no commas allowed in name/type fields
-            let variableNames:[String] = text[0].componentsSeparatedByString(",")
-            let variableTypes:[String] = text[1].componentsSeparatedByString(",")
+            let variableNames:[String] = text[0].components(separatedBy: ",")
+            let variableTypes:[String] = text[1].components(separatedBy: ",")
             
             // if there isn't an id, remove it
             if (variableNames.count == 0)
@@ -90,7 +91,7 @@ class BaseModel
                 let object = self.init();
                 
                 // get the variables from the data
-                var raw_data = objectData.componentsSeparatedByString(",")
+                var raw_data = objectData.components(separatedBy: ",")
                 var dataVariables = [String]()
                 
                 for var j in (0..<raw_data.count)
@@ -137,30 +138,31 @@ class BaseModel
                         continue
                     }
                     
+                    let name = variableNames[v]
+                    let value = dataVariables[v]
+                    
                     // parse out all the data based on types
-                    switch(variableTypes[v].lowercaseString)
+                    switch(variableTypes[v].lowercased())
                     {
                         case "color":
                             if !dataVariables[v].characters.contains("#")
                             {
-                                object.objectVariables[variableNames[v]] = ("#" + dataVariables[v]).lowercaseString.toColor()
-                            }
-                            else
-                            {
-                                object.objectVariables[variableNames[v]] = dataVariables[v].lowercaseString.toColor()
+                                object.objectVariables[name] = "#\(value)".lowercased().toColor()
+                            }else{
+                                object.objectVariables[name] = value.lowercased().toColor()
                             }
                             break
                         case "int":
-                            object.objectVariables[variableNames[v]] = Int(dataVariables[v])
+                            object.objectVariables[name] = Int(value)
                             break
                         case "float":
-                            object.objectVariables[variableNames[v]] = dataVariables[v].toFloat()
+                            object.objectVariables[name] = value.toFloat()
                             break
                         case "bool":
-                            object.objectVariables[variableNames[v]] = dataVariables[v].lowercaseString == "true"
+                            object.objectVariables[name] = (value.lowercased() == "true")
                             break
                         default:
-                            object.objectVariables[variableNames[v]] = dataVariables[v]
+                            object.objectVariables[name] = value
                             break
                     }
                 }
@@ -176,12 +178,12 @@ class BaseModel
         }
     }
     
-    static func findByIntID<T>(id:Int) -> T?
+    static func findByIntID<T>(_ id:Int) -> T?
     {
         return findByStringID("\(id)")
     }
     
-    static func findByStringID<T>(id:String) -> T?
+    static func findByStringID<T>(_ id:String) -> T?
     {
         let return_value = allCache[allKey]![id] as! T?
         return return_value
@@ -204,6 +206,6 @@ class BaseModel
     
     static func parseBool(value : String) -> Bool?
     {
-        return value.lowercaseString == "true"
+        return value.lowercased() == "true"
     }
 }

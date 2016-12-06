@@ -23,12 +23,12 @@ public class DASoundManager
     
     public static var soundPlayers = [String:AVAudioPlayer]()
     
-    public static func playMusic(filename: String)
+    public static func playMusic(_ filename: String)
     {
         musicPlayer = createMusicPlayer(filename)
     }
     
-    public static func crossFadeToMusic(filename:String)
+    public static func crossFadeToMusic(_ filename:String)
     {
         if(!MUSIC_ENABLED)
         {
@@ -41,7 +41,7 @@ public class DASoundManager
             return
         }
         
-        if(!musicPlayer!.playing)
+        if(!musicPlayer!.isPlaying)
         {
             playMusic(filename)
             return
@@ -55,7 +55,7 @@ public class DASoundManager
         
         musicPlayer!.volume = 0.025
         crossfadePlayer!.volume = 0.975
-        dispatch_after_delay(0.02, block: justKeepFading)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: justKeepFading)
     }
     
     private static func justKeepFading()
@@ -72,17 +72,17 @@ public class DASoundManager
         if(musicPlayer!.volume < 1.0)
         {
             print("CROSSFADE AT \(musicPlayer!.volume)")
-            dispatch_after_delay(0.02, block: justKeepFading)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: justKeepFading)
         }else{
             crossfadePlayer = nil
         }
     }
     
-    public static func createMusicPlayer(filename:String) -> AVAudioPlayer?
+    public static func createMusicPlayer(_ filename:String) -> AVAudioPlayer?
     {
         var music_player:AVAudioPlayer?
         
-        let url = NSBundle.mainBundle().URLForResource(filename, withExtension: nil)
+        let url = Bundle.main.url(forResource: filename, withExtension: nil)
         if (url == nil)
         {
             print("[ERROR] No file: \(filename)")
@@ -91,7 +91,7 @@ public class DASoundManager
         
         var error: NSError? = nil
         do {
-            music_player = try AVAudioPlayer(contentsOfURL: url!)
+            music_player = try AVAudioPlayer(contentsOf: url!)
         } catch let error1 as NSError {
             error = error1
             music_player = nil
@@ -126,7 +126,7 @@ public class DASoundManager
     {
         if let player = musicPlayer
         {
-            if player.playing
+            if player.isPlaying
             {
                 player.pause()
                 player.currentTime = 0
@@ -138,7 +138,7 @@ public class DASoundManager
     {
         if let player = musicPlayer
         {
-            if player.playing
+            if player.isPlaying
             {
                 player.pause()
             }
@@ -162,28 +162,28 @@ public class DASoundManager
             }
             
             
-            if !player.playing
+            if !player.isPlaying
             {
                 player.play()
             }
         }
     }
     
-    public static func playSound(filename:String, withDelay delay:Double)
+    public static func playSound(_ filename:String, withDelay delay:Double)
     {
         if(delay > 0)
         {
-            dispatch_after_delay(delay, block: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 playSound(filename)
-            })
+            }
         }else{
             playSound(filename)
         }
     }
     
-    public static func cacheSound(filename:String)
+    public static func cacheSound(_ filename:String)
     {
-        let url = NSBundle.mainBundle().URLForResource(filename, withExtension: nil)
+        let url = Bundle.main.url(forResource: filename, withExtension: nil)
         if (url == nil)
         {
             print("NO SFX FOUND: \(filename)")
@@ -194,7 +194,7 @@ public class DASoundManager
         {
             var error: NSError? = nil
             do {
-                soundPlayers[filename] = try AVAudioPlayer(contentsOfURL: url!)
+                soundPlayers[filename] = try AVAudioPlayer(contentsOf: url!)
             } catch let error1 as NSError {
                 error = error1
                 soundPlayers[filename] = nil
@@ -203,7 +203,7 @@ public class DASoundManager
         }
     }
     
-    public static func playSound(filename: String)
+    public static func playSound(_ filename: String)
     {
         if(!SFX_ENABLED)
         {
@@ -212,7 +212,7 @@ public class DASoundManager
         
 //        print("PLAY SOUND \(filename)");
         
-        let url = NSBundle.mainBundle().URLForResource(filename, withExtension: nil)
+        let url = Bundle.main.url(forResource: filename, withExtension: nil)
         if (url == nil)
         {
             print("NO SFX FOUND: \(filename)")
@@ -223,7 +223,7 @@ public class DASoundManager
         {
             var error: NSError? = nil
             do {
-                soundPlayers[filename] = try AVAudioPlayer(contentsOfURL: url!)
+                soundPlayers[filename] = try AVAudioPlayer(contentsOf: url!)
             } catch let error1 as NSError {
                 error = error1
                 soundPlayers[filename] = nil
@@ -233,7 +233,7 @@ public class DASoundManager
         
         if let player = soundPlayers[filename]
         {
-            if(player.playing)
+            if(player.isPlaying)
             {
                 player.currentTime = 0
             }else{

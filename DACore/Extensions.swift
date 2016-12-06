@@ -20,17 +20,6 @@ extension UIApplication
 }
 
 
-/**
- Arc Random for Double and Float
- */
-public func arc4random <T: IntegerLiteralConvertible> (type: T.Type) -> T {
-    var r: T = 0
-    arc4random_buf(&r, Int(sizeof(T)))
-    return r
-}
-
-
-
 //hashable XY coordinate
 struct XY : Hashable, Equatable, CustomStringConvertible
 {
@@ -74,17 +63,9 @@ extension Set
         }
         
         let n = Int(arc4random_uniform(UInt32(self.count)))
-        
-        let i = self.startIndex.advancedBy(n)
+        let i = index(self.startIndex, offsetBy: n)
         return self[i] as? T
     }
-}
-
-// Nice helper function for dispatch_after
-func dispatch_after_delay(delay:Double, block:dispatch_block_t) {
-    let queue = dispatch_get_main_queue()
-    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay * Double(NSEC_PER_SEC)))
-    dispatch_after(time, queue, block)
 }
 
 //https://github.com/yeahdongcn/UIColor-Hex-Swift/blob/master/UIColorExtension.swift
@@ -96,11 +77,11 @@ public extension UIColor {
         var alpha: CGFloat = 1.0
         
         if rgba.hasPrefix("#") {
-            let index   = rgba.startIndex.advancedBy(1)
-            let hex     = rgba.substringFromIndex(index)
-            let scanner = NSScanner(string: hex)
+            let index   = rgba.index(rgba.startIndex, offsetBy: 1)
+            let hex     = rgba.substring(from:index)
+            let scanner = Scanner(string: hex)
             var hexValue: CUnsignedLongLong = 0
-            if scanner.scanHexLongLong(&hexValue) {
+            if scanner.scanHexInt64(&hexValue) {
                 switch (hex.characters.count) {
                 case 3:
                     red   = CGFloat((hexValue & 0xF00) >> 8)       / 15.0
@@ -146,7 +127,8 @@ public extension Int
     }
     
 }
-public extension Double {
+public extension Double
+{
     /**
      Create a random num Double
      - parameter lower: number Double
@@ -154,9 +136,9 @@ public extension Double {
      :return: random number Double
      By DaRkDOG
      */
-    public static func random(lower lower: Double, upper: Double) -> Double {
-        let r = Double(arc4random(UInt64)) / Double(UInt64.max)
-        return (r * (upper - lower)) + lower
+    public static func random(lower: Double, upper: Double) -> Double
+    {
+        return (Double(arc4random()) / 0xFFFFFFFF) * (upper - lower) + lower
     }
 }
 public extension Float {
@@ -167,16 +149,17 @@ public extension Float {
      :return: random number Float
      By DaRkDOG
      */
-    public static func random(lower lower: Float, upper: Float) -> Float {
-        let r = Float(arc4random(UInt32)) / Float(UInt32.max)
-        return (r * (upper - lower)) + lower
+    public static func random(lower: Float, upper: Float) -> Float
+    {
+        return (Float(arc4random()) / 0xFFFFFFFF) * (upper - lower) + lower
     }
 }
 
 public extension CGFloat {
     
-    public static func random(lower lower:CGFloat, upper:CGFloat) -> CGFloat {
-        return CGFloat(Float.random(lower: Float(lower), upper:Float(upper)))
+    public static func random(lower:CGFloat, upper:CGFloat) -> CGFloat
+    {
+        return CGFloat(Float(arc4random()) / Float(UINT32_MAX)) * (upper - lower) + lower
     }
 }
 
@@ -216,14 +199,14 @@ extension String {
         return CGFloat( (self as NSString).floatValue )
     }
     
-    func split(split_string:String) -> [String]
+    func split(_ split_string:String) -> [String]
     {
-        return self.componentsSeparatedByString(split_string)
+        return self.components(separatedBy: split_string)
     }
     
-    func replace(target:String, withString replacement:String) -> String
+    func replace(_ target:String, withString replacement:String) -> String
     {
-        return self.stringByReplacingOccurrencesOfString(target, withString: replacement, options: NSStringCompareOptions.LiteralSearch, range: nil)
+        return self.replacingOccurrences(of: target, with: replacement)
     }
     
     func toUIColor() -> UIColor
@@ -231,25 +214,28 @@ extension String {
         return UIColor(rgba:self)
     }
     
-    subscript (i: Int) -> Character {
-        return self[self.startIndex.advancedBy(i)]
+    subscript (i: Int) -> Character
+    {
+        return self[self.index(self.startIndex, offsetBy: i)]
     }
     
-    subscript (i: Int) -> String {
+    subscript (i: Int) -> String
+    {
         return String(self[i] as Character)
     }
     
-    subscript (r: Range<Int>) -> String {
-        let start = startIndex.advancedBy(r.startIndex)
-        let end = start.advancedBy(r.endIndex - r.startIndex)
-        return self[Range(start ..< end)]
-    }
+//    subscript (r: Range<Int>) -> String {
+//        let start = startIndex.advancedBy(r.lowerBound)
+//        let end = start.advancedBy(r.upperBound - r.lowerBound)
+//        return self[Range(start ..< end)]
+//    }
     
-    func indexOf(target: String) -> Int
+    func indexOf(_ target: String) -> Int
     {
-        let range = self.rangeOfString(target)
-        if let range = range {
-            return startIndex.distanceTo(range.startIndex)
+        let range = self.range(of:target)
+        if let range = range
+        {
+            return self.distance(from: self.startIndex, to:range.lowerBound)
         } else {
             return -1
         }
@@ -260,7 +246,7 @@ extension String {
 extension Array {
     func indexOf<T : Equatable>(object:T) -> Int?
     {
-        for (index,obj) in self.enumerate()
+        for (index,obj) in self.enumerated()
         {
             if let typed_obj = obj as? T
             {
@@ -284,7 +270,7 @@ extension Array {
     
     func shuffle() -> Array<Element>
     {
-        return self.sort({ (a, b) -> Bool in
+        return self.sorted(by: { (a, b) -> Bool in
             return Float.random(lower:0, upper:1) > 0.5
         })
     }
@@ -302,7 +288,7 @@ public extension CGPoint
         let current_magnitude = magnitude()
         let scale_factor = target_magnitude / current_magnitude
         
-        return CGPointMake(x*scale_factor, y*scale_factor)
+        return CGPoint(x:x*scale_factor, y:y*scale_factor)
     }
 }
 
@@ -318,15 +304,15 @@ public extension CGVector
         let current_magnitude = magnitude()
         let scale_factor = target_magnitude / current_magnitude
         
-        return CGPointMake(dx*scale_factor, dy*scale_factor)
+        return CGPoint(x:dx*scale_factor, y:dy*scale_factor)
     }
 }
 
 public extension CGRect
 {
     var center:CGPoint
-        {
-            return CGPointMake(CGRectGetMidX(self), CGRectGetMidY(self))
+    {
+        return CGPoint(x:self.midX, y:self.midY)
     }
 }
 
@@ -341,7 +327,7 @@ public func - (left: CGPoint, right: CGPoint) -> CGPoint
     return CGPoint(x: left.x - right.x, y: left.y - right.y)
 }
 
-public func += (inout left: CGPoint, right: CGPoint)
+public func += (left: inout CGPoint, right: CGPoint)
 {
     left = left + right
 }
@@ -354,7 +340,7 @@ public func * (left:CGFloat, right:CGPoint) -> CGPoint
 {
     return right*left
 }
-public func *= (inout left: CGPoint, right: CGFloat)
+public func *= (left: inout CGPoint, right: CGFloat)
 {
     left = left*right
 }
@@ -368,7 +354,7 @@ public func * (left:CGFloat, right:CGSize) -> CGSize
 {
     return right*left
 }
-public func *= (inout left: CGSize, right: CGFloat)
+public func *= (left: inout CGSize, right: CGFloat)
 {
     left = left*right
 }
@@ -393,17 +379,17 @@ extension SKNode
             return nil
         }
         
-        return parent!.children.indexOf(self)
+        return parent!.children.index(of: self)
     }
     
-    func transferInPlace(new_parent:SKNode)
+    func transferInPlace(_ new_parent:SKNode)
     {
         if(parent == nil)
         {
             print("[ERROR] -- can't convert coordinate spaces if I'm not in the display tree!")
         }
         
-        position = new_parent.convertPoint(position, fromNode: parent!)
+        position = new_parent.convert(position, from: parent!)
         removeFromParent()
         new_parent.addChild(self)
     }
@@ -413,7 +399,7 @@ extension SKNode
         if let actual_parent = parent
         {
             removeFromParent()
-            actual_parent.insertChild(self, atIndex: 0)
+            actual_parent.insertChild(self, at: 0)
         }else{
             print("[ERROR] Cannot call moveToBack on a node with no parent!")
             fatalError("Cannot call moveToBack on a node with no parent!")
@@ -441,7 +427,7 @@ extension SKNode
         
         set(value)
         {
-            position = CGPointMake(value, position.y)
+            position = CGPoint(x: value, y: position.y)
         }
     }
     
@@ -454,7 +440,7 @@ extension SKNode
         
         set(value)
         {
-            position = CGPointMake(position.x, value)
+            position = CGPoint(x:position.x, y: value)
         }
     }
     
@@ -520,7 +506,7 @@ extension SKSpriteNode
         
         set(value)
         {
-            anchorPoint = CGPointMake(value, anchorPoint.y)
+            anchorPoint = CGPoint(x:value, y:anchorPoint.y)
         }
     }
     
@@ -533,17 +519,7 @@ extension SKSpriteNode
         
         set(value)
         {
-            anchorPoint = CGPointMake(anchorPoint.x, value)
+            anchorPoint = CGPoint(x:anchorPoint.x, y:value)
         }
     }
 }
-
-public func ==(lhs: NSDate, rhs: NSDate) -> Bool {
-    return lhs === rhs || lhs.compare(rhs) == .OrderedSame
-}
-
-public func <(lhs: NSDate, rhs: NSDate) -> Bool {
-    return lhs.compare(rhs) == .OrderedAscending
-}
-
-extension NSDate: Comparable { }

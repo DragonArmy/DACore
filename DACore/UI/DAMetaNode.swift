@@ -31,7 +31,7 @@ class DATextureCache
     private static var textureAliases = [String:String]()
     private static var cache = [String:SKTexture]()
     
-    static func get(texture_name_in:String) -> SKTexture
+    static func get(_ texture_name_in:String) -> SKTexture
     {
         var texture_name = texture_name_in
         if(texture_name.indexOf(".png") == -1)
@@ -53,35 +53,35 @@ class DATextureCache
         return cache[texture_name]!
     }
     
-    static func loadAtlas(atlas_name:String) -> SKTextureAtlas
+    static func loadAtlas(_ atlas_name:String) -> SKTextureAtlas
     {
         DATextureCache.loadAliases(atlas_name)
         return SKTextureAtlas(named: atlas_name)
     }
     
-    static func loadAliases(atlas_name:String)
+    static func loadAliases(_ atlas_name:String)
     {
         let count_before = textureAliases.keys.count
-        if let url = NSBundle.mainBundle().URLForResource(atlas_name, withExtension: "plist")
+        if let url = Bundle.main.url(forResource: atlas_name, withExtension: "plist")
         {
-            let data = NSDictionary(contentsOfURL: url)
+            let data = NSDictionary(contentsOf: url)
             
-            if let images = data?.valueForKey("images") as? NSArray
+            if let images = data?.value(forKey: "images") as? NSArray
             {
                 for image_any in images
                 {
                     if let image = image_any as? NSDictionary
                     {
-                        if let subimages = image.valueForKey("subimages") as? NSArray
+                        if let subimages = image.value(forKey: "subimages") as? NSArray
                         {
                             for sub_any in subimages
                             {
                                 if let sub = sub_any as? NSDictionary
                                 {
-                                    let aliases = sub.valueForKey("aliases") as! NSArray as! [String]
+                                    let aliases = sub.value(forKey: "aliases") as! NSArray as! [String]
                                     if(aliases.count > 0)
                                     {
-                                        let main_image = sub.valueForKey("name") as! NSString as String
+                                        let main_image = sub.value(forKey: "name") as! NSString as String
                                         
                                         for alias in aliases
                                         {
@@ -113,7 +113,7 @@ class DAFont
 {
     private static var aliases = [String:String]()
     
-    static func getFont(font:String) -> String
+    static func get(_ font:String) -> String
     {
         if(aliases.keys.contains(font))
         {
@@ -168,25 +168,25 @@ class DAMetaNode : DAContainer
     
     var ASYNCH_ENABLED = true
     
-    static func setup(device_tag:String)
+    static func setup(_ device_tag:String)
     {
         DAMetaNode.deviceTag = device_tag
         
         
-        let available_fonts = UIFont.familyNames()
+        let available_fonts = UIFont.familyNames
         for i in (0..<available_fonts.count)
         {
             let font_family = available_fonts[i]
-            let font_names = UIFont.fontNamesForFamilyName(font_family)
+            let font_names = UIFont.fontNames(forFamilyName: font_family)
 
             print("\(font_family): \(font_names)")
         }
     }
     
     // tuple of (String,bool) is for file_root and whether it's resolutionIndependent or not
-    static func loadMetadata(file_root_list:[(String, Bool)])
+    static func loadMetadata(_ file_root_list:[(String, Bool)])
     {
-        let bundle = NSBundle.mainBundle()
+        let bundle = Bundle.main
         
         for (file_root, omit_device_tag) in file_root_list
         {
@@ -197,15 +197,15 @@ class DAMetaNode : DAContainer
             }
             
             
-            if let meta_url = bundle.URLForResource("\(file_root)\(device_tag)", withExtension: "txt")
+            if let meta_url = bundle.url(forResource: "\(file_root)\(device_tag)", withExtension: "txt")
             {
                 print(meta_url)
                 
-                let metadata = try! String(contentsOfURL: meta_url, encoding: NSUTF8StringEncoding)
+                let metadata = try! String(contentsOf: meta_url, encoding: String.Encoding.utf8)
                 
-                let data = metadata.dataUsingEncoding(NSUTF8StringEncoding)!
+                let data = metadata.data(using: String.Encoding.utf8)!
                 
-                let json = try! NSJSONSerialization.JSONObjectWithData(data, options: []) as? Dictionary<String, AnyObject>
+                let json = try! JSONSerialization.jsonObject(with: data, options: []) as? Dictionary<String, AnyObject>
                 
                 DAMetaNode.LoadedMetadata[file_root] = json
             }else{
@@ -215,22 +215,22 @@ class DAMetaNode : DAContainer
     }
     
     // tuple of (String,bool) is for file_root and whether it's resolutionIndependent or not
-    static func preloadMetadataAsynch(file_root_list:[(String, Bool)])
+    static func preloadMetadataAsynch(_ file_root_list:[(String, Bool)])
     {
         for (file_root, omit_device_tag) in file_root_list
         {
             //print("QUEUING METADATA: \(file_root)")
             
-           let qualityOfServiceClass = DISPATCH_QUEUE_PRIORITY_BACKGROUND
-            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+            let qos = DispatchQoS.QoSClass.background
+            let backgroundQueue = DispatchQueue.global(qos:qos)
             
             let closure_file = file_root
             let closure_omit = omit_device_tag
             
-            dispatch_async(backgroundQueue) {
+            backgroundQueue.async {
                 DAMetaNode.loadMetadata([(closure_file, closure_omit)])
-                //print("FINISHED LOADING \(closure_file)")
             }
+            
             
         }
     }
@@ -293,9 +293,9 @@ class DAMetaNode : DAContainer
             return
         }
         
-        if(DAMetaNode.LoadedMetadata.indexForKey(file_root) != nil)
+        if(DAMetaNode.LoadedMetadata.index(forKey: file_root) != nil)
         {
-            processMetadata(DAMetaNode.LoadedMetadata[file_root]!, withAsynchSprites: asynch_sprites, useTextureCache: use_texture_cache)
+            processMetadata(json:DAMetaNode.LoadedMetadata[file_root]!, withAsynchSprites: asynch_sprites, useTextureCache: use_texture_cache)
         }else{
             //synchronously load metadata if we initialize a MetaNode
             //print("SYNCHRONOUS LOAD: \(file_root)")
@@ -304,7 +304,7 @@ class DAMetaNode : DAContainer
             
             if let json = DAMetaNode.LoadedMetadata[file_root]
             {
-                processMetadata(json, withAsynchSprites:asynch_sprites, useTextureCache:use_texture_cache)
+                processMetadata(json:json, withAsynchSprites:asynch_sprites, useTextureCache:use_texture_cache)
             }else{
                 print("UNABLE TO LOAD \(file_root)")
                 return
@@ -346,7 +346,7 @@ class DAMetaNode : DAContainer
     //  I changed this over to use a containers cache instead... but there are lots of places (i.e. Flump)
     //  that use the "it returned nil, ignore it" behavior. so if you really really need a container and 
     //  don't care if it's on the d-tree, use   containers["name"]... otherwise stick w/containerWithName
-    func containerWithName(container_name:String) -> DAContainer?
+    func container(withName container_name:String) -> DAContainer?
     {
         if(container_name.split("_").first! == "container")
         {
@@ -359,10 +359,10 @@ class DAMetaNode : DAContainer
 //        }
         
         //fall back to tree traversal
-        return childNodeWithName(".//container_" + container_name) as? DAContainer
+        return childNode(withName:".//container_" + container_name) as? DAContainer
     }
     
-    func paragraphWithName(paragraph_name:String) -> DAParagraphNode?
+    func paragraph(withName paragraph_name:String) -> DAParagraphNode?
     {
         if(paragraph_name.split("_").first! == "paragraph")
         {
@@ -372,30 +372,30 @@ class DAMetaNode : DAContainer
         return paragraphs[paragraph_name]
     }
     
-    func progressWithName(progress_name:String) -> DAProgressBar?
+    func progress(withName progress_name:String) -> DAProgressBar?
     {
         if(progress_name.split("_").first! == "progress")
         {
-            print("[ERROR] progressWithName provides the progress_, you may omit it from your call!")
+            print("[ERROR] progress:withName provides the progress_, you may omit it from your call!")
         }
         
-        return childNodeWithName(".//progress_" + progress_name) as? DAProgressBar
+        return childNode(withName:".//progress_" + progress_name) as? DAProgressBar
     }
     
-    func tabWithName(tab_name:String) -> DATabButton?
+    func tab(withName tab_name:String) -> DATabButton?
     {
         if(tab_name.split("_").first! == "tab")
         {
             print("[ERROR] tabWithName provides the progress_, you may omit it from your call!")
         }
         
-        return childNodeWithName(".//tab_" + tab_name) as? DATabButton
+        return childNode(withName:".//tab_" + tab_name) as? DATabButton
     }
     
     //simplest of the getters, doesn't prefix anything
-    func imageWithName(image_name:String) -> SKSpriteNode?
+    func image(withName image_name:String) -> SKSpriteNode?
     {
-        let maybe_image = childNodeWithName(".//" + image_name)
+        let maybe_image = childNode(withName:".//" + image_name)
         
         if maybe_image == nil
         {
@@ -413,7 +413,7 @@ class DAMetaNode : DAContainer
         return nil
     }
     
-    func labelWithName(label_name:String) -> SKLabelNode?
+    func label(withName label_name:String) -> SKLabelNode?
     {
         if(label_name.split("_").first! == "txt")
         {
@@ -424,7 +424,7 @@ class DAMetaNode : DAContainer
     }
     
     //buttons keep a name hash around because they can come from a scalebtn image, a scalebtn container, or a btn
-    func buttonWithName(button_name:String) -> DAButtonBase?
+    func button(withName button_name:String) -> DAButtonBase?
     {
         if(button_name.split("_").first! == "btn")
         {
@@ -434,7 +434,7 @@ class DAMetaNode : DAContainer
         return buttons[button_name]
     }
     
-    func placeholderWithName(placeholder_name:String) -> CGRect?
+    func placeholder(withName placeholder_name:String) -> CGRect?
     {
         if(placeholder_name.split("_").first! == "placeholder")
         {
@@ -539,31 +539,31 @@ class DAMetaNode : DAContainer
         }
     }
     
-    func asynchImageAdded(image:SKNode)
+    func asynchImageAdded(_ image:SKNode)
     {
         //override me if you have any custom post processing stuff to do!
     }
 
     static let FRAME_BUDGET = Double(1.0/60.0)
-    static func processAsynchImages(frame_start:NSDate)
+    static func processAsynchImages(frame_start:Date)
     {
         if(ASYNCH_SPRITES.count == 0)
         {
             return
         }
         
-        var elapsed = NSDate().timeIntervalSinceDate(frame_start)
+        var elapsed = Date().timeIntervalSince(frame_start)
         var count = 0
         while(ASYNCH_SPRITES.count > 0 && elapsed < FRAME_BUDGET)
         {
             count += 1
-            let asynch_sprite = ASYNCH_SPRITES.removeAtIndex(0)
+            let asynch_sprite = ASYNCH_SPRITES.remove(at: 0)
             if let meta_node = asynch_sprite.metaNode
             {
                 meta_node.asynchProcessImage(asynch_sprite)
             }
             
-            elapsed = NSDate().timeIntervalSinceDate(frame_start)
+            elapsed = Date().timeIntervalSince(frame_start)
         }
         
         if(count > 0)
@@ -597,7 +597,7 @@ class DAMetaNode : DAContainer
         }
     }
     
-    func asynchProcessImage(asynch_sprite:AsynchSprite)
+    func asynchProcessImage(_ asynch_sprite:AsynchSprite)
     {
 //        print("PROCESSING \(asynch_sprite.metaNode!)")
         
@@ -615,7 +615,7 @@ class DAMetaNode : DAContainer
     //processChildren works a little differently in that it returns the children...
     //you don't have to actually do anything with them, but for compound objects such
     //as buttons and progress bars this is required
-    func processChildren(children:[AnyObject], withAsynch asynch:Bool, useTextureCache use_texture_cache:Bool=false) -> [SKNode]
+    func processChildren(_ children:[AnyObject], withAsynch asynch:Bool, useTextureCache use_texture_cache:Bool=false) -> [SKNode]
     {
         var child_nodes:[SKNode] = []
         
@@ -649,7 +649,7 @@ class DAMetaNode : DAContainer
         return child_nodes
     }
     
-    func processContainerNode(node:Dictionary<String, AnyObject>, withAsynch asynch:Bool, useTextureCache use_texture_cache:Bool=false) -> SKNode
+    func processContainerNode(_ node:Dictionary<String, AnyObject>, withAsynch asynch:Bool, useTextureCache use_texture_cache:Bool=false) -> SKNode
     {
         var container:DAResetNode?
         
@@ -750,7 +750,7 @@ class DAMetaNode : DAContainer
         return container!
     }
     
-    func processScale9Node(node:Dictionary<String, AnyObject>, useTextureCache use_texture_cache:Bool=false) -> SKSpriteNode
+    func processScale9Node(_ node:Dictionary<String, AnyObject>, useTextureCache use_texture_cache:Bool=false) -> SKSpriteNode
     {
         var center:CGRect?
         var sprite:SKSpriteNode?
@@ -775,9 +775,9 @@ class DAMetaNode : DAContainer
                         {
                             if(name == "size")
                             {
-                                size = placeholderWithName(name)!
+                                size = placeholder(withName:name)!
                             }else if(name == "center"){
-                                center = placeholderWithName(name)!
+                                center = placeholder(withName:name)!
                             }else{
                                 print("EXTRA SCALE9 PLACEHOLDER: \(name)")
                             }
@@ -824,7 +824,7 @@ class DAMetaNode : DAContainer
         return CGRect(x:x, y:y, width:w, height:h)
     }
     
-    func processParagraphNode(name:String, withChildren children:[AnyObject]) -> DAParagraphNode
+    func processParagraphNode(_ name:String, withChildren children:[AnyObject]) -> DAParagraphNode
     {
         let node:DAParagraphNode = DAParagraphNode()
         node.name = name
@@ -864,20 +864,20 @@ class DAMetaNode : DAContainer
         paragraph.fontColor = label!.fontColor!
         paragraph.horizontalAlignmentMode = label!.horizontalAlignmentMode
         paragraph.fontSize = label!.fontSize
-        paragraph.fontName = DAFont.getFont(label!.fontName!)
+        paragraph.fontName = DAFont.get(label!.fontName!)
         paragraph.text = label!.text!
         
         paragraph.paragraphWidth = placeholder!.width
 
-        if(label!.horizontalAlignmentMode == .Left)
+        if(label!.horizontalAlignmentMode == .left)
         {
-            paragraph.explicitAnchorPoint = CGPointMake(0, 1)
+            paragraph.explicitAnchorPoint = CGPoint(x:0, y:1)
             node.x = placeholder!.minX
-        }else if(label!.horizontalAlignmentMode == .Right){
-            paragraph.explicitAnchorPoint = CGPointMake(1, 1)
+        }else if(label!.horizontalAlignmentMode == .right){
+            paragraph.explicitAnchorPoint = CGPoint(x:1, y:1)
             node.x = placeholder!.maxX
-        }else if(label!.horizontalAlignmentMode == .Center){
-            paragraph.explicitAnchorPoint = CGPointMake(0.5, 1)
+        }else if(label!.horizontalAlignmentMode == .center){
+            paragraph.explicitAnchorPoint = CGPoint(x:0.5, y:1)
             node.x = placeholder!.center.x
         }else{
             fatalError("UH OH! WE CURRENTLY ONLY SUPPORT Left/Right/Center Justifications")
@@ -888,15 +888,15 @@ class DAMetaNode : DAContainer
         return node
     }
     
-    func processTextNode(node:Dictionary<String, AnyObject>) -> SKLabelNode
+    func processTextNode(_ node:Dictionary<String, AnyObject>) -> SKLabelNode
     {
         //{"name":"header","type":"text","position":[-1,627.5],"size":[272,31],"color":"ff686f","font":"Arial","justification":"center","fontSize":40,"text":"TESTING PSD"}
         
         if let font = node["font"] as? NSString as? String
         {
-            let label = SKLabelNode(fontNamed: DAFont.getFont(font))
+            let label = SKLabelNode(fontNamed: DAFont.get(font))
             
-            label.verticalAlignmentMode = SKLabelVerticalAlignmentMode.Center
+            label.verticalAlignmentMode = SKLabelVerticalAlignmentMode.center
             
             if let name = node["name"] as? NSString as? String
             {
@@ -932,11 +932,11 @@ class DAMetaNode : DAContainer
             {
                 if(align == "center")
                 {
-                    label.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center
+                    label.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.center
                 }else if(align == "left"){
-                    label.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Left
+                    label.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.left
                 }else if(align == "right"){
-                    label.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Right
+                    label.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.right
                 }else{
                     print("[MetaNode] -- INVALID LABEL ORIENTATION ON LABEL \(label.name) -- \(align)")
                 }
@@ -950,7 +950,7 @@ class DAMetaNode : DAContainer
         return SKLabelNode()
     }
     
-    func processImageNode(node:Dictionary<String, AnyObject>, withAsynch asynch:Bool, useTextureCache use_texture_cache:Bool=false) -> SKNode
+    func processImageNode(_ node:Dictionary<String, AnyObject>, withAsynch asynch:Bool, useTextureCache use_texture_cache:Bool=false) -> SKNode
     {
         if(asynch && ASYNCH_ENABLED)
         {
@@ -967,7 +967,7 @@ class DAMetaNode : DAContainer
         }
     }
     
-    func processImageNodeSynchronously(node:Dictionary<String, AnyObject>, useTextureCache use_texture_cache:Bool) -> SKNode
+    func processImageNodeSynchronously(_ node:Dictionary<String, AnyObject>, useTextureCache use_texture_cache:Bool) -> SKNode
     {
         if let image_name = node["name"] as? NSString as? String
         {
@@ -987,7 +987,7 @@ class DAMetaNode : DAContainer
                 image.position = CGPoint(x:position[0], y:position[1])
             }
             
-            let image_pieces = image_name.componentsSeparatedByString("_")
+            let image_pieces = image_name.split("_")
             if let image_type = image_pieces.first
             {
                 if(image_type == "flipX")
@@ -1022,7 +1022,7 @@ class DAMetaNode : DAContainer
     }
     
     //no return type here
-    func processPlaceholderNode(node:Dictionary<String, AnyObject>) -> SKNode?
+    @discardableResult func processPlaceholderNode(_ node:Dictionary<String, AnyObject>) -> SKNode?
     {
         if let position:[CGFloat] = node["position"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
@@ -1032,7 +1032,7 @@ class DAMetaNode : DAContainer
                 {
                     placeholders[name] = CGRect(x: position[0] - size[0]/2.0, y: position[1] - size[1]/2.0, width: size[0], height: size[1])
                     
-                    if(name.rangeOfString("modal", options: [], range: nil, locale: nil) != nil)
+                    if(name.indexOf("modal") >= 0)
                     {
                         let modal = SKSpriteNode(color: "#230211".toColor(), size: placeholders[name]!.size)
                         modal.alpha = 0.7
@@ -1051,12 +1051,12 @@ class DAMetaNode : DAContainer
     func printDisplayTree()
     {
         print("------------------------ DISPLAY TREE ------------------------")
-        printDisplayTree(self, currentDepth:0)
+        printDisplayTree(node: self, currentDepth:0)
     }
     
     func printDisplayTree(node:SKNode, currentDepth depth:Int)
     {
-        let tab = Array<String>(count: depth, repeatedValue: "  ").joinWithSeparator("") + "->"
+        let tab = Array<String>(repeating: "  ", count: depth).joined(separator: "") + "->"
         let node_name = (node.name == nil ? node.description : node.name!)
         print("\(tab) \(node_name)     \(node.position)")
         
@@ -1066,7 +1066,7 @@ class DAMetaNode : DAContainer
             {
                 if let node_child = child as? SKNode
                 {
-                    printDisplayTree(node_child, currentDepth: depth + 1)
+                    printDisplayTree(node: node_child, currentDepth: depth + 1)
                 }
                 
             }

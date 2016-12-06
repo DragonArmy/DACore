@@ -52,7 +52,7 @@ class FlumpNode : DAMetaNode
             }
         }
         
-        //userInteractionEnabled = true
+        //isUserInteractionEnabled = true
     }
     
     required init(coder: NSCoder)
@@ -60,18 +60,18 @@ class FlumpNode : DAMetaNode
         fatalError("NSCoding not supported")
     }
     
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
     {
-        super.touchesBegan(touches, withEvent: event)
+        super.touchesBegan(touches, with: event)
         
         if let touch:UITouch = touches.anyItem()
         {
             onTouchesBegan.fire(touch)
         }
     }
-    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?)
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)
     {
-        super.touchesEnded(touches, withEvent: event)
+        super.touchesEnded(touches, with: event)
         
         if let touch:UITouch = touches.anyItem()
         {
@@ -79,12 +79,12 @@ class FlumpNode : DAMetaNode
         }
     }
     
-    func goto(movie_name:String) -> FlumpNode
+    @discardableResult func goto(_ movie_name:String) -> FlumpNode
     {
         isLooping = false
         stop()
         
-        resetChildren(false)
+        resetChildren(recursive: false)
         
         //if we don't have a restPose, our "reset()" state is our rest pose
         if(restPose == nil)
@@ -99,9 +99,9 @@ class FlumpNode : DAMetaNode
             
             for layer in movie.layers
             {
-                if let child = containerWithName(layer.name)
+                if let child = container(withName:layer.name)
                 {
-                    if child.hidden
+                    if child.isHidden
                     {
                         print("\(layer.name) is hidden, we're not going to muck with it")
                         continue
@@ -141,7 +141,7 @@ class FlumpNode : DAMetaNode
         return self
     }
     
-    func playOnce(movie_name:String, withCallback callback: ()->() = {}) -> FlumpNode
+    @discardableResult func playOnce(_ movie_name:String, withCallback callback: @escaping ()->() = {}) -> FlumpNode
     {
         playOnceCallback = callback
         doPlay(movie_name, withLoop:false)
@@ -149,7 +149,7 @@ class FlumpNode : DAMetaNode
         return self
     }
     
-    func play(movie_name:String) -> FlumpNode
+    @discardableResult func play(_ movie_name:String) -> FlumpNode
     {
         doPlay(movie_name, withLoop:true)
         
@@ -157,7 +157,7 @@ class FlumpNode : DAMetaNode
     }
     
     private static var animationCache = [String:SKAction]()
-    private func doPlay(movie_name:String, withLoop is_looping:Bool)
+    private func doPlay(_ movie_name:String, withLoop is_looping:Bool)
     {
         //will stop & reset & go to first frame
         goto(movie_name)
@@ -174,9 +174,9 @@ class FlumpNode : DAMetaNode
             
             for layer in movie.layers
             {
-                if let child = containerWithName(layer.name)
+                if let child = container(withName:layer.name)
                 {
-                    if child.hidden
+                    if child.isHidden
                     {
                         print("\(layer.name) is hidden, we're not going to animate it")
                         continue
@@ -193,23 +193,23 @@ class FlumpNode : DAMetaNode
                     
                     if(isLooping)
                     {
-                        let reset = layer.getReset(layer)
+                        let reset = layer.getReset(restLayer: layer)
                         let loop = SKAction.sequence([animation,reset])
                         
-                        child.runAction(loop, completion: {
+                        child.run(loop, completion: {
                             self.onLoop.fire(movie_name)
                             self.doPlay(movie_name, withLoop:true)
                         })
                         
                         //not sure why, but using repeatAcitonForever creates a hitch in the animation
-//                        child.runAction(SKAction.repeatActionForever(loop), withKey:"robot")
+//                        child.run(SKAction.repeatActionForever(loop), withKey:"robot")
                     }else{
                         if(first)
                         {
-                            child.runAction(animation, completion: onSinglePlayComplete)
+                            child.run(animation, completion: onSinglePlayComplete)
                             first = false
                         }else{
-                            child.runAction(animation)
+                            child.run(animation)
                         }
                         
                     }
@@ -231,14 +231,14 @@ class FlumpNode : DAMetaNode
         cached_callback()
     }
     
-    func stop() -> FlumpNode
+    @discardableResult func stop() -> FlumpNode
     {
         isPlaying = false
         if let movie = Flump.LoadedMovies[currentMovie]
         {
             for layer in movie.layers
             {
-                if let child = containerWithName(layer.name)
+                if let child = container(withName:layer.name)
                 {
                     child.removeAllActions()
                 }

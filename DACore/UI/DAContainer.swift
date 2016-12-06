@@ -88,7 +88,7 @@ class DAContainerBase : DAResetNode
         fatalError("NSCoding not supported")
     }
     
-    override func addChild(node:SKNode)
+    override func addChild(_ node:SKNode)
     {
         if(node == innerContainer)
         {
@@ -98,13 +98,13 @@ class DAContainerBase : DAResetNode
         }
     }
     
-    override func insertChild(node: SKNode, atIndex index: Int)
+    override func insertChild(_ node: SKNode, at index: Int)
     {
         if(node == innerContainer)
         {
-            super.insertChild(node, atIndex: index)
+            super.insertChild(node, at: index)
         }else{
-            innerContainer.insertChild(node, atIndex: index)
+            innerContainer.insertChild(node, at: index)
         }
     }
     
@@ -115,8 +115,8 @@ class DAContainerBase : DAResetNode
         innerContainer.removeAllChildren()
     }
     
-    override func removeChildrenInArray(nodes: [SKNode]) {
-        innerContainer.removeChildrenInArray(nodes)
+    override func removeChildren(in nodes: [SKNode]) {
+        innerContainer.removeChildren(in:nodes)
     }
     
     override var children : [SKNode]
@@ -127,14 +127,14 @@ class DAContainerBase : DAResetNode
         }
     }
     
-    override func childNodeWithName(name: String) -> SKNode?
+    override func childNode(withName name: String) -> SKNode?
     {
-        return innerContainer.childNodeWithName(name)
+        return innerContainer.childNode(withName:name)
     }
     
-    override func enumerateChildNodesWithName(name: String, usingBlock block: ((SKNode, UnsafeMutablePointer<ObjCBool>) -> Void))
+    override func enumerateChildNodes(withName name: String, using block: @escaping (SKNode, UnsafeMutablePointer<ObjCBool>) -> Void)
     {
-        innerContainer.enumerateChildNodesWithName(name, usingBlock: block)
+        innerContainer.enumerateChildNodes(withName:name, using: block)
     }
     
     func judder(amount:CGFloat)
@@ -154,7 +154,7 @@ class DAContainerBase : DAResetNode
         self.resetPosition = self.position
     }
     
-    func convertToMask(mask:SKNode)
+    func convertToMask(_ mask:SKNode)
     {
         let old_inner = innerContainer
         

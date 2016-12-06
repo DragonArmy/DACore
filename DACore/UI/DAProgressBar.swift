@@ -68,7 +68,7 @@ class DAProgressBar : DAContainerBase
     {
         if let short_name = self.name?.replace("progress_", withString:"")
         {
-            if let fill = self.childNodeWithName("//" + short_name + "_fill")
+            if let fill = self.childNode(withName: "//" + short_name + "_fill")
             {
                 if let fill_sprite = fill as? SKSpriteNode
                 {

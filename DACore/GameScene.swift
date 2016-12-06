@@ -12,7 +12,7 @@ import GLKit
 
 class GameScene: SKScene
 {
-    let onFinishUpdate = Signal<NSDate>()
+    let onFinishUpdate = Signal<Date>()
     
     
     var spriteKitRoot = SKNode()
@@ -34,7 +34,7 @@ class GameScene: SKScene
         spriteKitRoot.name = "spriteKitRoot"
         
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        scaleMode = SKSceneScaleMode.AspectFit
+        scaleMode = SKSceneScaleMode.aspectFit
         
         spriteKitRoot.addChild(metaNode);
     }
@@ -60,26 +60,26 @@ class GameScene: SKScene
         _metaNodeContainerRoot = ""
         
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        scaleMode = SKSceneScaleMode.AspectFit
+        scaleMode = SKSceneScaleMode.aspectFit
         
         
-        onFinishUpdate.listen(self, callback:DAMetaNode.processAsynchImages)
+        onFinishUpdate.subscribe(on:self, callback:DAMetaNode.processAsynchImages)
     }
     
-    override func willMoveFromView(view: SKView)
+    override func willMove(from view: SKView)
     {
     }
     
-    var gameSceneLastUpdate = NSDate()
-    override func update(currentTime: NSTimeInterval)
+    var gameSceneLastUpdate = Date()
+    override func update(_ currentTime: TimeInterval)
     {
-        gameSceneLastUpdate = NSDate()
+        gameSceneLastUpdate = Date()
         super.update(currentTime)
     }
     
     override func didFinishUpdate()
     {
-        onFinishUpdate.fire(gameSceneLastUpdate)
+        onFinishUpdate.fire(gameSceneLastUpdate as Date)
     }
     
     func printAnimationGroup(group:CAAnimationGroup, withDepth depth:Int)
@@ -88,7 +88,7 @@ class GameScene: SKScene
         {
             if let sub_group:CAAnimationGroup = sub_anim as? CAAnimationGroup
             {
-                printAnimationGroup(sub_group, withDepth: (depth+1))
+                printAnimationGroup(group: sub_group, withDepth: (depth+1))
             }else{
                 if let keyframe:CAKeyframeAnimation = sub_anim as? CAKeyframeAnimation
                 {
@@ -103,41 +103,41 @@ class GameScene: SKScene
     }
     
     //helpers that just forward on to metaNode to make Controller logic cleaner
-    func containerWithName(container_name:String) -> DAContainer?
+    func container(withName container_name:String) -> DAContainer?
     {
-        return metaNode.containerWithName(container_name)
+        return metaNode.container(withName:container_name)
     }
     
-    func progressWithName(progress_name:String) -> DAProgressBar?
+    func progressWithName(withName progress_name:String) -> DAProgressBar?
     {
-        return metaNode.progressWithName(progress_name)
+        return metaNode.progress(withName:progress_name)
     }
     
-    func tabWithName(tab_name:String) -> DATabButton?
+    func tab(withName tab_name:String) -> DATabButton?
     {
-        return metaNode.tabWithName(tab_name)
+        return metaNode.tab(withName:tab_name)
     }
     
     //simplest of the getters, doesn't prefix anything
-    func imageWithName(image_name:String) -> SKSpriteNode?
+    func image(withName image_name:String) -> SKSpriteNode?
     {
-        return metaNode.imageWithName(image_name)
+        return metaNode.image(withName:image_name)
     }
     
     //buttons keep a name hash around because they can come from a scalebtn image, a scalebtn container, or a btn
-    func buttonWithName(button_name:String) -> DAButtonBase?
+    func button(withName button_name:String) -> DAButtonBase?
     {
-        return metaNode.buttonWithName(button_name)
+        return metaNode.button(withName:button_name)
     }
     
-    func placeholderWithName(placeholder_name:String) -> CGRect?
+    func placeholder(withName placeholder_name:String) -> CGRect?
     {
-        return metaNode.placeholderWithName(placeholder_name)
+        return metaNode.placeholder(withName:placeholder_name)
     }
     
-    func labelWithName(label_name:String) -> SKLabelNode?
+    func label(withName label_name:String) -> SKLabelNode?
     {
-        return metaNode.labelWithName(label_name)
+        return metaNode.label(withName:label_name)
     }
     
 }

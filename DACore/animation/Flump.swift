@@ -14,7 +14,7 @@ struct FlumpMovie
     var frameRate:Float
     var layers:[FlumpLayer]
     
-    var duration:NSTimeInterval
+    var duration:TimeInterval
     {
         get
         {
@@ -24,11 +24,11 @@ struct FlumpMovie
                 max_frame = max(max_frame, layer.maxFrame)
             }
             
-            return NSTimeInterval(max_frame / frameRate)
+            return TimeInterval(max_frame / frameRate)
         }
     }
     
-    func layerWithName(search:String) -> FlumpLayer?
+    func layerWithName(_ search:String) -> FlumpLayer?
     {
         for layer in layers
         {
@@ -51,10 +51,10 @@ struct FlumpLayer : Equatable
     //but that requires doing interpolation if it's an intermediary frame
     func getGoto() -> SKAction
     {
-        return getGoto(self)
+        return getGoto(restLayer:self)
     }
     
-    func getGoto(rest_layer:FlumpLayer) -> SKAction
+    func getGoto(restLayer rest_layer:FlumpLayer) -> SKAction
     {
         return FlumpLayer.constructGoToFrame(restFrame:rest_layer.frames[0], targetFrame:frames[0])
     }
@@ -62,10 +62,10 @@ struct FlumpLayer : Equatable
     //flatten all the keyframes on this layer such that they can be applied to a layer
     func getAction() -> SKAction
     {
-        return getAction(self)
+        return getAction(restLayer:self)
     }
     
-    func getReset(rest_layer:FlumpLayer) -> SKAction
+    func getReset(restLayer rest_layer:FlumpLayer) -> SKAction
     {
         let reset_frame = rest_layer.frames[0]
         let last_frame  = frames.last!
@@ -73,7 +73,7 @@ struct FlumpLayer : Equatable
         return FlumpLayer.constructGoToFrame(restFrame: last_frame, targetFrame: reset_frame)
     }
     
-    func getAction(rest_layer:FlumpLayer) -> SKAction
+    func getAction(restLayer rest_layer:FlumpLayer) -> SKAction
     {
         var actions = [SKAction]()
         
@@ -88,10 +88,10 @@ struct FlumpLayer : Equatable
             
             if(i < frames.count-1 && frames[i].tweened)
             {
-                actions.append(FlumpLayer.constructTween(frames[i], frame2: frames[i+1]))
+                actions.append(FlumpLayer.constructTween(frame1: frames[i], frame2: frames[i+1]))
                 lastFrame = frames[i+1] //we'll already be at frame+1, don't jump
             }else{
-                actions.append(SKAction.waitForDuration(frames[i].duration))
+                actions.append(SKAction.wait(forDuration: frames[i].duration))
                 lastFrame = frames[i]
             }
         }
@@ -106,16 +106,16 @@ struct FlumpLayer : Equatable
         //this one assumes that we've reset the metacontainer to it's reset position before calling this!
         //we can't use moveTo because it'll move it absolutely
         let pos_delta = CGVector(dx: frame2.position.x - frame1.position.x, dy: frame2.position.y - frame1.position.y)
-        actions.append(SKAction.moveBy(pos_delta, duration: 0))
+        actions.append(SKAction.move(by: pos_delta, duration: 0))
         
         let rot_delta = frame2.rotation - frame1.rotation
-        actions.append(SKAction.rotateToAngle(rot_delta, duration: 0))
+        actions.append(SKAction.rotate(toAngle: rot_delta, duration: 0))
         
         //CONVENTION -- Rest Pose most have all its pieces scaled to 1
-        actions.append(SKAction.scaleXTo(frame2.xScale, duration: 0))
-        actions.append(SKAction.scaleYTo(frame2.yScale, duration: 0))
+        actions.append(SKAction.scaleX(to: frame2.xScale, duration: 0))
+        actions.append(SKAction.scaleY(to: frame2.yScale, duration: 0))
         
-        actions.append(SKAction.fadeAlphaTo(frame2.alpha, duration: 0))
+        actions.append(SKAction.fadeAlpha(to: frame2.alpha, duration: 0))
         
         return SKAction.group(actions)
     }
@@ -132,32 +132,32 @@ struct FlumpLayer : Equatable
         if(frame1.position != frame2.position)
         {
             let delta = CGVector(dx: frame2.position.x - frame1.position.x, dy: frame2.position.y - frame1.position.y)
-            actions.append(SKAction.moveBy(delta, duration: frame1.duration))
+            actions.append(SKAction.move(by: delta, duration: frame1.duration))
         }
         
         if(frame1.rotation != frame2.rotation)
         {
             let delta = frame2.rotation - frame1.rotation
-            actions.append(SKAction.rotateByAngle(delta, duration:frame1.duration))
+            actions.append(SKAction.rotate(byAngle: delta, duration:frame1.duration))
         }
         
         if(frame1.xScale != frame2.xScale)
         {
-            actions.append(SKAction.scaleXTo(frame2.xScale, duration:frame1.duration))
+            actions.append(SKAction.scaleX(to: frame2.xScale, duration:frame1.duration))
         }
         if(frame1.yScale != frame2.yScale)
         {
-            actions.append(SKAction.scaleYTo(frame2.yScale, duration:frame1.duration))
+            actions.append(SKAction.scaleY(to: frame2.yScale, duration:frame1.duration))
         }
         
         if(frame1.alpha != frame2.alpha)
         {
-            actions.append(SKAction.fadeAlphaTo(frame2.alpha, duration:frame1.duration))
+            actions.append(SKAction.fadeAlpha(to: frame2.alpha, duration:frame1.duration))
         }
         
         if(actions.count == 0)
         {
-            return SKAction.waitForDuration(frame1.duration)
+            return SKAction.wait(forDuration: frame1.duration)
         }
         
         return SKAction.group(actions)
@@ -183,7 +183,7 @@ struct FlumpKeyframe
     var symbolName:String?          //can be null if it's a frameLabel or empty frame
     var startFrame:Float            //keyframe
     var endFrame:Float
-    var duration:NSTimeInterval     //in seconds
+    var duration:TimeInterval     //in seconds
     var tweened:Bool
     var pivot:CGPoint
     var position:CGPoint
@@ -251,16 +251,16 @@ class Flump
     static var LoadedAnimations = [String:String]()
     static var LoadedMovies = Dictionary<String, FlumpMovie>()
     
-    static func loadAnimationsAsynch(file_root_list:[String])
+    static func loadAnimationsAsynch(fileRootList file_root_list:[String])
     {
         for file_root in file_root_list
         {
             //print("QUEUING ANIMATION: \(file_root)")
-            let qualityOfServiceClass = DISPATCH_QUEUE_PRIORITY_BACKGROUND
-            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+            let qos = DispatchQoS.QoSClass.background
+            let backgroundQueue = DispatchQueue.global(qos:qos)
             
             let closure_file = file_root
-            dispatch_async(backgroundQueue) {
+            backgroundQueue.async {
                 Flump.loadAnimation(closure_file)
                 //print("FINISHED LOADING \(closure_file)")
             }
@@ -268,7 +268,7 @@ class Flump
         }
     }
     
-    static func isLoaded(file_root:String) -> Bool
+    static func isLoaded(_ file_root:String) -> Bool
     {
         if(LoadedAnimations[file_root] != nil)
         {
@@ -277,9 +277,9 @@ class Flump
         return false
     }
     
-    static func loadAnimation(file_root:String)
+    static func loadAnimation(_ file_root:String)
     {
-        let bundle = NSBundle.mainBundle()
+        let bundle = Bundle.main
         
         if(Flump.LoadedAnimations[file_root] != nil)
         {
@@ -287,7 +287,7 @@ class Flump
             return
         }
         
-        let animation_url = bundle.URLForResource("\(file_root)", withExtension: "json")
+        let animation_url = bundle.url(forResource: "\(file_root)", withExtension: "json")
         
         // edie added this because I have no idea why this error is being thrown
         if(animation_url == nil)
@@ -298,8 +298,7 @@ class Flump
         
         do
         {
-            let data = try String(contentsOfURL: animation_url!, encoding: NSUTF8StringEncoding)
-
+            let data = try String(contentsOf: animation_url!, encoding: String.Encoding.utf8)
             Flump.LoadedAnimations[file_root] = data
             parseFlumpJSON(data)
         }catch{
@@ -308,7 +307,7 @@ class Flump
     }
     
     
-    static func parseFlumpJSON(animation_data:String)
+    static func parseFlumpJSON(_ animation_data:String)
     {
         //print("PARSING FLUMP JSON")
         
@@ -317,9 +316,9 @@ class Flump
             print("[FLUMP ERROR] You must provide metadata!")
         }
         
-        let data:NSData = animation_data.dataUsingEncoding(NSUTF8StringEncoding)!
+        let data:Data = animation_data.data(using: String.Encoding.utf8)!
         
-        if let json = try! NSJSONSerialization.JSONObjectWithData(data, options: []) as? Dictionary<String, AnyObject>
+        if let json = try! JSONSerialization.jsonObject(with: data, options: []) as? Dictionary<String, AnyObject>
         {
             
             var frame_rate:Float = 24
@@ -361,7 +360,7 @@ class Flump
                             {
                                 for keyframe in keyframes
                                 {
-                                    let duration:NSTimeInterval = NSTimeInterval((keyframe["duration"] as! NSNumber as Float) / frame_rate)
+                                    let duration:TimeInterval = TimeInterval((keyframe["duration"] as! NSNumber as Float) / frame_rate)
                                     let symbol:String? = keyframe["ref"] as? NSString as? String
                                     let start_frame:Float = keyframe["index"] as! NSNumber as Float
                                     let end_frame:Float = start_frame + (keyframe["duration"] as! NSNumber as Float)

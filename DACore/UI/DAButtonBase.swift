@@ -29,12 +29,12 @@ class DAButtonBase : DAContainerBase
     let onButtonClick = Signal<DAButtonBase>()
 
     var isTouching:Bool = false
-    var lastTouch:NSTimeInterval = 0
+    var lastTouch:TimeInterval = 0
     
     var touchRect:CGRect?
     var enabled = true
     
-    var lastPress = NSDate()
+    var lastPress = Date()
     var cooldown:Double = 0.0
     
     //if touchMask != nil, do a raycast of our touch in the scene and only allow touches IFF the touchMask was also touched!
@@ -44,7 +44,7 @@ class DAButtonBase : DAContainerBase
     {
         super.init()
         
-        userInteractionEnabled = true
+        isUserInteractionEnabled = true
         
         buttonSound = DAButtonBase.DEFAULT_BUTTON_SOUND
         cooldown = DAButtonBase.DEFAULT_TOUCH_COOLDOWN
@@ -90,7 +90,7 @@ class DAButtonBase : DAContainerBase
         temp_parent = parent
         while(temp_parent != nil)
         {
-            if(temp_parent!.hidden)
+            if(temp_parent!.isHidden)
             {
                 //print("\(temp_parent!) \(temp_parent!.name) is hidden")
                 return true
@@ -101,7 +101,7 @@ class DAButtonBase : DAContainerBase
         return false
     }
     
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
     {
         isTouching = false;
         
@@ -123,11 +123,11 @@ class DAButtonBase : DAContainerBase
             if(touch.timestamp > lastTouch)
             {
                 lastTouch = touch.timestamp
-                let touch_pos = touch.locationInNode(scene!)
+                let touch_pos = touch.location(in: scene!)
                 initialTouchPos = touch_pos
 
-                let hit_nodes = scene!.nodesAtPoint(touch_pos)
-                scene!.touchesBegan(touches, withEvent: event)
+                let hit_nodes = scene!.nodes(at:touch_pos)
+                scene!.touchesBegan(touches, with: event)
                 for node in hit_nodes
                 {
                     if(node == self)
@@ -135,9 +135,9 @@ class DAButtonBase : DAContainerBase
                         continue
                     }
                     
-                    if(node.userInteractionEnabled)
+                    if(node.isUserInteractionEnabled)
                     {
-                        node.touchesBegan(touches, withEvent: event)
+                        node.touchesBegan(touches, with: event)
                     }
                 }
             }
@@ -148,8 +148,8 @@ class DAButtonBase : DAContainerBase
         if let mask = touchMask
         {
             let touch = touches.first!
-            let touch_pos = touch.locationInNode(scene!)
-            let hit_nodes = scene!.nodesAtPoint(touch_pos)
+            let touch_pos = touch.location(in: scene!)
+            let hit_nodes = scene!.nodes(at: touch_pos)
             
             var in_mask = false
             
@@ -170,8 +170,8 @@ class DAButtonBase : DAContainerBase
         }
         /********** END TOUCH MASKING **********/
         
-        let press_time = NSDate()
-        if(press_time.timeIntervalSinceDate(lastPress) < cooldown)
+        let press_time = Date()
+        if(press_time.timeIntervalSince(lastPress) < cooldown)
         {
             print("TOO SOON")
             return
@@ -200,7 +200,7 @@ class DAButtonBase : DAContainerBase
     }
     
     
-    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?)
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?)
     {
         if(scene == nil)
         {
@@ -214,7 +214,7 @@ class DAButtonBase : DAContainerBase
             if(touch.timestamp > lastTouch)
             {
                 lastTouch = touch.timestamp
-                let touch_pos = touch.locationInNode(scene!)
+                let touch_pos = touch.location(in: scene!)
                 
                 if((touch_pos - initialTouchPos).magnitude() > wanderAmount)
                 {
@@ -222,8 +222,8 @@ class DAButtonBase : DAContainerBase
                     isButtonDown = false
                 }
                 
-                let hit_nodes = scene!.nodesAtPoint(touch_pos)
-                scene!.touchesMoved(touches, withEvent:event)
+                let hit_nodes = scene!.nodes(at: touch_pos)
+                scene!.touchesMoved(touches, with:event)
                 for node in hit_nodes
                 {
                     if(node == self)
@@ -231,9 +231,9 @@ class DAButtonBase : DAContainerBase
                         continue
                     }
                     
-                    if(node.userInteractionEnabled)
+                    if(node.isUserInteractionEnabled)
                     {
-                        node.touchesMoved(touches, withEvent: event)
+                        node.touchesMoved(touches, with: event)
                     }
                 }
             }
@@ -245,8 +245,8 @@ class DAButtonBase : DAContainerBase
         if let mask = touchMask
         {
             let touch = touches.first!
-            let touch_pos = touch.locationInNode(scene!)
-            let hit_nodes = scene!.nodesAtPoint(touch_pos)
+            let touch_pos = touch.location(in: scene!)
+            let hit_nodes = scene!.nodes(at: touch_pos)
             
             var in_mask = false
             
@@ -273,12 +273,12 @@ class DAButtonBase : DAContainerBase
         
         if let touch = touches.first
         {
-            let location: CGPoint = touch.locationInNode(parent!)
+            let location: CGPoint = touch.location(in: parent!)
 
             let expanded_rect = touchRect!.insetBy(dx: -DAButtonBase.TOUCH_EXPANSION, dy: -DAButtonBase.TOUCH_EXPANSION)
             
             //use touchRect instead of self b/c our size can change based on input
-            if CGRectContainsPoint(expanded_rect, location)
+            if expanded_rect.contains(location)
             {
                 isButtonDown = true
             }else{
@@ -288,7 +288,7 @@ class DAButtonBase : DAContainerBase
         }
     }
     
-    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?)
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)
     {
         if(scene == nil)
         {
@@ -302,10 +302,10 @@ class DAButtonBase : DAContainerBase
             if(touch.timestamp > lastTouch)
             {
                 lastTouch = touch.timestamp
-                let touch_pos = touch.locationInNode(scene!)
+                let touch_pos = touch.location(in: scene!)
                 
-                let hit_nodes = scene!.nodesAtPoint(touch_pos)
-                scene!.touchesEnded(touches, withEvent: event)
+                let hit_nodes = scene!.nodes(at: touch_pos)
+                scene!.touchesEnded(touches, with: event)
                 for node in hit_nodes
                 {
                     if(node == self)
@@ -313,9 +313,9 @@ class DAButtonBase : DAContainerBase
                         continue
                     }
                     
-                    if(node.userInteractionEnabled)
+                    if(node.isUserInteractionEnabled)
                     {
-                        node.touchesEnded(touches, withEvent: event)
+                        node.touchesEnded(touches, with: event)
                     }
                 }
             }
@@ -327,8 +327,8 @@ class DAButtonBase : DAContainerBase
         if let mask = touchMask
         {
             let touch = touches.first!
-            let touch_pos = touch.locationInNode(scene!)
-            let hit_nodes = scene!.nodesAtPoint(touch_pos)
+            let touch_pos = touch.location(in: scene!)
+            let hit_nodes = scene!.nodes(at: touch_pos)
             
             var in_mask = false
             
@@ -358,12 +358,12 @@ class DAButtonBase : DAContainerBase
         
         if let touch = touches.first
         {
-            let location: CGPoint = touch.locationInNode(parent!)
+            let location: CGPoint = touch.location(in: parent!)
             
             let expanded_rect = touchRect!.insetBy(dx: -DAButtonBase.TOUCH_EXPANSION, dy: -DAButtonBase.TOUCH_EXPANSION)
             
             //use touchRect instead of self b/c our size can change based on input
-            if CGRectContainsPoint(expanded_rect, location)
+            if expanded_rect.contains(location)
             {
                 isButtonDown = true
             }else{
@@ -377,7 +377,7 @@ class DAButtonBase : DAContainerBase
             
             if(enabled)
             {
-                lastPress = NSDate()
+                lastPress = Date()
                 onButtonUp.fire(self)
                 onButtonClick.fire(self)
             }

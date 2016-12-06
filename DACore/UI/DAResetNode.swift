@@ -24,7 +24,7 @@ class DAResetNode : SKNode
             
             setScale(1)
             zRotation = 0
-            hidden = false
+            isHidden = false
             alpha = 1
             
         }else{
@@ -34,7 +34,7 @@ class DAResetNode : SKNode
         
         if(recursive)
         {
-            resetChildren(recursive)
+            resetChildren(recursive: recursive)
         }
     }
     
@@ -44,7 +44,7 @@ class DAResetNode : SKNode
         {
             if let resettable = child as? DAResetNode
             {
-                resettable.reset(recursive)
+                resettable.reset(recursive: recursive)
             }
         }
     }

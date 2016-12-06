@@ -28,18 +28,18 @@ class DAParagraphNode : DAResetNode
 class DAMultilineLabel : SKSpriteNode
 {
     private var _text = ""
-    private var _fontColor = SKColor.whiteColor()
+    private var _fontColor = SKColor.white
     private var _fontName = "Helvetica"
     private var _fontSize = CGFloat(32)
-    private var _horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center
-    private var _verticalAlignmentMode = SKLabelVerticalAlignmentMode.Baseline
+    private var _horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.center
+    private var _verticalAlignmentMode = SKLabelVerticalAlignmentMode.baseline
     
     private var _paragraphWidth = CGFloat(0)
     private var _explicitAnchorPoint:CGPoint?
     
     init()
     {
-        super.init(texture: nil, color: UIColor.greenColor(), size: CGSize(width: 0, height: 0))
+        super.init(texture: nil, color: SKColor.green, size: CGSize(width: 0, height: 0))
         
         retexture()
     }
@@ -71,17 +71,17 @@ class DAMultilineLabel : SKSpriteNode
             if _explicitAnchorPoint == nil
             {
                 //reset to default anchorPoint
-                anchorPoint = CGPointMake(0.5, 0.5)
+                anchorPoint = CGPoint(x:0.5, y:0.5)
             }else{
                 anchorPoint = _explicitAnchorPoint!
             }
         }
     }
     
-    func imageFromText(text:String) -> UIImage?
+    func imageFromText(_ text:String) -> UIImage?
     {
         let paragraph_style = NSMutableParagraphStyle()
-        paragraph_style.lineBreakMode = NSLineBreakMode.ByWordWrapping
+        paragraph_style.lineBreakMode = NSLineBreakMode.byWordWrapping
         paragraph_style.alignment = horizontalNSTextAlignment
         paragraph_style.lineSpacing = 1
         
@@ -109,8 +109,8 @@ class DAMultilineLabel : SKSpriteNode
         
         //var texture_rect = (text as NSString).boundingRectWithSize(texture_size, options: NSStringDrawingOptions.UsesLineFragmentOrigin, attributes: text_attributes, context: nil)
         
-        var texture_rect = (text as NSString).boundingRectWithSize(texture_size,
-            options: NSStringDrawingOptions.UsesLineFragmentOrigin,
+        var texture_rect = (text as NSString).boundingRect(with: texture_size,
+            options: NSStringDrawingOptions.usesLineFragmentOrigin,
             attributes: text_attributes,
             context:nil
         )
@@ -127,7 +127,7 @@ class DAMultilineLabel : SKSpriteNode
         size = texture_rect.size
         
         UIGraphicsBeginImageContextWithOptions(texture_rect.size, false, 0)
-        (text as NSString).drawInRect(texture_rect, withAttributes: text_attributes)
+        (text as NSString).draw(in: texture_rect, withAttributes: text_attributes)
         
         let image = UIGraphicsGetImageFromCurrentImageContext()
         
@@ -140,12 +140,12 @@ class DAMultilineLabel : SKSpriteNode
     {
         switch(_horizontalAlignmentMode)
         {
-            case .Center:
-                return NSTextAlignment.Center
-            case .Left:
-                return NSTextAlignment.Left
-            case .Right:
-                return NSTextAlignment.Right
+            case .center:
+                return NSTextAlignment.center
+            case .left:
+                return NSTextAlignment.left
+            case .right:
+                return NSTextAlignment.right
         }
     }
     
