@@ -271,7 +271,7 @@ extension Array {
     func shuffle() -> Array<Element>
     {
         return self.sorted(by: { (a, b) -> Bool in
-            return Float.random(lower:0, upper:1) > 0.5
+            return Float.random(lower:0.0, upper:1.0) > 0.5
         })
     }
 }

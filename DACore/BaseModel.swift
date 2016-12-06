@@ -94,35 +94,61 @@ class BaseModel
                 var raw_data = objectData.components(separatedBy: ",")
                 var dataVariables = [String]()
                 
-                for var j in (0..<raw_data.count)
+                while(raw_data.count > 0)
                 {
+                    var working_string = raw_data.removeFirst()
                     
-                    
-                    //check to see if we have quotes
-                    if(raw_data[j] == "\"\""){
+                    if(working_string  == "\"\""){
                         //empty string kinda screws up the logic below
-                        dataVariables.append(raw_data[j])
-                    }else if(j < raw_data.count - 1 && raw_data[j].hasPrefix("\"")){
-                        var working_string = raw_data[j].replace("\"", withString: "")
+                        dataVariables.append(working_string)
+                    }else if(raw_data.count > 0 && working_string.hasPrefix("\"")){
                         
-                        for k in ((j+1)..<raw_data.count)
+                        working_string = working_string.replace("\"", withString: "")
+                        
+                        while(raw_data.count > 0)
                         {
-                            if(raw_data[k].hasSuffix("\""))
+                            if(raw_data.first!.hasSuffix("\""))
                             {
-                                working_string = working_string + "," + raw_data[k].replace("\"", withString: "")
-                                j = k;
-                                break;
+                                working_string = working_string + "," + raw_data.removeFirst().replace("\"", withString: "")
+                                break
                             }else{
-                                working_string = working_string + "," + raw_data[k]
+                                working_string = working_string + "," + raw_data.removeFirst()
                             }
                         }
-                        
-                        //                        print("REJOINED DATA: \(working_string)")
                         dataVariables.append(working_string)
                     }else{
-                        dataVariables.append(raw_data[j])
+                        //default: take me as i am
+                        dataVariables.append(working_string)
                     }
                 }
+                
+//                for var j in (0..<raw_data.count)
+//                {
+//                    //check to see if we have quotes
+//                    if(raw_data[j] == "\"\""){
+//                        //empty string kinda screws up the logic below
+//                        dataVariables.append(raw_data[j])
+//                    }else if(j < raw_data.count - 1 && raw_data[j].hasPrefix("\"")){
+//                        var working_string = raw_data[j].replace("\"", withString: "")
+//                        
+//                        for k in ((j+1)..<raw_data.count)
+//                        {
+//                            if(raw_data[k].hasSuffix("\""))
+//                            {
+//                                working_string = working_string + "," + raw_data[k].replace("\"", withString: "")
+//                                j = k;
+//                                break;
+//                            }else{
+//                                working_string = working_string + "," + raw_data[k]
+//                            }
+//                        }
+//                        
+//                        //print("REJOINED DATA: \(working_string)")
+//                        dataVariables.append(working_string)
+//                    }else{
+//                        dataVariables.append(raw_data[j])
+//                    }
+//                }
                 
                 if(dataVariables.count == 0)
                 {
@@ -162,6 +188,7 @@ class BaseModel
                             object.objectVariables[name] = (value.lowercased() == "true")
                             break
                         default:
+                            print("\(name) is \(value)")
                             object.objectVariables[name] = value
                             break
                     }

@@ -173,14 +173,14 @@ class DAMetaNode : DAContainer
         DAMetaNode.deviceTag = device_tag
         
         
-        let available_fonts = UIFont.familyNames
-        for i in (0..<available_fonts.count)
-        {
-            let font_family = available_fonts[i]
-            let font_names = UIFont.fontNames(forFamilyName: font_family)
-
-            print("\(font_family): \(font_names)")
-        }
+//        let available_fonts = UIFont.familyNames
+//        for i in (0..<available_fonts.count)
+//        {
+//            let font_family = available_fonts[i]
+//            let font_names = UIFont.fontNames(forFamilyName: font_family)
+//
+//            print("\(font_family): \(font_names)")
+//        }
     }
     
     // tuple of (String,bool) is for file_root and whether it's resolutionIndependent or not
