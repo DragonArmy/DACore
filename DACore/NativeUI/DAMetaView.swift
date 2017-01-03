@@ -47,7 +47,7 @@ class DAMetaView : DAContainerView
     var images          = [String:DAImageView]()
     var labels          = [String:DALabelView]()
      
-    static func setup(device_tag:String, scale_factor:CGFloat)
+    static func setup(_ device_tag:String, scaleFactor scale_factor:CGFloat)
     {
         DAMetaView.deviceTag = device_tag
         DAMetaView.scaleFactor = scale_factor
@@ -64,9 +64,9 @@ class DAMetaView : DAContainerView
     }
     
     // tuple of (String,bool) is for file_root and whether it's resolutionIndependent or not
-    static func loadMetadata(file_root_list:[(String, Bool)])
+    static func loadMetadata(_ file_root_list:[(String, Bool)])
     {
-        let bundle = NSBundle.mainBundle()
+        let bundle = Bundle.main
         
         for (file_root, omit_device_tag) in file_root_list
         {
@@ -77,15 +77,15 @@ class DAMetaView : DAContainerView
             }
             
             
-            if let meta_url = bundle.URLForResource("\(assetPath)\(file_root)\(device_tag)/\(file_root)\(device_tag)", withExtension: "txt")
+            if let meta_url = bundle.url(forResource: "\(assetPath)\(file_root)\(device_tag)/\(file_root)\(device_tag)", withExtension: "txt")
             {
                 print(meta_url)
                 
-                let metadata = try! String(contentsOfURL: meta_url, encoding: NSUTF8StringEncoding)
+                let metadata = try! String(contentsOf: meta_url, encoding: String.Encoding.utf8)
                 
-                let data = metadata.dataUsingEncoding(NSUTF8StringEncoding)!
+                let data = metadata.data(using: String.Encoding.utf8)!
                 
-                let json = try! NSJSONSerialization.JSONObjectWithData(data, options: []) as? Dictionary<String, AnyObject>
+                let json = try! JSONSerialization.jsonObject(with: data, options: []) as? Dictionary<String, AnyObject>
                 
                 DAMetaView.LoadedMetadata[file_root] = json
             }else{
@@ -95,19 +95,15 @@ class DAMetaView : DAContainerView
     }
     
     // tuple of (String,bool) is for file_root and whether it's resolutionIndependent or not
-    static func preloadMetadataAsynch(file_root_list:[(String, Bool)])
+    static func preloadMetadataAsynch(_ file_root_list:[(String, Bool)])
     {
         for (file_root, omit_device_tag) in file_root_list
         {
-            let qualityOfServiceClass = DISPATCH_QUEUE_PRIORITY_BACKGROUND
-            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-            
             let closure_file = file_root
             let closure_omit = omit_device_tag
             
-            dispatch_async(backgroundQueue) {
+            DispatchQueue.main.async {
                 DAMetaView.loadMetadata([(closure_file, closure_omit)])
-                //print("FINISHED LOADING \(closure_file)")
             }
             
         }
@@ -144,7 +140,7 @@ class DAMetaView : DAContainerView
             addSubview(view)
         }
         
-        reset(true)
+        reset(recursive: true)
         center = CGPoint(x:rootWidth/2, y:rootHeight/2)
     }
     
@@ -171,7 +167,7 @@ class DAMetaView : DAContainerView
             return
         }
         
-        if(DAMetaView.LoadedMetadata.indexForKey(file_root) != nil)
+        if(DAMetaView.LoadedMetadata.index(forKey: file_root) != nil)
         {
             processMetadata(DAMetaView.LoadedMetadata[file_root]!)
         }else{
@@ -197,7 +193,7 @@ class DAMetaView : DAContainerView
         }
         
         //set up all our frames on all our children
-        reset(true)
+        reset(recursive: true)
         
         //we probably don't want our root view centered at 0,0, so assume we want it at rootWidth/2, rootHeight/2
         center = CGPoint(x:rootWidth/2, y:rootHeight/2)
@@ -224,7 +220,7 @@ class DAMetaView : DAContainerView
     }
     
     //SUPER DUPER HELPFUL TYPED GETTERS
-    func containerWithName(container_name:String) -> DAContainerView?
+    func container(withName container_name:String) -> DAContainerView?
     {
         if(container_name.split("_").first! == "container")
         {
@@ -235,7 +231,7 @@ class DAMetaView : DAContainerView
         return containers["container_\(container_name)"]
     }
     
-    func tabWithName(tab_name:String) -> DATabView?
+    func tab(withName tab_name:String) -> DATabView?
     {
         if(tab_name.split("_").first! == "tab")
         {
@@ -246,12 +242,12 @@ class DAMetaView : DAContainerView
     }
     
     //simplest of the getters, doesn't prefix anything
-    func imageWithName(image_name:String) -> DAImageView?
+    func image(withName image_name:String) -> DAImageView?
     {
         return images[image_name]
     }
     
-    func labelWithName(label_name:String) -> DALabelView?
+    func label(withName label_name:String) -> DALabelView?
     {
         if(label_name.split("_").first! == "txt")
         {
@@ -262,7 +258,7 @@ class DAMetaView : DAContainerView
     }
     
     //buttons keep a name hash around because they can come from a scalebtn image, a scalebtn container, or a btn
-    func buttonWithName(button_name:String) -> DAButtonViewBase?
+    func button(withName button_name:String) -> DAButtonViewBase?
     {
         if(button_name.split("_").first! == "btn")
         {
@@ -272,7 +268,7 @@ class DAMetaView : DAContainerView
         return buttons[button_name]
     }
     
-    func placeholderWithName(placeholder_name:String) -> CGRect?
+    func placeholder(withName placeholder_name:String) -> CGRect?
     {
         if(placeholder_name.split("_").first! == "placeholder")
         {
@@ -283,7 +279,7 @@ class DAMetaView : DAContainerView
     }
     
     let DEBUG = false
-    func processMetadata(json:Dictionary<String,AnyObject>)
+    func processMetadata(_ json:Dictionary<String,AnyObject>)
     {
 //        print("PROCESS METADATA")
         
@@ -390,7 +386,7 @@ class DAMetaView : DAContainerView
     //processChildren works a little differently in that it returns the children...
     //you don't have to actually do anything with them, but for compound objects such
     //as buttons and progress bars this is required
-    func processChildren(children:[AnyObject]) -> [DAView]
+    func processChildren(_ children:[AnyObject]) -> [DAView]
     {
         var child_views:[DAView] = []
         
@@ -424,7 +420,7 @@ class DAMetaView : DAContainerView
         return child_views
     }
     
-    func processPosition(coords:[CGFloat]) -> CGPoint
+    func processPosition(_ coords:[CGFloat]) -> CGPoint
     {
         var x = coords[0]
         var y = coords[1]
@@ -436,7 +432,7 @@ class DAMetaView : DAContainerView
         return CGPoint(x:x, y:y)
     }
     
-    func processContainerView(view:Dictionary<String, AnyObject>) -> DAView
+    func processContainerView(_ view:Dictionary<String, AnyObject>) -> DAView
     {
         var container:DAView!
         
@@ -547,7 +543,7 @@ class DAMetaView : DAContainerView
         return container
     }
     
-    func processScale9View(node:Dictionary<String, AnyObject>, useTextureCache use_texture_cache:Bool=false) -> DAImageView
+    func processScale9View(_ node:Dictionary<String, AnyObject>, useTextureCache use_texture_cache:Bool=false) -> DAImageView
     {
         var center:CGRect!
         var image:DAImageView!
@@ -572,9 +568,9 @@ class DAMetaView : DAContainerView
                             {
                                 if(name == "size")
                                 {
-                                    size = placeholderWithName(name)!
+                                    size = placeholder(withName:name)!
                                 }else if(name == "center"){
-                                    center = placeholderWithName(name)!
+                                    center = placeholder(withName:name)!
                                 }else{
                                     print("EXTRA SCALE9 PLACEHOLDER: \(name)")
                                 }
@@ -594,7 +590,7 @@ class DAMetaView : DAContainerView
         let image_view = image.image
         let center_inset = DAMetaView.getCenterInset(outerRect: image.frame, innerRect: center)
         
-        let cap_image = image_view.image!.resizableImageWithCapInsets(center_inset)
+        let cap_image = image_view.image!.resizableImage(withCapInsets: center_inset)
         image_view.image = cap_image
         
         image.frame = size
@@ -616,13 +612,13 @@ class DAMetaView : DAContainerView
         return UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
     }
     
-    func processTextView(view:Dictionary<String, AnyObject>) -> DALabelView
+    func processTextView(_ view:Dictionary<String, AnyObject>) -> DALabelView
     {
         if let font = view["font"] as? NSString as? String
         {
             let label = DALabelView()
             
-            let font_name = DAFont.getFont(font)
+            let font_name = DAFont.get(font)
             var font_size:CGFloat = 14
             if let fs = view["fontSize"] as? NSNumber as? CGFloat
             {
@@ -666,7 +662,7 @@ class DAMetaView : DAContainerView
             {
                 if(alpha < 1.0)
                 {
-                    label.opaque = false
+                    label.isOpaque = false
                     label.alpha = alpha
                 }
             }
@@ -675,12 +671,12 @@ class DAMetaView : DAContainerView
             {
                 if(align == "center")
                 {
-                    label.textAlignment = NSTextAlignment.Center
+                    label.textAlignment = NSTextAlignment.center
                 }else if(align == "left"){
-                    label.textAlignment = NSTextAlignment.Left
+                    label.textAlignment = NSTextAlignment.left
                     label.resetPosition = CGPoint(x: label.resetPosition.x + label.resetSize.width/2, y: label.resetPosition.y)
                 }else if(align == "right"){
-                    label.textAlignment = NSTextAlignment.Right
+                    label.textAlignment = NSTextAlignment.right
                     label.resetPosition = CGPoint(x: label.resetPosition.x - label.resetSize.width/2, y: label.resetPosition.y)
                 }else{
                     print("[DAMetaView] -- INVALID LABEL ORIENTATION ON LABEL \(label.name) -- \(align)")
@@ -700,7 +696,7 @@ class DAMetaView : DAContainerView
         return UIImage(named: path)!
     }
     
-    func processImageView(view:Dictionary<String, AnyObject>) -> DAView
+    func processImageView(_ view:Dictionary<String, AnyObject>) -> DAView
     {
         if let image_name = view["name"] as? NSString as? String
         {
@@ -720,7 +716,7 @@ class DAMetaView : DAContainerView
             
             if(image_type == "flipX")
             {
-                image.image.transform = CGAffineTransformMakeScale(-1, 1)
+                image.image.transform = CGAffineTransform(scaleX: -1, y: 1)
             }
             
             //simple scale button!
@@ -751,7 +747,7 @@ class DAMetaView : DAContainerView
     }
     
     //no return type here
-    func processPlaceholder(view:Dictionary<String, AnyObject>) -> DAView?
+    @discardableResult func processPlaceholder(_ view:Dictionary<String, AnyObject>) -> DAView?
     {
         if let position = view["position"] as? NSArray as? [NSNumber] as? [CGFloat]
         {
@@ -761,10 +757,10 @@ class DAMetaView : DAContainerView
                 {
                     placeholders[name] = CGRect(x: position[0]*DAMetaView.scaleFactor, y: position[1]*DAMetaView.scaleFactor, width: size[0]*DAMetaView.scaleFactor, height: size[1]*DAMetaView.scaleFactor)
                     
-                    if(name.rangeOfString("modal", options: [], range: nil, locale: nil) != nil)
+                    if(name.indexOf("modal") >= 0)
                     {
                         let modal = DAView(frame: placeholders[name]!)
-                        modal.opaque = false
+                        modal.isOpaque = false
                         modal.alpha = 0.7
                         modal.name = "modal"
                         modal.backgroundColor = "#230211".toUIColor()
@@ -784,9 +780,9 @@ class DAMetaView : DAContainerView
         printDisplayTree(self, currentDepth:0)
     }
     
-    func printDisplayTree(view:DAView, currentDepth depth:Int)
+    func printDisplayTree(_ view:DAView, currentDepth depth:Int)
     {
-        let tab = Array<String>(count: depth, repeatedValue: "  ").joinWithSeparator("") + "->"
+        let tab = Array<String>(repeating: "  ", count: depth).joined(separator:"") + "->"
         let view_name = (view.name == nil ? view.description : view.name!)
         print("\(tab) \(view_name)     \(view.frame.center)")
         

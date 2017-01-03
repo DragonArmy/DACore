@@ -33,9 +33,9 @@ class DAButtonView : DAButtonViewBase
                     
                     if(tag == "down")
                     {
-                        node_child.hidden = !_isButtonDown
+                        node_child.isHidden = !_isButtonDown
                     }else if(tag == "up"){
-                        node_child.hidden = _isButtonDown
+                        node_child.isHidden = _isButtonDown
                     }else{
                         //do nothing! keep your state
                     }

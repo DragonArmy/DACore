@@ -59,10 +59,11 @@ class DAButtonViewBase : DAView
             
             
             let time = NSDate()
-            if(lastTouch.timeIntervalSinceDate(time) < minimumPressTime)
+            if(lastTouch.timeIntervalSince(time as Date) < minimumPressTime)
             {
-                let delta = minimumPressTime - lastTouch.timeIntervalSinceDate(time)
-                dispatch_after_delay(delta, block: updateDisplay)
+                let delta = minimumPressTime - lastTouch.timeIntervalSince(time as Date)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + delta, execute: updateDisplay)
             }else{
                 updateDisplay()
             }
@@ -73,7 +74,7 @@ class DAButtonViewBase : DAView
     {
         super.init()
         
-        userInteractionEnabled = true
+        isUserInteractionEnabled = true
         
         buttonSound = DAButtonViewBase.DEFAULT_BUTTON_SOUND
         cooldown = DAButtonViewBase.DEFAULT_TOUCH_COOLDOWN
@@ -99,7 +100,7 @@ class DAButtonViewBase : DAView
         temp_parent = superview
         while(temp_parent != nil)
         {
-            if(temp_parent!.hidden)
+            if(temp_parent!.isHidden)
             {
                 //print("\(temp_parent!) \(temp_parent!.name) is hidden")
                 return true
@@ -110,7 +111,7 @@ class DAButtonViewBase : DAView
         return false
     }
     
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
     {
         isTouching = false;
         
@@ -125,7 +126,7 @@ class DAButtonViewBase : DAView
         }
         
         lastTouch = NSDate()
-        if(lastTouch.timeIntervalSinceDate(lastPress) < cooldown)
+        if(lastTouch.timeIntervalSince(lastPress as Date) < cooldown)
         {
             print("TOO SOON")
             return
@@ -144,7 +145,7 @@ class DAButtonViewBase : DAView
         
     }
     
-    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?)
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?)
     {
         if(!isTouching)
         {
@@ -158,12 +159,12 @@ class DAButtonViewBase : DAView
         
         if let touch = touches.first
         {
-            let location: CGPoint = touch.locationInView(superview)
+            let location: CGPoint = touch.location(in: superview)
             
             let expanded_rect = frame.insetBy(dx: -DAButtonBase.TOUCH_EXPANSION, dy: -DAButtonBase.TOUCH_EXPANSION)
             
             //use touchRect instead of self b/c our size can change based on input
-            if CGRectContainsPoint(expanded_rect, location)
+            if expanded_rect.contains(location)
             {
                 isButtonDown = true
             }else{
@@ -172,7 +173,7 @@ class DAButtonViewBase : DAView
         }
     }
     
-    override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?)
+    override func touchesCancelled(_ touches: Set<UITouch>?, with event: UIEvent?)
     {
         if(!isTouching)
         {
@@ -186,7 +187,7 @@ class DAButtonViewBase : DAView
         isButtonDown = false
     }
     
-    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?)
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)
     {
         if(!isTouching)
         {
@@ -201,12 +202,12 @@ class DAButtonViewBase : DAView
         
         if let touch = touches.first
         {
-            let location: CGPoint = touch.locationInView(superview)
+            let location: CGPoint = touch.location(in: superview)
             
             let expanded_rect = frame.insetBy(dx: -DAButtonBase.TOUCH_EXPANSION, dy: -DAButtonBase.TOUCH_EXPANSION)
             
             //use touchRect instead of self b/c our size can change based on input
-            if CGRectContainsPoint(expanded_rect, location)
+            if expanded_rect.contains(location)
             {
                 isButtonDown = true
             }else{

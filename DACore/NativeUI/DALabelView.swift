@@ -18,7 +18,7 @@ class DALabelView : DAView
         super.init()
         addSubview(label)
         
-        label.lineBreakMode = NSLineBreakMode.ByClipping
+        label.lineBreakMode = NSLineBreakMode.byClipping
     }
 
     required init?(coder aDecoder: NSCoder)
@@ -69,7 +69,7 @@ class DALabelView : DAView
         {
             if(label.textAlignment.rawValue == 4)
             {
-                return NSTextAlignment.Left
+                return NSTextAlignment.left
             }
             
             return label.textAlignment
@@ -78,7 +78,7 @@ class DALabelView : DAView
         {
             if(value.rawValue == 4)
             {
-                label.textAlignment = NSTextAlignment.Left
+                label.textAlignment = NSTextAlignment.left
             }else{
                 label.textAlignment = value
             }
@@ -88,7 +88,7 @@ class DALabelView : DAView
     
     override func reset(recursive:Bool=true)
     {
-        super.reset(recursive)
+        super.reset(recursive: recursive)
         sizeToFit()
     }
     
@@ -100,7 +100,7 @@ class DALabelView : DAView
         }
         
         let nstext = label.text! as NSString
-        let size = nstext.sizeWithAttributes([NSFontAttributeName:label.font])
+        let size = nstext.size(attributes: [NSFontAttributeName:label.font])
 
         var horizontal = (size.width - frame.size.width)
         if let max_width = maxWidth
@@ -112,11 +112,11 @@ class DALabelView : DAView
         var new_frame:CGRect = frame
         switch(textAlignment)
         {
-            case .Left:
+            case .left:
                 new_frame = CGRect(x: frame.origin.x, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
-            case .Right:
+            case .right:
                 new_frame = CGRect(x: frame.origin.x - horizontal, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
-            case .Center:
+            case .center:
                 new_frame = CGRect(x: frame.origin.x - horizontal/2, y: frame.origin.y - vertical/2, width: frame.size.width + horizontal, height: frame.size.height+vertical)
             default:
                 print("OOPS WE DONT SUPPORT \(textAlignment)")

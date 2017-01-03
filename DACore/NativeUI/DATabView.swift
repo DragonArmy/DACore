@@ -65,14 +65,14 @@ class DATabView : DAView
             
             for view in allLinkedViews
             {
-                view.hidden = true
+                view.isHidden = true
             }
             
             if let linked_views = linkedViews[value]
             {
                 for view in linked_views
                 {
-                    view.hidden = false
+                    view.isHidden = false
                 }
             }
             
@@ -117,7 +117,7 @@ class DATabView : DAView
             }
         }
         
-        super.reset(recursive)
+        super.reset(recursive: recursive)
         self.currentState = _currentState
     }
     
@@ -171,7 +171,7 @@ class DATabView : DAView
         }
         
         //if we're not in the cycle (i.e. locked), stay where we are
-        if let index = cycle.indexOf(currentState)
+        if let index = cycle.index(of: currentState)
         {
             let next_index = (index + 1) % cycle.count
             return cycle[next_index]
@@ -190,7 +190,7 @@ class DATabView : DAView
             stateWillChange.fire(self)
             
             currentState = next_state
-            reset(true)
+            reset(recursive: true)
             
             stateDidChange.fire(self)
         }
@@ -206,7 +206,7 @@ class DATabView : DAView
             {
                 if let button = view as? DAButtonViewBase
                 {
-                    button.onButtonClick.listen(self, callback:handleButtonClick)
+                    button.onButtonClick.subscribe(on:self, callback:handleButtonClick)
                 }
                 
                 if let state = view.name?.split("_").last

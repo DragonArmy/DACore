@@ -93,7 +93,7 @@ class DAView : UIView
         
         if(recursive)
         {
-            resetChildren(true)
+            resetChildren(recursive: true)
         }
     }
     
@@ -130,7 +130,7 @@ class DAView : UIView
         
         if(recursive)
         {
-            resetChildren(true)
+            resetChildren(recursive: true)
         }
     }
     
@@ -145,7 +145,7 @@ class DAView : UIView
                 
                 resettable.rootWidth = rootWidth
                 resettable.rootHeight = rootHeight
-                resettable.reset(recursive)
+                resettable.reset(recursive: recursive)
             }
         }
     }

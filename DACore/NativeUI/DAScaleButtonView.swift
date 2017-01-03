@@ -16,9 +16,9 @@ class DAScaleButtonView : DAButtonViewBase
     {
         if(_isButtonDown)
         {
-            transform = CGAffineTransformMakeScale(DAScaleButton.DOWN_SCALE,DAScaleButton.DOWN_SCALE)
+            transform = CGAffineTransform(scaleX: DAScaleButton.DOWN_SCALE,y: DAScaleButton.DOWN_SCALE)
         }else{
-            transform = CGAffineTransformMakeScale(1.0, 1.0)
+            transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
         }
     }
     

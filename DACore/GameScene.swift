@@ -108,7 +108,7 @@ class GameScene: SKScene
         return metaNode.container(withName:container_name)
     }
     
-    func progressWithName(withName progress_name:String) -> DAProgressBar?
+    func progress(withName progress_name:String) -> DAProgressBar?
     {
         return metaNode.progress(withName:progress_name)
     }
