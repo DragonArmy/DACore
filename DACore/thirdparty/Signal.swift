@@ -18,7 +18,7 @@ final public class Signal<T> {
     public typealias SignalCallback = (T) -> Void
     
     /// The number of times the `Signal` has fired.
-    public private(set) var fireCount: Int = 0
+    public fileprivate(set) var fireCount: Int = 0
     
     /// Whether or not the `Signal` should retain a reference to the last data it was fired with. Defaults to false.
     public var retainLastData: Bool = false {
@@ -31,7 +31,7 @@ final public class Signal<T> {
     
     /// The last data that the `Signal` was fired with. In order for the `Signal` to retain the last fired data, its
     /// `retainLastFired`-property needs to be set to true
-    public private(set) var lastDataFired: T? = nil
+    public fileprivate(set) var lastDataFired: T? = nil
     
     /// All the observers of to the `Signal`.
     public var observers:[AnyObject] {
@@ -45,7 +45,7 @@ final public class Signal<T> {
         }
     }
     
-    private var signalListeners = [SignalSubscription<T>]()
+    fileprivate var signalListeners = [SignalSubscription<T>]()
     
     /// Initializer.
     ///
@@ -127,7 +127,7 @@ final public class Signal<T> {
         
         for signalListener in signalListeners {
             if signalListener.filter == nil || signalListener.filter!(data) == true {
-                _ = signalListener.dispatch(data: data)
+                _ = signalListener.dispatch(data)
             }
         }
     }
@@ -156,7 +156,7 @@ final public class Signal<T> {
     
     // MARK: - Private Interface
     
-    private func flushCancelledListeners() {
+    fileprivate func flushCancelledListeners() {
         var removeListeners = false
         for signalListener in signalListeners {
             if signalListener.observer == nil {
@@ -186,7 +186,7 @@ final public class SignalSubscription<T> {
     fileprivate var filter: (SignalFilter)?
     fileprivate var callback: SignalCallback
     fileprivate var dispatchQueue: DispatchQueue?
-    private var sampleInterval: TimeInterval?
+    fileprivate var sampleInterval: TimeInterval?
     
     fileprivate init(observer: AnyObject, callback: @escaping SignalCallback) {
         self.observer = observer
@@ -240,7 +240,7 @@ final public class SignalSubscription<T> {
     
     // MARK: - Private Interface
     
-    fileprivate func dispatch(data: T) -> Bool {
+    fileprivate func dispatch(_ data: T) -> Bool {
         guard observer != nil else {
             return false
         }

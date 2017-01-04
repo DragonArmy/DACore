@@ -18,8 +18,8 @@ class GameScene: SKScene
     var spriteKitRoot = SKNode()
     var metaNode:DAMetaNode
     
-    private var _metaNodeFileRoot:String = ""
-    private var _metaNodeContainerRoot:String? = nil
+    fileprivate var _metaNodeFileRoot:String = ""
+    fileprivate var _metaNodeContainerRoot:String? = nil
     
     init(size:CGSize, fromFile file_root:String, fromContainer container_root:String?)
     {
@@ -82,13 +82,13 @@ class GameScene: SKScene
         onFinishUpdate.fire(gameSceneLastUpdate as Date)
     }
     
-    func printAnimationGroup(group:CAAnimationGroup, withDepth depth:Int)
+    func printAnimationGroup(_ group:CAAnimationGroup, withDepth depth:Int)
     {
         for sub_anim in group.animations!
         {
             if let sub_group:CAAnimationGroup = sub_anim as? CAAnimationGroup
             {
-                printAnimationGroup(group: sub_group, withDepth: (depth+1))
+                printAnimationGroup(sub_group, withDepth: (depth+1))
             }else{
                 if let keyframe:CAKeyframeAnimation = sub_anim as? CAKeyframeAnimation
                 {
